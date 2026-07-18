@@ -44,6 +44,7 @@ class TradePlanResponse(BaseModel):
     shares: int
     lots: int
     risk_reward_ratio: float | None
+    note: str | None = None
 
 
 class HistoryBar(BaseModel):

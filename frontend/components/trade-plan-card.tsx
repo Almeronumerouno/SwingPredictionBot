@@ -40,6 +40,11 @@ export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
           <span className="text-sm font-medium text-[var(--color-text-secondary)]">Size</span>
           <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.lots} lot <span className="text-[var(--color-text-muted)] font-normal">({plan.shares} lbr)</span></span>
         </div>
+        {plan.note && (
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium">
+            {plan.note}
+          </div>
+        )}
       </div>
     </div>
   );

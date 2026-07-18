@@ -3,16 +3,26 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+function fmt(n: string) {
+  const num = parseInt(n.replace(/\D/g, ""), 10);
+  if (isNaN(num)) return "";
+  return new Intl.NumberFormat("id-ID").format(num);
+}
+
+function unfmt(s: string) {
+  return s.replace(/\./g, "");
+}
+
 export default function CapitalControl({ kode, capital }: { kode: string; capital?: number }) {
   const router = useRouter();
-  const [modal, setModal] = useState(capital ? String(capital) : "10000000");
+  const [modal, setModal] = useState(capital ? fmt(String(capital)) : "10.000.000");
   const [length, setLength] = useState("250");
 
   const apply = () => {
     const params = new URLSearchParams();
-    const modalNum = Number(modal);
+    const modalNum = parseInt(unfmt(modal), 10);
     const lengthNum = Number(length);
-    
+
     if (modalNum && modalNum !== 10000000) params.set("capital", String(modalNum));
     if (lengthNum && lengthNum !== 250) params.set("length", String(lengthNum));
     router.replace(`/saham/${kode}?${params.toString()}`);
@@ -25,11 +35,10 @@ export default function CapitalControl({ kode, capital }: { kode: string; capita
         <div>
           <label className="text-xs text-[var(--color-text-secondary)] block mb-1">Modal (Rp)</label>
           <input
-            type="number"
-            min={1_000_000}
-            step={1_000_000}
+            type="text"
+            inputMode="numeric"
             value={modal}
-            onChange={(e) => setModal(e.target.value)}
+            onChange={(e) => setModal(fmt(e.target.value))}
             className="w-full h-8 px-2.5 text-xs border border-[var(--color-border)] rounded-md bg-[var(--color-bg)] text-[var(--color-text-primary)] tabular-nums focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]/40 transition-all duration-150"
           />
         </div>

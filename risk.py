@@ -78,7 +78,20 @@ def build_trade_plan(score_result: dict, entry_price: float, atr: float, capital
     }
 
     if size == 0:
-        plan["note"] = "capital tidak cukup untuk 1 lot (100 lembar)"
+        cost_1lot = entry_price * LOT_SIZE
+        if capital >= cost_1lot:
+            plan["shares"] = LOT_SIZE
+            plan["lots"] = 1
+            plan["note"] = (
+                f"Hanya mampu 1 lot. Risiko aktual > {config.RISK_PER_TRADE_PCT*100:.0f}% "
+                f"modal karena jarak SL melebihi batas aman untuk modal Rp {int(capital):,}. "
+                f"Saran: tambah modal atau cari saham dengan harga lebih rendah."
+            )
+        else:
+            plan["note"] = (
+                f"Butuh minimal Rp {int(cost_1lot):,} "
+                f"untuk 1 lot ({LOT_SIZE} lbr @ Rp {int(entry_price):,})"
+            )
 
     return plan
 

@@ -41,6 +41,7 @@ export interface TradePlanResponse {
   shares: number
   lots: number
   risk_reward_ratio: number | null
+  note: string | null
 }
 
 export interface RawIndicators {
