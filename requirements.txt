@@ -1,0 +1,7 @@
+cloudscraper>=1.2.71
+pandas>=2.0
+numpy>=1.24
+python-dotenv>=1.0
+yfinance>=0.2.40
+fastapi>=0.115
+uvicorn[standard]>=0.34
