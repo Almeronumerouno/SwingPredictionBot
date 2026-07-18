@@ -50,6 +50,8 @@ class GainerEntry:
     frequency: float = 0.0   # jumlah transaksi (dari IDX), 0 kalau fallback Yahoo
     foreign_buy: float = 0.0
     foreign_sell: float = 0.0
+    swing_score: float | None = None
+    recommendation: str | None = None
 
 
 def _ensure_cache_dir() -> None:

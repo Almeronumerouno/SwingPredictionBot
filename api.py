@@ -3,6 +3,7 @@
 from typing import Any
 
 import logging
+import time
 
 import numpy as np
 
@@ -14,7 +15,7 @@ import config
 import indicators as ind
 import risk
 import scoring
-from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list
+from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.idx_trading import IdxTradingError
 from data_source.yahoo_client import YahooClientError, fetch_trading_info
 
@@ -64,6 +65,8 @@ class GainerEntryResponse(BaseModel):
     frequency: float
     foreign_buy: float
     foreign_sell: float
+    swing_score: float | None = None
+    recommendation: str | None = None
 
 
 class GainersResponse(BaseModel):
@@ -75,6 +78,8 @@ class GainersResponse(BaseModel):
 
 class AnalisisResponse(BaseModel):
     kode: str
+    nama: str
+    harga: float
     last_updated: str
     score: ScoreResponse
     trade_plan: TradePlanResponse | None
@@ -160,6 +165,7 @@ def analyze_stock(kode: str, capital: float) -> dict:
 
     return {
         "kode": kode,
+        "harga": float(close[-1]),
         "last_updated": bars[-1].date,
         "score": score_result,
         "trade_plan": trade_plan,
@@ -182,6 +188,21 @@ app.add_middleware(
 )
 
 
+@app.post("/scrape")
+def trigger_scrape():
+    try:
+        securities = get_or_fetch_securities_list()
+        gainers = scan_top_gainers(securities)
+        return {
+            "status": "ok",
+            "count": len(gainers),
+            "message": f"Scrape berhasil. {len(gainers)} gainers ditemukan.",
+        }
+    except Exception as e:
+        logging.error("Scrape gagal: %s", e)
+        raise HTTPException(status_code=500, detail=f"Scrape gagal: {e}")
+
+
 @app.get("/gainers", response_model=GainersResponse)
 def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
     try:
@@ -197,11 +218,50 @@ def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
             detail=f"Belum ada data gainers untuk tanggal {label}.",
         )
 
+    data = cached["data"]
+
+    for entry in data:
+        try:
+            bars = fetch_trading_info(entry.code, length=config.HISTORY_LOOKBACK_DAYS)
+            if len(bars) < config.MIN_TRADING_DAYS:
+                continue
+
+            close = np.array([b.close for b in bars])
+            high = np.array([b.high for b in bars])
+            low = np.array([b.low for b in bars])
+            volume = np.array([b.volume for b in bars])
+
+            rsi_val = ind.rsi(close)
+            atr_val = ind.atr(high, low, close)
+            ema_val = ind.ema_trend(close)
+            adx_val = ind.adx(high, low, close)
+            mfi_val = ind.mfi(high, low, close, volume)
+            rvol_val = ind.rvol(volume)
+            donch = ind.donchian_channel(high, low)
+            sr = ind.support_resistance_levels(high, low)
+
+            score_result = scoring.compute_score({
+                "close": close, "rsi": rsi_val, "atr": atr_val,
+                "adx": adx_val["adx"], "plus_di": adx_val["plus_di"],
+                "minus_di": adx_val["minus_di"], "ema_fast": ema_val["ema_fast"],
+                "ema_slow": ema_val["ema_slow"], "mfi": mfi_val, "rvol": rvol_val,
+                "donchian_upper": donch["upper"], "donchian_lower": donch["lower"],
+                "support": sr["support"], "resistance": sr["resistance"],
+            })
+
+            if score_result.get("valid"):
+                entry.swing_score = score_result["swing_score"]
+                entry.recommendation = score_result["recommendation"]
+
+            time.sleep(0.3)
+        except Exception:
+            continue
+
     return {
         "scraped_at": cached["scraped_at"],
         "date": cached["scraped_at"][:10],
-        "count": len(cached["data"]),
-        "data": cached["data"],
+        "count": len(data),
+        "data": data,
     }
 
 
@@ -219,6 +279,8 @@ def get_analisis(
             detail=f"Kode saham {kode} tidak ditemukan di daftar efek IDX.",
         )
 
+    nama = next((s.name for s in securities if s.code == kode), kode)
+
     try:
         result = analyze_stock(kode, capital)
     except InsufficientDataError as e:
@@ -229,6 +291,7 @@ def get_analisis(
             detail=f"Gagal ambil data untuk {kode}: {e}",
         )
 
+    result["nama"] = nama
     return result
 
 

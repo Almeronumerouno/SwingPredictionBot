@@ -12,31 +12,37 @@ export default function PriceChart({ data }: { data: Candle[] }) {
 
     const chart = createChart(chartRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#a1a1aa",
+        background: { type: ColorType.Solid, color: "#FFFFFF" },
+        textColor: "#64748B",
+        fontSize: 11,
       },
       grid: {
-        vertLines: { color: "#27272a" },
-        horzLines: { color: "#27272a" },
+        vertLines: { color: "#F1F5F9" },
+        horzLines: { color: "#F1F5F9" },
       },
       width: chartRef.current.clientWidth,
       height: 400,
       crosshair: { mode: 0 },
-      timeScale: { borderColor: "#3f3f46" },
-      rightPriceScale: { borderColor: "#3f3f46" },
+      timeScale: {
+        borderColor: "#E2E8F0",
+        timeVisible: false,
+      },
+      rightPriceScale: {
+        borderColor: "#E2E8F0",
+        scaleMargins: { top: 0.05, bottom: 0.05 },
+      },
     });
 
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#4ade80",
-      downColor: "#f87171",
-      borderDownColor: "#f87171",
-      borderUpColor: "#4ade80",
-      wickDownColor: "#f87171",
-      wickUpColor: "#4ade80",
+    const series = chart.addSeries(CandlestickSeries, {
+      upColor: "#059669",
+      downColor: "#DC2626",
+      borderDownColor: "#DC2626",
+      borderUpColor: "#059669",
+      wickDownColor: "#DC2626",
+      wickUpColor: "#059669",
     });
 
-    candlestickSeries.setData(data);
-
+    series.setData(data);
     chart.timeScale().fitContent();
 
     const handleResize = () => {

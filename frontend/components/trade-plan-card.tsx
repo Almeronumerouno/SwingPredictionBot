@@ -1,35 +1,44 @@
-import type { AnalisisResponse } from "@/types/api";
+import type { TradePlanResponse } from "@/types/api";
 
-const fmt = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+const fmt = (n: number) =>
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
-export default function TradePlanCard({ plan }: { plan: AnalisisResponse["trading_plan"] }) {
+export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
+  const isBuy = plan.direction === "BUY";
+  
   return (
-    <div className="bg-zinc-800 rounded-lg p-4 space-y-2">
-      <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">Trading Plan</h3>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <p className="text-zinc-400 text-xs">Entry Zone</p>
-          <p className="text-white">{plan.entry_zone}</p>
+    <div className="border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Trading Plan</h3>
+        <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${isBuy ? "bg-[var(--color-up)]/10 text-[var(--color-up)] border-[var(--color-up)]/20" : "bg-[var(--color-down)]/10 text-[var(--color-down)] border-[var(--color-down)]/20"}`}>
+          {plan.direction}
+        </span>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="flex justify-between items-center py-2 border-b border-[var(--color-border)]/50">
+          <span className="text-sm font-medium text-[var(--color-text-secondary)]">Entry</span>
+          <span className="text-base font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(plan.entry)}</span>
         </div>
-        <div>
-          <p className="text-zinc-400 text-xs">Stop Loss</p>
-          <p className="text-red-400 tabular-nums">{fmt(plan.stop_loss)}</p>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-3 rounded-lg bg-[var(--color-down)]/5 border border-[var(--color-down)]/10">
+            <span className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Stop Loss</span>
+            <span className="block text-lg font-bold tabular-nums text-[var(--color-down)]">{fmt(plan.stop_loss)}</span>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--color-up)]/5 border border-[var(--color-up)]/10">
+            <span className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Take Profit</span>
+            <span className="block text-lg font-bold tabular-nums text-[var(--color-up)]">{fmt(plan.take_profit)}</span>
+          </div>
         </div>
-        <div>
-          <p className="text-zinc-400 text-xs">Target 1</p>
-          <p className="text-green-400 tabular-nums">{fmt(plan.target_1)}</p>
+
+        <div className="flex justify-between items-center pt-2">
+          <span className="text-sm font-medium text-[var(--color-text-secondary)]">R/R Ratio</span>
+          <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.risk_reward_ratio ? `1 : ${plan.risk_reward_ratio.toFixed(2)}` : "-"}</span>
         </div>
-        <div>
-          <p className="text-zinc-400 text-xs">Target 2</p>
-          <p className="text-green-400 tabular-nums">{fmt(plan.target_2)}</p>
-        </div>
-        <div className="col-span-2">
-          <p className="text-zinc-400 text-xs">Risk/Reward</p>
-          <p className="text-white tabular-nums">{plan.risk_reward}</p>
-        </div>
-        <div className="col-span-2">
-          <p className="text-zinc-400 text-xs">Modal Dibutuhkan</p>
-          <p className="text-yellow-400 tabular-nums">{fmt(plan.modal_dibutuhkan)}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-[var(--color-text-secondary)]">Size</span>
+          <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.lots} lot <span className="text-[var(--color-text-muted)] font-normal">({plan.shares} lbr)</span></span>
         </div>
       </div>
     </div>

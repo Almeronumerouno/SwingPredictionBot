@@ -1,5 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E6E8EA;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+  --color-primary: #334155;
+  --color-accent: #059669;
+  --color-up: #059669;
+  --color-down: #DC2626;
+  --color-muted-bg: #F2F3F4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+input, select, button {
+  font-family: inherit;
+}
+
+/* Monospaced numbers for financial data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Thin scrollbar for tables */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 2px;
+}
+
+/* Toast slide-in animation */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }
