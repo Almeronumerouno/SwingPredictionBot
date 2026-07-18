@@ -6,6 +6,7 @@ import ScoreCard from "@/components/score-card";
 import TradePlanCard from "@/components/trade-plan-card";
 import PriceChart from "@/components/price-chart";
 import CapitalControl from "./capital-control";
+import BackButton from "@/components/back-button";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -52,10 +53,7 @@ export default async function SahamPage({
   return (
     <>
       <header className="mb-8">
-        <a href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-200">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          Kembali ke daftar
-        </a>
+        <BackButton />
         <div className="flex flex-col md:flex-row md:items-end justify-between mt-6 gap-4">
           <div>
             <div className="flex items-center gap-3">
