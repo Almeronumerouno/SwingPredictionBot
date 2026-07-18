@@ -25,16 +25,32 @@ def _take_profit(entry: float, atr: float, direction: str) -> float:
         return entry - mult * atr
 
 
-def _position_size(capital: float, entry: float, stop_loss: float) -> int:
-    risk_amount = capital * config.RISK_PER_TRADE_PCT
+def _position_shares(capital: float, entry: float, stop_loss: float) -> tuple[int, str | None]:
+    """
+    Hitung posisi berdasarkan alokasi 25% modal per posisi.
+    Jika hasilnya < 1 lot, coba sampai 50% capital.
+
+    Returns (shares, note):
+      - shares: jumlah lembar (kelipatan LOT_SIZE), 0 jika tidak mampu 1 lot
+      - note: peringatan jika risiko > 1%, None jika aman
+    """
     per_share_risk = abs(entry - stop_loss)
     if per_share_risk <= 0:
-        return 0
-    raw_shares = risk_amount / per_share_risk
-    shares = int(raw_shares // LOT_SIZE) * LOT_SIZE
-    if shares < LOT_SIZE:
-        return 0
-    return shares
+        return 0, None
+
+    cost_per_lot = entry * LOT_SIZE
+
+    for deploy_pct in (0.25, 0.50):
+        max_lots = int((capital * deploy_pct) // cost_per_lot)
+        if max_lots >= 1:
+            shares = max_lots * LOT_SIZE
+            risk_pct = (per_share_risk * shares) / capital
+            note = None
+            if risk_pct > config.RISK_PER_TRADE_PCT:
+                note = f"Risiko aktual {risk_pct*100:.1f}%"
+            return shares, note
+
+    return 0, None
 
 
 def build_trade_plan(score_result: dict, entry_price: float, atr: float, capital: float) -> dict | None:
@@ -61,13 +77,29 @@ def build_trade_plan(score_result: dict, entry_price: float, atr: float, capital
 
     sl = _stop_loss(entry_price, atr, direction, risk_level)
     tp = _take_profit(entry_price, atr, direction)
-    size = _position_size(capital, entry_price, sl)
+
+    size, note = _position_shares(capital, entry_price, sl)
+    if size == 0:
+        cost_1lot = entry_price * LOT_SIZE
+        return {
+            "direction": direction,
+            "entry": entry_price,
+            "stop_loss": round(sl, 0),
+            "take_profit": round(tp, 0),
+            "shares": 0,
+            "lots": 0,
+            "risk_reward_ratio": None,
+            "note": (
+                f"Butuh minimal Rp {int(cost_1lot):,} "
+                f"untuk 1 lot ({LOT_SIZE} lbr @ Rp {int(entry_price):,})"
+            ),
+        }
 
     risk = abs(entry_price - sl)
     reward = abs(tp - entry_price)
     rr_ratio = round(reward / risk, 2) if risk > 0 else None
 
-    plan = {
+    return {
         "direction": direction,
         "entry": entry_price,
         "stop_loss": round(sl, 0),
@@ -75,25 +107,8 @@ def build_trade_plan(score_result: dict, entry_price: float, atr: float, capital
         "shares": size,
         "lots": size // LOT_SIZE,
         "risk_reward_ratio": rr_ratio,
+        "note": note,
     }
-
-    if size == 0:
-        cost_1lot = entry_price * LOT_SIZE
-        if capital >= cost_1lot:
-            plan["shares"] = LOT_SIZE
-            plan["lots"] = 1
-            plan["note"] = (
-                f"Hanya mampu 1 lot. Risiko aktual > {config.RISK_PER_TRADE_PCT*100:.0f}% "
-                f"modal karena jarak SL melebihi batas aman untuk modal Rp {int(capital):,}. "
-                f"Saran: tambah modal atau cari saham dengan harga lebih rendah."
-            )
-        else:
-            plan["note"] = (
-                f"Butuh minimal Rp {int(cost_1lot):,} "
-                f"untuk 1 lot ({LOT_SIZE} lbr @ Rp {int(entry_price):,})"
-            )
-
-    return plan
 
 
 if __name__ == "__main__":

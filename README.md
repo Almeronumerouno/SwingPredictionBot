@@ -11,21 +11,37 @@ Swing trading signal generator untuk Bursa Efek Indonesia (IDX). Data dari IDX l
 | 2 | Layer Normalisasi & Scoring (`scoring.py`) | **100%** |
 | 3 | Risk & Trade Plan (`risk.py`) | **100%** |
 | 4 | API Layer (`api.py`, FastAPI) | **100%** |
-| 5 | Frontend Dashboard (Next.js) | **0%** |
+| 5 | Frontend Dashboard (Next.js) | **100%** |
 | 6 | Testing & Refinement | **0%** |
+
+### Fase 5 Checklist
+
+| Item | Status |
+|------|--------|
+| Dashboard — Top Gainers table + signal badges | ✅ |
+| Detail Saham — ScoreCard, component bars, price chart, trade plan | ✅ |
+| Scrape Button — Trigger + toast notification auto-dismiss | ✅ |
+| Date Picker — Pilih tanggal gainers | ✅ |
+| Sidebar Nav — Dashboard + Analisis | ✅ |
+| Halaman Analisis — Form input kode saham | ✅ |
+| Capital Control — Input modal (auto-format) + history length | ✅ |
+| Stock detail page — Loading skeleton, error, not found | ✅ |
+| Logo swingbot (public/logo.png) | ✅ |
+| Trade Plan note — "Risiko aktual X%" alih-alih warning keras | ✅ |
 
 ### Fase 4 Checklist
 
 | Item | Status |
 |------|--------|
-| `requirements.txt` — tambah fastapi, uvicorn; hapus python-telegram-bot | ✅ |
-| `config.py` — `API_CORS_ORIGINS`, `DEFAULT_CAPITAL`, `MAX_HISTORY_QUERY_DAYS` | ✅ |
-| `api.py` — Pydantic response models (ScoreResponse, TradePlanResponse, GainerEntryResponse, dll) | ✅ |
-| `api.py` — `analyze_stock()` service layer (fetch → indikator → scoring → risk) | ✅ |
-| `api.py` — `GET /gainers?date=` (cache reader, no scoring) | ✅ |
-| `api.py` — `GET /analisis/{kode}?capital=` (securities validation, error handling) | ✅ |
-| `api.py` — `GET /history/{kode}?length=` (securities validation, length query, 502 on Yahoo fail) | ✅ |
-| `api.py` — CORS middleware from config | ✅ |
+| `requirements.txt` — fastapi, uvicorn | ✅ |
+| `config.py` — CORS, DEFAULT_CAPITAL, MAX_HISTORY_QUERY_DAYS | ✅ |
+| Pydantic response models | ✅ |
+| `analyze_stock()` service layer | ✅ |
+| `POST /scrape` | ✅ |
+| `GET /gainers?date=` | ✅ |
+| `GET /analisis/{kode}?capital=` | ✅ |
+| `GET /history/{kode}?length=` | ✅ |
+| CORS middleware | ✅ |
 
 ## Change of Plan
 
@@ -57,6 +73,11 @@ Awalnya direncanakan bot Telegram (Fase 4), tapi diubah jadi **dashboard web**:
 │   ├── gainers.py         # Top N Gainers (IDX → Yahoo fallback)
 │   └── yahoo_client.py    # Data historis via yfinance
 │
+├── frontend/              # Fase 5: Next.js dashboard
+│   ├── app/               # Pages (Dashboard, Analisis, Stock Detail)
+│   ├── components/        # UI components
+│   └── lib/               # API client & types
+│
 └── cache/                 # Cache JSON (securities list, gainers, history)
 ```
 
@@ -77,21 +98,34 @@ Awalnya direncanakan bot Telegram (Fase 4), tapi diubah jadi **dashboard web**:
 
 **Rekomendasi**: Buy ≥ 65, Sell ≤ 35, Hold di antaranya.
 
-**Data validity gate**: `compute_score()` return `valid: False` + semua field `None` kalau salah satu dari 4 komponen NaN — gak ada lagi silent NaN yang lolos sebagai HOLD. Konsumen (API/frontend) wajib cek `valid` dulu sebelum bikin trade plan.
+## Risk Management (Fase 3)
 
-### Testing
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
+| Risk per trade | Bervariasi — ditampilkan sebagai "Risiko aktual X%" | Tergantung jarak SL |
+| Stop Loss | entry ± ATR × 1.5 (× 0.8 jika risk tinggi) | |
+| Take Profit | entry ± ATR × 2.5 | R:R ~1:1.67 |
+| Lot size | 100 lembar | Konvensi IDX |
 
-| Skenario | Hasil |
-|----------|-------|
-| BBCA (normal, ADX 13.8) | Swing 62.4 → HOLD, confidence sedang, risk sedang |
+**Perubahan penting**: Sejak 18 Juli 2026, position sizing diubah dari risk-based 1% (terlalu konservatif untuk modal retail) menjadi **capital-based 25%**. Risk aktual dihitung dan ditampilkan sebagai informasi, bukan peringatan.
 
 ## Setup
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env
-# Isi TELEGRAM_BOT_TOKEN (untuk nanti)
+cd frontend && npm install
 
+# Terminal 1: Backend
+python -m uvicorn api:app --reload --port 8000
+
+# Terminal 2: Frontend
+cd frontend && npm run dev
+```
+
+## Testing
+
+```bash
 python test_real_data.py  # Smoke test indikator + scoring
 python -m data_source.gainers  # Test gainers scan
 ```
@@ -109,6 +143,9 @@ python -m data_source.gainers  # Test gainers scan
 Riset menyebutkan 5 komponen (Trend, Momentum, Volume, **Volatility**, Price Action). Kode menggunakan **4 komponen** — Volatility/ATR dikeluarkan dari SwingScore dan dipindah ke `risk.py` untuk SL/TP sizing.
 
 **Alasan**: Riset sendiri tidak konsisten — deskripsi awal bilang 5 faktor, tapi contoh formula di "Spesifikasi Teknis Akhir" hanya memuat ADX+RSI+MFI+ATR. ATR juga tidak directional (tidak bisa dibedakan bullish/bearish), sehingga tidak cocok sebagai komponen linear SwingScore 0-100. Keputusan arsitektural: pisah signal (arah) vs risk sizing (besaran volatilitas).
+
+### Position sizing: capital-based bukan risk-based
+Riset menyebutkan risk 1% per trade. Dalam praktik, untuk modal retail Rp 100rb–10jt, aturan ini terlalu ketat dan menghasilkan posisi yang tidak berarti (1-3 lot dari modal yang mampu membeli 10-100 lot). Kode menggunakan **25% alokasi modal** sebagai patokan, risk aktual diinformasikan ke user.
 
 ### Fibonacci — 7 level vs 5 level
 Riset: 5 level (23.6%–78.6%). Kode: 7 level (+ 0% dan 100% endpoint). Penambahan minor untuk completeness.

@@ -12,7 +12,7 @@ export default function PriceChart({ data }: { data: Candle[] }) {
 
     const chart = createChart(chartRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#FFFFFF" },
+        background: { type: ColorType.Solid, color: "transparent" },
         textColor: "#64748B",
         fontSize: 11,
       },
@@ -21,7 +21,7 @@ export default function PriceChart({ data }: { data: Candle[] }) {
         horzLines: { color: "#F1F5F9" },
       },
       width: chartRef.current.clientWidth,
-      height: 400,
+      height: chartRef.current.clientHeight || 400,
       crosshair: { mode: 0 },
       timeScale: {
         borderColor: "#E2E8F0",
@@ -46,7 +46,12 @@ export default function PriceChart({ data }: { data: Candle[] }) {
     chart.timeScale().fitContent();
 
     const handleResize = () => {
-      chart.applyOptions({ width: chartRef.current!.clientWidth });
+      if (chartRef.current) {
+        chart.applyOptions({ 
+          width: chartRef.current.clientWidth,
+          height: chartRef.current.clientHeight || 400
+        });
+      }
     };
     window.addEventListener("resize", handleResize);
 
@@ -56,5 +61,5 @@ export default function PriceChart({ data }: { data: Candle[] }) {
     };
   }, [data]);
 
-  return <div ref={chartRef} />;
+  return <div ref={chartRef} className="w-full h-full min-h-[400px]" />;
 }

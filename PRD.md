@@ -4,7 +4,7 @@
 |------|--------|
 | **Product Name** | Swing Bot IDX |
 | **Version** | 0.1.0 |
-| **Status** | Fase 4 (API selesai) — Fase 5 (Frontend) dalam pengembangan |
+| **Status** | Fase 5 (Frontend) selesai — nunggu Fase 6 (testing/backtest) |
 | **Last Updated** | 18 Juli 2026 |
 
 ---
@@ -110,8 +110,9 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 |----|-------------|-------|--------|
 | F3.1 | **Stop Loss** | entry ± ATR × 1.5 (0.8 × multiplier jika risk tinggi) | `risk.py:10` |
 | F3.2 | **Take Profit** | entry ± ATR × 2.5 (R:R ~1:1.67) | `risk.py:20` |
-| F3.3 | **Position Sizing** | (capital × 1%) / risk_per_share, rounded ke lot (100 lembar) | `risk.py:28` |
-| F3.4 | **Minimal Lot** | Jika < 1 lot, return 0 (capital tidak cukup) | `risk.py:36` |
+| F3.3 | **Position Sizing** | capital × 25% / entry_price, rounded ke lot (100 lembar) | `risk.py:28` |
+| F3.4 | **Fallback sizing** | Jika 25% < 1 lot, coba 50% capital | `risk.py:51` |
+| F3.5 | **Risk info** | Hitung risk aktual, tampilkan sebagai info (bukan warning) | `risk.py:55` |
 
 ### Fase 4 — API Layer (100% Selesai)
 
@@ -123,7 +124,7 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | F4.4 | `/history/{kode}?length=` | GET | Data OHLCV historis mentah | `api.py:300` |
 | F4.5 | CORS | — | Allow origins dari config (`localhost:3000`) | `api.py:182` |
 
-### Fase 5 — Frontend Dashboard (Sedang Dikerjakan)
+### Fase 5 — Frontend Dashboard (100% Selesai)
 
 | ID | Requirement | Status | Route |
 |----|-------------|--------|-------|
@@ -137,8 +138,11 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | F5.8 | **Loading Skeleton** | ✅ | `/saham/[kode]` |
 | F5.9 | **Error & Not Found** | ✅ | Global + per-route |
 | F5.10 | **Toast Notification** | ✅ | Auto-dismiss 4 detik |
-| F5.11 | **Dark Mode** | ❌ | Belum |
-| F5.12 | **Search / Filter** gainers | ❌ | Belum |
+| F5.11 | **Capital auto-format** (Indonesian thousand separator) | ✅ | CapitalControl |
+| F5.12 | **Logo swingbot** — ganti favicon + metadata | ✅ | Layout |
+| F5.13 | **Sidebar "Top Gainers" → "Dashboard"** | ✅ | Sidebar |
+| F5.14 | **Dark Mode** | ❌ | Belum |
+| F5.15 | **Search / Filter** gainers | ❌ | Belum |
 
 ### Fase 6 — Testing & Refinement (0%)
 
@@ -437,11 +441,12 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Risk per trade | 1% dari modal | Conservative |
+| Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
+| Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
 | Stop Loss | entry ± ATR × 1.5 | × 0.8 jika risk level tinggi |
 | Take Profit | entry ± ATR × 2.5 | R:R ~1:1.67 |
 | Lot size | 100 lembar | Konvensi IDX |
-| Minimal capital | ~Rp 1,000,000 | Tergantung harga saham |
+| Minimal capital | ~Rp 100,000 | Tergantung harga saham (1 lot termurah) |
 
 ---
 
@@ -578,7 +583,15 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 
 ## 13. Future Roadmap
 
-### Short-term (Fase 5 — Frontend)
+### Short-term (Sudah Selesai — Fase 5)
+- ✅ Scrape trigger + toast notification
+- ✅ Capital control dengan auto-format
+- ✅ Logo swingbot + favicon
+- ✅ Trade Plan note informatif ("Risiko aktual X%")
+- ✅ Sidebar navigation (Dashboard, Analisis)
+- ✅ Stock detail page (ScoreCard, chart, trade plan, capital control)
+
+### Short-term (Belum — Next)
 - [ ] Dark mode
 - [ ] Sorting & filtering gainers table
 - [ ] Indicator detail panel (RSI, ADX, MFI, RVOL)
