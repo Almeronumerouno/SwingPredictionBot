@@ -43,6 +43,22 @@ export interface TradePlanResponse {
   risk_reward_ratio: number | null
 }
 
+export interface RawIndicators {
+  rsi: number | null
+  mfi: number | null
+  atr: number | null
+  adx: number | null
+  plus_di: number | null
+  minus_di: number | null
+  ema_fast: number | null
+  ema_slow: number | null
+  rvol: number | null
+  support: number | null
+  resistance: number | null
+  fibonacci: Record<string, number> | null
+  candlestick_patterns: string[]
+}
+
 export interface AnalisisResponse {
   kode: string
   nama: string
@@ -50,6 +66,7 @@ export interface AnalisisResponse {
   last_updated: string
   score: ScoreResponse
   trade_plan: TradePlanResponse | null
+  raw_indicators: RawIndicators | null
   capital_used: number
 }
 

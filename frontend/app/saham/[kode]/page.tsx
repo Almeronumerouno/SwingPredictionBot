@@ -7,6 +7,7 @@ import TradePlanCard from "@/components/trade-plan-card";
 import PriceChart from "@/components/price-chart";
 import CapitalControl from "./capital-control";
 import BackButton from "@/components/back-button";
+import TechnicalIndicators from "@/components/technical-indicators";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -124,6 +125,7 @@ export default async function SahamPage({
           <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden h-[500px]">
             <PriceChart data={chartData} />
           </div>
+          <TechnicalIndicators data={analisis.raw_indicators} />
         </div>
         <div className="space-y-6">
           {analisis.trade_plan ? (

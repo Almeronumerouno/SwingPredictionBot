@@ -76,6 +76,22 @@ class GainersResponse(BaseModel):
     data: list[GainerEntryResponse]
 
 
+class RawIndicatorsResponse(BaseModel):
+    rsi: float | None
+    mfi: float | None
+    atr: float | None
+    adx: float | None
+    plus_di: float | None
+    minus_di: float | None
+    ema_fast: float | None
+    ema_slow: float | None
+    rvol: float | None
+    support: float | None
+    resistance: float | None
+    fibonacci: dict[str, float] | None
+    candlestick_patterns: list[str]
+
+
 class AnalisisResponse(BaseModel):
     kode: str
     nama: str
@@ -83,6 +99,7 @@ class AnalisisResponse(BaseModel):
     last_updated: str
     score: ScoreResponse
     trade_plan: TradePlanResponse | None
+    raw_indicators: RawIndicatorsResponse | None
     capital_used: float
 
 
@@ -92,7 +109,7 @@ class HistoryResponse(BaseModel):
 
 
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
-               GainersResponse, AnalisisResponse, HistoryResponse):
+               GainersResponse, RawIndicatorsResponse, AnalisisResponse, HistoryResponse):
     _model.model_rebuild()
 
 
@@ -163,12 +180,58 @@ def analyze_stock(kode: str, capital: float) -> dict:
     else:
         trade_plan = None
 
+    def _safe_float(val) -> float | None:
+        if isinstance(val, (np.ndarray, list)):
+            val = val[-1]
+        return float(val) if not np.isnan(val) else None
+        
+    sup_val = None
+    if sr["support"]:
+        sups = [s["level"] for s in sr["support"] if s["level"] <= close[-1]]
+        sup_val = max(sups) if sups else None
+
+    res_val = None
+    if sr["resistance"]:
+        reses = [r["level"] for r in sr["resistance"] if r["level"] > close[-1]]
+        res_val = min(reses) if reses else None
+        
+    fib_val = None
+    if sr["support"] and sr["resistance"]:
+        max_h = max([r["level"] for r in sr["resistance"]])
+        min_l = min([s["level"] for s in sr["support"]])
+        if max_h > min_l:
+            fib_val = ind.fibonacci_retracement(max_h, min_l)
+            
+    candles = ind.candlestick_patterns(open_, high, low, close)
+    detected_patterns = []
+    if candles["doji"][-1]: detected_patterns.append("Doji")
+    if candles["hammer"][-1]: detected_patterns.append("Hammer")
+    if candles["bullish_engulfing"][-1]: detected_patterns.append("Bullish Engulfing")
+    if candles["bearish_engulfing"][-1]: detected_patterns.append("Bearish Engulfing")
+
+    raw_indicators = {
+        "rsi": _safe_float(rsi_val),
+        "mfi": _safe_float(mfi_val),
+        "atr": _safe_float(atr_val),
+        "adx": _safe_float(adx_val["adx"]),
+        "plus_di": _safe_float(adx_val["plus_di"]),
+        "minus_di": _safe_float(adx_val["minus_di"]),
+        "ema_fast": _safe_float(ema_val["ema_fast"]),
+        "ema_slow": _safe_float(ema_val["ema_slow"]),
+        "rvol": _safe_float(rvol_val),
+        "support": sup_val,
+        "resistance": res_val,
+        "fibonacci": fib_val,
+        "candlestick_patterns": detected_patterns
+    }
+
     return {
         "kode": kode,
         "harga": float(close[-1]),
         "last_updated": bars[-1].date,
         "score": score_result,
         "trade_plan": trade_plan,
+        "raw_indicators": raw_indicators,
         "capital_used": capital,
     }
 
