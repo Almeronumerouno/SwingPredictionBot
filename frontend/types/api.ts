@@ -58,6 +58,7 @@ export interface RawIndicators {
   resistance: number | null
   fibonacci: Record<string, number> | null
   candlestick_patterns: string[]
+  pattern_candles?: { open: number; high: number; low: number; close: number }[]
 }
 
 export interface AnalisisResponse {

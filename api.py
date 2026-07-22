@@ -214,11 +214,37 @@ def analyze_stock(kode: str, capital: float) -> dict:
             fib_val = ind.fibonacci_retracement(max_h, min_l)
             
     candles = ind.candlestick_patterns(open_, high, low, close)
-    detected_patterns = []
-    if candles["doji"][-1]: detected_patterns.append("Doji")
-    if candles["hammer"][-1]: detected_patterns.append("Hammer")
-    if candles["bullish_engulfing"][-1]: detected_patterns.append("Bullish Engulfing")
-    if candles["bearish_engulfing"][-1]: detected_patterns.append("Bearish Engulfing")
+    _CANDLE_LABELS = {
+        "doji": "Doji", "dragonfly_doji": "Dragonfly Doji", "gravestone_doji": "Gravestone Doji",
+        "long_legged_doji": "Long-Legged Doji", "hammer": "Hammer", "hanging_man": "Hanging Man",
+        "inverted_hammer": "Inverted Hammer", "shooting_star": "Shooting Star",
+        "marubozu": "Marubozu", "belt_hold_bullish": "Belt Hold Bullish",
+        "belt_hold_bearish": "Belt Hold Bearish", "spinning_top": "Spinning Top",
+        "bullish_engulfing": "Bullish Engulfing", "bearish_engulfing": "Bearish Engulfing",
+        "bullish_harami": "Bullish Harami", "bearish_harami": "Bearish Harami",
+        "harami_cross": "Harami Cross", "piercing": "Piercing", "dark_cloud_cover": "Dark Cloud Cover",
+        "tweezer_top": "Tweezer Top", "tweezer_bottom": "Tweezer Bottom",
+        "on_neck": "On-Neck", "in_neck": "In-Neck",
+        "kicker_bullish": "Kicker Bullish", "kicker_bearish": "Kicker Bearish",
+        "morning_star": "Morning Star", "evening_star": "Evening Star",
+        "abandoned_baby_bullish": "Abandoned Baby Bullish", "abandoned_baby_bearish": "Abandoned Baby Bearish",
+        "three_white_soldiers": "Three White Soldiers", "three_black_crows": "Three Black Crows",
+        "three_inside_up": "Three Inside Up", "three_inside_down": "Three Inside Down",
+        "three_outside_up": "Three Outside Up", "three_outside_down": "Three Outside Down",
+        "rising_three_methods": "Rising Three Methods", "falling_three_methods": "Falling Three Methods",
+    }
+    detected_patterns = [label for key, label in _CANDLE_LABELS.items() if candles.get(key, np.array([False]))[-1]]
+
+    lookback = min(3, len(close))
+    pattern_candles = [
+        {
+            "open": float(open_[-lookback + i]),
+            "high": float(high[-lookback + i]),
+            "low": float(low[-lookback + i]),
+            "close": float(close[-lookback + i]),
+        }
+        for i in range(lookback)
+    ]
 
     raw_indicators = {
         "rsi": _safe_float(rsi_val),
@@ -233,7 +259,8 @@ def analyze_stock(kode: str, capital: float) -> dict:
         "support": sup_val,
         "resistance": res_val,
         "fibonacci": fib_val,
-        "candlestick_patterns": detected_patterns
+        "candlestick_patterns": detected_patterns,
+        "pattern_candles": pattern_candles
     }
 
     return {

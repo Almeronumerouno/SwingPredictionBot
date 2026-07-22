@@ -1,6 +1,7 @@
 "use client";
 
 import type { RawIndicators } from "@/types/api";
+import CandlestickPatterns from "./candlestick-patterns";
 
 function SignalBadge({ label, signal }: { label: string; signal: "bullish" | "bearish" | "neutral" | "strong_bullish" | "strong_bearish" }) {
   const styles = {
@@ -314,26 +315,12 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
 
         {/* Candlestick Patterns */}
         {data.candlestick_patterns && data.candlestick_patterns.length > 0 && (
-          <div>
-            <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Pola Candlestick Terdeteksi</h4>
-            <div className="flex flex-wrap gap-2">
-              {data.candlestick_patterns.map((pattern, i) => {
-                const isBullish = pattern.toLowerCase().includes("bullish") || pattern.toLowerCase().includes("hammer");
-                const isBearish = pattern.toLowerCase().includes("bearish");
-                const cls = isBullish
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : isBearish
-                    ? "bg-red-50 text-red-700 border-red-200"
-                    : "bg-amber-50 text-amber-700 border-amber-200";
-                const icon = isBullish ? "▲" : isBearish ? "▼" : "◆";
-                return (
-                  <span key={i} className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border ${cls}`}>
-                    <span>{icon}</span> {pattern}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
+          <CandlestickPatterns 
+            patterns={data.candlestick_patterns} 
+            lastPrice={data.ema_fast || data.ema_slow || 0} 
+            atr={data.atr} 
+            realCandles={data.pattern_candles}
+          />
         )}
       </div>
     </div>

@@ -369,23 +369,31 @@ def fibonacci_extension(swing_low_a: float, swing_high_b: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Price Action: Candlestick Patterns (Hammer, Engulfing, Doji)
+# Price Action: Candlestick Patterns (Single, Double, Triple)
 # ---------------------------------------------------------------------------
+
+def _trend_direction(close: np.ndarray, lookback: int = 5) -> np.ndarray:
+    """Return "up" / "down" / "neutral" per bar based on SMA comparison."""
+    close = np.asarray(close, dtype=float)
+    n = len(close)
+    trend = np.full(n, "neutral", dtype=object)
+    for i in range(lookback, n):
+        sma = np.mean(close[i - lookback:i])
+        if close[i] > sma * 1.015:
+            trend[i] = "up"
+        elif close[i] < sma * 0.985:
+            trend[i] = "down"
+    return trend
+
 
 def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
                           close: np.ndarray, doji_body_pct: float = 0.10,
-                          hammer_shadow_ratio: float = 2.0) -> dict:
+                          shadow_ratio: float = 2.0) -> dict:
     """
-    Deteksi pola dasar per-bar. Threshold berdasar konvensi umum
-    (StockCharts ChartSchool, TradingView pattern scanners):
-      - Doji: body <= 10% dari total range (high-low)
-      - Hammer: lower shadow >= 2x body, upper shadow kecil, body di bagian
-        atas range (bullish reversal candidate -- konteks tren tetap perlu
-        dicek di layer scoring, ini cuma deteksi bentuk candle-nya doang)
-      - Bullish/Bearish Engulfing: body candle sekarang membungkus penuh
-        body candle sebelumnya DAN warnanya berlawanan
+    Deteksi Single, Double, dan Triple candlestick patterns.
+    Threshold mengikuti konvensi umum StockCharts / TradingView.
 
-    Return dict of boolean arrays, index sejajar dengan input.
+    Return dict of boolean arrays (index sejajar input) untuk tiap pola.
     """
     open_ = np.asarray(open_, dtype=float)
     high = np.asarray(high, dtype=float)
@@ -398,45 +406,370 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
     full_range_safe = np.where(full_range == 0, np.nan, full_range)
     upper_shadow = high - np.maximum(open_, close)
     lower_shadow = np.minimum(open_, close) - low
-
-    doji = np.zeros(n, dtype=bool)
+    is_bullish = close > open_
+    is_bearish = close < open_
     valid_range = full_range > 0
+
+    trend = _trend_direction(close)
+
+    out: dict[str, np.ndarray] = {}
+
+    # ── helpers ──
+    def _bool_arr() -> np.ndarray:
+        return np.zeros(n, dtype=bool)
+
+    def _range_pct(i: int) -> float:
+        return body[i] / full_range[i] if full_range[i] > 0 else 1.0
+
+    # ─────────────────────────────────
+    #  SINGLE-CANDLE PATTERNS
+    # ─────────────────────────────────
+
+    # Doji
+    doji = _bool_arr()
     doji[valid_range] = (body[valid_range] / full_range[valid_range]) <= doji_body_pct
+    out["doji"] = doji
 
-    hammer = np.zeros(n, dtype=bool)
+    # Dragonfly Doji
+    dfly = _bool_arr()
+    dfly[valid_range] = (
+        doji[valid_range]
+        & (upper_shadow[valid_range] <= 0.1 * full_range[valid_range])
+        & (lower_shadow[valid_range] >= 0.6 * full_range[valid_range])
+    )
+    out["dragonfly_doji"] = dfly
+
+    # Gravestone Doji
+    gstone = _bool_arr()
+    gstone[valid_range] = (
+        doji[valid_range]
+        & (lower_shadow[valid_range] <= 0.1 * full_range[valid_range])
+        & (upper_shadow[valid_range] >= 0.6 * full_range[valid_range])
+    )
+    out["gravestone_doji"] = gstone
+
+    # Long-Legged Doji
+    ll_doji = _bool_arr()
+    ll_doji[valid_range] = (
+        doji[valid_range]
+        & (upper_shadow[valid_range] >= 0.3 * full_range[valid_range])
+        & (lower_shadow[valid_range] >= 0.3 * full_range[valid_range])
+    )
+    out["long_legged_doji"] = ll_doji
+
+    # Hamer (downtrend) / Hanging Man (uptrend)
+    hammer_shape = _bool_arr()
     with np.errstate(divide="ignore", invalid="ignore"):
-        hammer_cond = (
-            (body > 0)
-            & (lower_shadow >= hammer_shadow_ratio * body)
-            & (upper_shadow <= body)
+        hammer_shape[valid_range] = (
+            (body[valid_range] > 0)
+            & (lower_shadow[valid_range] >= shadow_ratio * body[valid_range])
+            & (upper_shadow[valid_range] <= body[valid_range])
         )
-    hammer[:] = hammer_cond
+    hammer = _bool_arr()
+    hanging_man = _bool_arr()
+    for i in range(n):
+        if hammer_shape[i]:
+            if trend[i] == "down":
+                hammer[i] = True
+            elif trend[i] == "up":
+                hanging_man[i] = True
+    out["hammer"] = hammer
+    out["hanging_man"] = hanging_man
 
-    bullish_engulfing = np.zeros(n, dtype=bool)
-    bearish_engulfing = np.zeros(n, dtype=bool)
+    # Inverted Hammer (downtrend) / Shooting Star (uptrend)
+    inv_shape = _bool_arr()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        inv_shape[valid_range] = (
+            (body[valid_range] > 0)
+            & (upper_shadow[valid_range] >= shadow_ratio * body[valid_range])
+            & (lower_shadow[valid_range] <= body[valid_range])
+        )
+    inv_hammer = _bool_arr()
+    shooting_star = _bool_arr()
+    for i in range(n):
+        if inv_shape[i]:
+            if trend[i] == "down":
+                inv_hammer[i] = True
+            elif trend[i] == "up":
+                shooting_star[i] = True
+    out["inverted_hammer"] = inv_hammer
+    out["shooting_star"] = shooting_star
+
+    # Marubozu
+    marubozu = _bool_arr()
+    marubozu[valid_range] = (body[valid_range] >= 0.95 * full_range[valid_range])
+    out["marubozu"] = marubozu
+
+    # Belt Hold
+    belt_hold_bullish = _bool_arr()
+    belt_hold_bearish = _bool_arr()
+    for i in range(n):
+        if not valid_range[i] or body[i] == 0:
+            continue
+        if is_bullish[i] and lower_shadow[i] <= 0.05 * full_range[i] and upper_shadow[i] <= 0.3 * body[i]:
+            belt_hold_bullish[i] = True
+        if is_bearish[i] and upper_shadow[i] <= 0.05 * full_range[i] and lower_shadow[i] <= 0.3 * body[i]:
+            belt_hold_bearish[i] = True
+    out["belt_hold_bullish"] = belt_hold_bullish
+    out["belt_hold_bearish"] = belt_hold_bearish
+
+    # Spinning Top
+    spinning_top = _bool_arr()
+    for i in range(n):
+        if not valid_range[i]:
+            continue
+        rp = _range_pct(i)
+        if 0.1 < rp <= 0.3:
+            us_pct = upper_shadow[i] / full_range[i] if full_range[i] > 0 else 0
+            ls_pct = lower_shadow[i] / full_range[i] if full_range[i] > 0 else 0
+            if abs(us_pct - ls_pct) <= 0.15:
+                spinning_top[i] = True
+    out["spinning_top"] = spinning_top
+
+    # ─────────────────────────────────
+    #  TWO-CANDLE PATTERNS
+    # ─────────────────────────────────
+
+    bullish_engulfing = _bool_arr()
+    bearish_engulfing = _bool_arr()
+    bullish_harami = _bool_arr()
+    bearish_harami = _bool_arr()
+    harami_cross = _bool_arr()
+    piercing = _bool_arr()
+    dark_cloud = _bool_arr()
+    tweezer_top = _bool_arr()
+    tweezer_bottom = _bool_arr()
+    on_neck = _bool_arr()
+    in_neck = _bool_arr()
+    kicker_bullish = _bool_arr()
+    kicker_bearish = _bool_arr()
+
     for i in range(1, n):
-        prev_bullish = close[i - 1] > open_[i - 1]
-        prev_bearish = close[i - 1] < open_[i - 1]
-        cur_bullish = close[i] > open_[i]
-        cur_bearish = close[i] < open_[i]
-        prev_body_low = min(open_[i - 1], close[i - 1])
-        prev_body_high = max(open_[i - 1], close[i - 1])
-        cur_body_low = min(open_[i], close[i])
-        cur_body_high = max(open_[i], close[i])
+        p_open, p_high, p_low, p_close = open_[i - 1], high[i - 1], low[i - 1], close[i - 1]
+        c_open, c_high, c_low, c_close = open_[i], high[i], low[i], close[i]
 
-        if prev_bearish and cur_bullish:
-            if cur_body_low <= prev_body_low and cur_body_high >= prev_body_high:
+        p_body_low = min(p_open, p_close)
+        p_body_high = max(p_open, p_close)
+        c_body_low = min(c_open, c_close)
+        c_body_high = max(c_open, c_close)
+        p_bull = p_close > p_open
+        p_bear = p_close < p_open
+        c_bull = c_close > c_open
+        c_bear = c_close < c_open
+
+        # Engulfing
+        if p_bear and c_bull:
+            if c_body_low <= p_body_low and c_body_high >= p_body_high:
                 bullish_engulfing[i] = True
-        if prev_bullish and cur_bearish:
-            if cur_body_low <= prev_body_low and cur_body_high >= prev_body_high:
+        if p_bull and c_bear:
+            if c_body_low <= p_body_low and c_body_high >= p_body_high:
                 bearish_engulfing[i] = True
 
-    return {
-        "doji": doji,
-        "hammer": hammer,
-        "bullish_engulfing": bullish_engulfing,
-        "bearish_engulfing": bearish_engulfing,
-    }
+        # Harami
+        if p_bear and c_bull:
+            if c_body_low > p_body_low and c_body_high < p_body_high:
+                bullish_harami[i] = True
+        if p_bull and c_bear:
+            if c_body_low > p_body_low and c_body_high < p_body_high:
+                bearish_harami[i] = True
+
+        # Harami Cross
+        if (p_bear and c_bull) or (p_bull and c_bear):
+            if c_body_low > p_body_low and c_body_high < p_body_high:
+                c_range = c_high - c_low
+                if c_range > 0 and (abs(c_close - c_open) / c_range) <= doji_body_pct:
+                    harami_cross[i] = True
+
+        # Piercing Line
+        if p_bear and c_bull:
+            midpoint = (p_open + p_close) / 2.0
+            if c_open < p_low and c_close > midpoint and c_close < p_open:
+                piercing[i] = True
+
+        # Dark Cloud Cover
+        if p_bull and c_bear:
+            midpoint = (p_open + p_close) / 2.0
+            if c_open > p_high and c_close < midpoint and c_close > p_open:
+                dark_cloud[i] = True
+
+        # Tweezer Top
+        if trend[i] == "up":
+            if abs(c_high - p_high) / max(c_high, p_high) <= 0.01:
+                tweezer_top[i] = True
+
+        # Tweezer Bottom
+        if trend[i] == "down":
+            if abs(c_low - p_low) / max(c_low, p_low) <= 0.01:
+                tweezer_bottom[i] = True
+
+        # On-Neck Line
+        if p_bear and c_bull:
+            if abs(c_close - p_low) / max(c_close, p_low) <= 0.01:
+                on_neck[i] = True
+
+        # In-Neck Line
+        if p_bear and c_bull:
+            c_range = c_high - c_low
+            if c_range > 0 and 0.01 < abs(c_close - p_low) / max(c_close, p_low) <= 0.03:
+                in_neck[i] = True
+
+        # Kicker Bullish
+        if p_bear and c_bull:
+            if c_low > p_high:
+                kicker_bullish[i] = True
+
+        # Kicker Bearish
+        if p_bull and c_bear:
+            if c_high < p_low:
+                kicker_bearish[i] = True
+
+    out["bullish_engulfing"] = bullish_engulfing
+    out["bearish_engulfing"] = bearish_engulfing
+    out["bullish_harami"] = bullish_harami
+    out["bearish_harami"] = bearish_harami
+    out["harami_cross"] = harami_cross
+    out["piercing"] = piercing
+    out["dark_cloud_cover"] = dark_cloud
+    out["tweezer_top"] = tweezer_top
+    out["tweezer_bottom"] = tweezer_bottom
+    out["on_neck"] = on_neck
+    out["in_neck"] = in_neck
+    out["kicker_bullish"] = kicker_bullish
+    out["kicker_bearish"] = kicker_bearish
+
+    # ─────────────────────────────────
+    #  THREE-CANDLE PATTERNS
+    # ─────────────────────────────────
+
+    morning_star = _bool_arr()
+    evening_star = _bool_arr()
+    abandoned_baby_bullish = _bool_arr()
+    abandoned_baby_bearish = _bool_arr()
+    three_white_soldiers = _bool_arr()
+    three_black_crows = _bool_arr()
+    three_inside_up = _bool_arr()
+    three_inside_down = _bool_arr()
+    three_outside_up = _bool_arr()
+    three_outside_down = _bool_arr()
+    rising_three = _bool_arr()
+    falling_three = _bool_arr()
+
+    def _body_pct(i: int) -> float:
+        return body[i] / full_range[i] if full_range[i] > 0 else 0.5
+
+    for i in range(2, n):
+        c1, c2, c3 = i - 2, i - 1, i
+        o1, h1, l1, c1_c = open_[c1], high[c1], low[c1], close[c1]
+        o2, h2, l2, c2_c = open_[c2], high[c2], low[c2], close[c2]
+        o3, h3, l3, c3_c = open_[c3], high[c3], low[c3], close[c3]
+
+        b1_bull = c1_c > o1
+        b1_bear = c1_c < o1
+        b2_bull = c2_c > o2
+        b2_bear = c2_c < o2
+        b3_bull = c3_c > o3
+        b3_bear = c3_c < o3
+
+        b1_body = abs(c1_c - o1)
+        b2_body = abs(c2_c - o2)
+        b3_body = abs(c3_c - o3)
+        b1_hi = max(o1, c1_c)
+        b1_lo = min(o1, c1_c)
+        b3_hi = max(o3, c3_c)
+        b3_lo = min(o3, c3_c)
+
+        # Morning Star
+        if b1_bear and b3_bull:
+            c2_small = full_range[c2] > 0 and (_body_pct(c2) <= 0.3 or b2_body < b1_body * 0.3)
+            if c2_small and l2 < l1 and c3_c > (o1 + c1_c) / 2.0:
+                morning_star[c3] = True
+
+        # Evening Star
+        if b1_bull and b3_bear:
+            c2_small = full_range[c2] > 0 and (_body_pct(c2) <= 0.3 or b2_body < b1_body * 0.3)
+            if c2_small and h2 > h1 and c3_c < (o1 + c1_c) / 2.0:
+                evening_star[c3] = True
+
+        # Abandoned Baby Bullish
+        if morning_star[c3] and full_range[c2] > 0:
+            if h2 < l1 and h2 < l3:
+                abandoned_baby_bullish[c3] = True
+
+        # Abandoned Baby Bearish
+        if evening_star[c3] and full_range[c2] > 0:
+            if l2 > h1 and l2 > h3:
+                abandoned_baby_bearish[c3] = True
+
+        # Three White Soldiers
+        if b1_bull and b2_bull and b3_bull:
+            if (c2_c > c1_c and c3_c > c2_c
+                    and _body_pct(c1) >= 0.4 and _body_pct(c2) >= 0.4 and _body_pct(c3) >= 0.4):
+                three_white_soldiers[c3] = True
+
+        # Three Black Crows
+        if b1_bear and b2_bear and b3_bear:
+            if (c2_c < c1_c and c3_c < c2_c
+                    and _body_pct(c1) >= 0.4 and _body_pct(c2) >= 0.4 and _body_pct(c3) >= 0.4):
+                three_black_crows[c3] = True
+
+        # Three Inside Up
+        if b1_bear and b2_bull:
+            if l2 > l1 and h2 < h1 and b3_bull and c3_c > h1:
+                three_inside_up[c3] = True
+
+        # Three Inside Down
+        if b1_bull and b2_bear:
+            if l2 > l1 and h2 < h1 and b3_bear and c3_c < l1:
+                three_inside_down[c3] = True
+
+        # Three Outside Up
+        if b1_bear and b2_bull and h2 > h1 and l2 < l1:
+            if b3_bull and c3_c > c2_c:
+                three_outside_up[c3] = True
+
+        # Three Outside Down
+        if b1_bull and b2_bear and h2 > h1 and l2 < l1:
+            if b3_bear and c3_c < c2_c:
+                three_outside_down[c3] = True
+
+        # Rising Three Methods
+        if b1_bull and b3_bull and _body_pct(c1) >= 0.4 and _body_pct(c3) >= 0.4:
+            candles_between = True
+            for j in range(1, 3):
+                if i - j <= 0:
+                    break
+                cj = i - j
+                if close[cj] > o1 or close[cj] < l1 or open_[cj] > o1 or open_[cj] < l1:
+                    candles_between = False
+            if candles_between and c3_c > c1_c:
+                rising_three[c3] = True
+
+        # Falling Three Methods
+        if b1_bear and b3_bear and _body_pct(c1) >= 0.4 and _body_pct(c3) >= 0.4:
+            candles_between = True
+            for j in range(1, 3):
+                if i - j <= 0:
+                    break
+                cj = i - j
+                if close[cj] < o1 or close[cj] > h1 or open_[cj] < o1 or open_[cj] > h1:
+                    candles_between = False
+            if candles_between and c3_c < c1_c:
+                falling_three[c3] = True
+
+    out["morning_star"] = morning_star
+    out["evening_star"] = evening_star
+    out["abandoned_baby_bullish"] = abandoned_baby_bullish
+    out["abandoned_baby_bearish"] = abandoned_baby_bearish
+    out["three_white_soldiers"] = three_white_soldiers
+    out["three_black_crows"] = three_black_crows
+    out["three_inside_up"] = three_inside_up
+    out["three_inside_down"] = three_inside_down
+    out["three_outside_up"] = three_outside_up
+    out["three_outside_down"] = three_outside_down
+    out["rising_three_methods"] = rising_three
+    out["falling_three_methods"] = falling_three
+
+    return out
 
 
 # ---------------------------------------------------------------------------
