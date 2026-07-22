@@ -540,21 +540,17 @@ Sidebar
 | Data Valid gate | ScoreCard (Yes/No) | Detail saham |
 | Trade Plan (SL, TP, lots, R:R) | TradePlanCard | Detail saham |
 | OHLCV history | Candlestick chart (lightweight-charts) | Detail saham |
+| RSI(14), MFI(14), ADX + DI | GaugeBar components (Oscillators) | Detail saham |
+| RVOL(20) | GaugeBar component (Volume) | Detail saham |
+| ATR(14), EMA(10,25) | Text display (Parameters) | Detail saham |
+| Support/Resistance levels | Text display (Price Action) | Detail saham |
+| Fibonacci levels | Progress bar display (Price Action) | Detail saham |
+| Candlestick patterns | Pattern cards dengan dynamic SVG (Price Action) | Detail saham |
+| Scrape timestamp | Stat card "Terakhir Diambil" | Detail saham |
 
 ### 11.2 Yang Belum Ditampilkan (Tersedia di Backend)
 
-| Backend Component | Frontend Display | Prioritas |
-|-------------------|-----------------|-----------|
-| RSI(14) value | Belum ada | Medium |
-| ADX + DI values | Belum ada | Medium |
-| MFI(14) value | Belum ada | Medium |
-| ATR(14) value | Belum ada | Medium |
-| EMA(10,25) values | Belum ada | Medium |
-| RVOL(20) value | Belum ada | Medium |
-| Support/Resistance levels | Belum ada | Low |
-| Fibonacci levels | Belum ada | Low |
-| Candlestick patterns | Belum ada | Low |
-| Scrape timestamp | Stat card "Terakhir Diambil" | ✅ |
+*Semua data dari backend sudah ditampilkan di frontend (Fase 5 selesai sepenuhnya).*
 
 ### 11.3 Yang Tidak Ada di Backend
 
@@ -590,11 +586,11 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - ✅ Trade Plan note informatif ("Risiko aktual X%")
 - ✅ Sidebar navigation (Dashboard, Analisis)
 - ✅ Stock detail page (ScoreCard, chart, trade plan, capital control)
+- ✅ Indicator detail panel (RSI, ADX, MFI, RVOL, S/R, Fibonacci, Candlestick)
 
 ### Short-term (Belum — Next)
 - [ ] Dark mode
 - [ ] Sorting & filtering gainers table
-- [ ] Indicator detail panel (RSI, ADX, MFI, RVOL)
 - [ ] Auto-refresh scrape (cron/scheduler)
 - [ ] Export laporan PDF
 
