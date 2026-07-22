@@ -40,10 +40,11 @@ export default function AnalisisPage() {
             <input
               type="text"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 4))}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Masukkan kode saham (cth: BBCA)"
+              maxLength={4}
               className="w-full py-4 px-2 text-lg font-bold tracking-wider uppercase text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] placeholder:font-medium placeholder:normal-case placeholder:tracking-normal bg-transparent border-none focus:outline-none focus:ring-0"
               autoFocus
             />

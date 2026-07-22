@@ -40,14 +40,16 @@ def _position_shares(capital: float, entry: float, stop_loss: float) -> tuple[in
 
     cost_per_lot = entry * LOT_SIZE
 
-    for deploy_pct in (0.25, 0.50):
+    # Pakai 100% modal yang di-input (user preference: all-in sesuai angka yang dimasukkan)
+    for deploy_pct in (1.0,):
         max_lots = int((capital * deploy_pct) // cost_per_lot)
         if max_lots >= 1:
             shares = max_lots * LOT_SIZE
             risk_pct = (per_share_risk * shares) / capital
             note = None
             if risk_pct > config.RISK_PER_TRADE_PCT:
-                note = f"Risiko aktual {risk_pct*100:.1f}%"
+                risk_amt = int(per_share_risk * shares)
+                note = f"Risiko jika kena SL: Rp {risk_amt:,} ({risk_pct*100:.1f}% dari modal)"
             return shares, note
 
     return 0, None

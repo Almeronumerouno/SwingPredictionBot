@@ -1,6 +1,8 @@
 """api.py — Fase 4: API Layer (FastAPI)."""
 
+from datetime import date, datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import logging
 import time
@@ -109,8 +111,16 @@ class HistoryResponse(BaseModel):
     bars: list[HistoryBar]
 
 
+class MarketStatusResponse(BaseModel):
+    is_open: bool
+    message: str
+    current_time: str
+    suggested_source: str
+
+
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
-               GainersResponse, RawIndicatorsResponse, AnalisisResponse, HistoryResponse):
+               GainersResponse, RawIndicatorsResponse, AnalisisResponse, HistoryResponse,
+               MarketStatusResponse):
     _model.model_rebuild()
 
 
@@ -238,6 +248,22 @@ def analyze_stock(kode: str, capital: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Market Status
+# ---------------------------------------------------------------------------
+
+WIB = ZoneInfo("Asia/Jakarta")
+
+
+def _market_is_open() -> bool:
+    now = datetime.now(WIB)
+    if now.weekday() >= 5:
+        return False
+    open_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    close_time = now.replace(hour=15, minute=0, second=0, microsecond=0)
+    return open_time <= now < close_time
+
+
+# ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
 
@@ -252,11 +278,37 @@ app.add_middleware(
 )
 
 
+@app.get("/market-status", response_model=MarketStatusResponse)
+def get_market_status():
+    now = datetime.now(WIB)
+    is_open = _market_is_open()
+    days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+    day_name = days[now.weekday()]
+    time_str = now.strftime("%H:%M")
+    if is_open:
+        message = f"Pasar sedang BUKA ({day_name}, {time_str} WIB)"
+        suggested = "yahoo"
+    else:
+        if now.weekday() >= 5:
+            message = f"Pasar TUTUP — hari {day_name}"
+        elif now.hour < 9:
+            message = f"Pasar TUTUP — belum dibuka ({time_str} WIB)"
+        else:
+            message = f"Pasar TUTUP — sudah tutup ({time_str} WIB)"
+        suggested = "idx"
+    return {
+        "is_open": is_open,
+        "message": message,
+        "current_time": now.isoformat(),
+        "suggested_source": suggested,
+    }
+
+
 @app.post("/scrape")
-def trigger_scrape():
+def trigger_scrape(source: str | None = Query(None, pattern=r"^(yahoo|idx)$")):
     try:
         securities = get_or_fetch_securities_list()
-        gainers = scan_top_gainers(securities)
+        gainers = scan_top_gainers(securities, force_source=source)
         return {
             "status": "ok",
             "count": len(gainers),
@@ -286,37 +338,10 @@ def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
 
     for entry in data:
         try:
-            bars = fetch_trading_info(entry.code, length=config.HISTORY_LOOKBACK_DAYS)
-            if len(bars) < config.MIN_TRADING_DAYS:
-                continue
-
-            close = np.array([b.close for b in bars])
-            high = np.array([b.high for b in bars])
-            low = np.array([b.low for b in bars])
-            volume = np.array([b.volume for b in bars])
-
-            rsi_val = ind.rsi(close)
-            atr_val = ind.atr(high, low, close)
-            ema_val = ind.ema_trend(close)
-            adx_val = ind.adx(high, low, close)
-            mfi_val = ind.mfi(high, low, close, volume)
-            rvol_val = ind.rvol(volume)
-            donch = ind.donchian_channel(high, low)
-            sr = ind.support_resistance_levels(high, low)
-
-            score_result = scoring.compute_score({
-                "close": close, "rsi": rsi_val, "atr": atr_val,
-                "adx": adx_val["adx"], "plus_di": adx_val["plus_di"],
-                "minus_di": adx_val["minus_di"], "ema_fast": ema_val["ema_fast"],
-                "ema_slow": ema_val["ema_slow"], "mfi": mfi_val, "rvol": rvol_val,
-                "donchian_upper": donch["upper"], "donchian_lower": donch["lower"],
-                "support": sr["support"], "resistance": sr["resistance"],
-            })
-
-            if score_result.get("valid"):
-                entry.swing_score = score_result["swing_score"]
-                entry.recommendation = score_result["recommendation"]
-
+            result = analyze_stock(entry.code, config.DEFAULT_CAPITAL)
+            if result["score"]["valid"]:
+                entry.swing_score = result["score"]["swing_score"]
+                entry.recommendation = result["score"]["recommendation"]
             time.sleep(0.3)
         except Exception:
             continue

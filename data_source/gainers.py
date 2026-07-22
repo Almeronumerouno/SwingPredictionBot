@@ -164,23 +164,41 @@ def _scan_via_yahoo(securities: list[Security]) -> list[GainerEntry]:
     return results[: config.TOP_GAINERS_COUNT]
 
 
-def scan_top_gainers(securities: Optional[list[Security]] = None) -> list[GainerEntry]:
+def scan_top_gainers(securities: Optional[list[Security]] = None,
+                     force_source: Optional[str] = None) -> list[GainerEntry]:
     """
     Strategi utama: 1x call IDX GetStockSummary -> sort by pct_change.
     Kalau IDX gagal, fallback ke scan paralel Yahoo Finance (~900 request).
+
+    Args:
+        securities: daftar Security (di-fetch otomatis kalau None).
+        force_source: "yahoo" -> paksa Yahoo, "idx" -> paksa IDX,
+                      None -> auto (IDX dulu, fallback Yahoo).
     """
     scraped_at = datetime.now(WIB)
     top_n: list[GainerEntry] = []
 
-    try:
-        top_n = _scan_via_idx()
-        source = "IDX"
-    except (IdxTradingError, Exception) as e:
-        print(f"[WARN] IDX GetStockSummary gagal, fallback ke Yahoo: {e}")
+    if force_source == "yahoo":
         if securities is None:
             securities = get_or_fetch_securities_list()
         top_n = _scan_via_yahoo(securities)
-        source = "Yahoo (fallback)"
+        source = "Yahoo (paksa)"
+    elif force_source == "idx":
+        try:
+            top_n = _scan_via_idx()
+            source = "IDX (paksa)"
+        except (IdxTradingError, Exception) as e:
+            raise
+    else:
+        try:
+            top_n = _scan_via_idx()
+            source = "IDX"
+        except (IdxTradingError, Exception) as e:
+            print(f"[WARN] IDX GetStockSummary gagal, fallback ke Yahoo: {e}")
+            if securities is None:
+                securities = get_or_fetch_securities_list()
+            top_n = _scan_via_yahoo(securities)
+            source = "Yahoo (fallback)"
 
     print(f"[INFO] Top gainers diambil dari {source}: {len(top_n)} saham")
     _cache_gainers(top_n, scraped_at)
