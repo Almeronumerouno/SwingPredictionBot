@@ -10,6 +10,8 @@ export interface GainerEntry {
   foreign_sell: number
   swing_score: number | null
   recommendation: string | null
+  gorengan_score: number | null
+  gorengan_level: string | null
 }
 
 export interface GainersResponse {
@@ -61,6 +63,23 @@ export interface RawIndicators {
   pattern_candles?: { open: number; high: number; low: number; close: number }[]
 }
 
+export interface GorenganFactors {
+  historical_pump_dump_risk: number
+  liquidity_risk: number
+  volume_anomaly: number
+  distribution_risk: number
+  parabolic_move_risk: number
+  volatility_anomaly: number
+}
+
+export interface GorenganAnalysis {
+  score: number
+  level: string
+  factors: GorenganFactors
+  warnings: string[]
+  explanation: string
+}
+
 export interface AnalisisResponse {
   kode: string
   nama: string
@@ -70,6 +89,7 @@ export interface AnalisisResponse {
   trade_plan: TradePlanResponse | null
   raw_indicators: RawIndicators | null
   capital_used: number
+  gorengan: GorenganAnalysis | null
 }
 
 export interface HistoryBar {

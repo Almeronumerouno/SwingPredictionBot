@@ -4,13 +4,14 @@ interface Props {
   sub?: string;
   positive?: boolean;
   negative?: boolean;
+  warning?: boolean;
   icon?: React.ReactNode;
 }
 
-export default function ScoreCard({ label, value, sub, positive, negative, icon }: Props) {
-  const color = positive ? "text-[var(--color-up)]" : negative ? "text-[var(--color-down)]" : "text-[var(--color-text-primary)]";
-  const dotColor = positive ? "bg-[var(--color-up)]" : negative ? "bg-[var(--color-down)]" : "bg-[var(--color-text-muted)]";
-  const glowColor = positive ? "shadow-[0_0_12px_rgba(5,150,105,0.08)]" : negative ? "shadow-[0_0_12px_rgba(220,38,38,0.08)]" : "shadow-sm";
+export default function ScoreCard({ label, value, sub, positive, negative, warning, icon }: Props) {
+  const color = positive ? "text-[var(--color-up)]" : negative ? "text-[var(--color-down)]" : warning ? "text-orange-500" : "text-[var(--color-text-primary)]";
+  const dotColor = positive ? "bg-[var(--color-up)]" : negative ? "bg-[var(--color-down)]" : warning ? "bg-orange-400" : "bg-[var(--color-text-muted)]";
+  const glowColor = positive ? "shadow-[0_0_12px_rgba(5,150,105,0.08)]" : negative ? "shadow-[0_0_12px_rgba(220,38,38,0.08)]" : warning ? "shadow-[0_0_12px_rgba(251,146,60,0.08)]" : "shadow-sm";
   
   return (
     <div className={`group border border-[var(--color-border)] rounded-xl px-5 py-4 bg-[var(--color-surface)] ${glowColor} hover:shadow-md hover:-translate-y-1 hover:border-[var(--color-primary)]/20 transition-all duration-300 ease-out flex flex-col justify-between h-full`}>

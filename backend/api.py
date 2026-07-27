@@ -17,6 +17,7 @@ import config
 import indicators as ind
 import risk
 import scoring
+import gorengan
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.idx_trading import IdxTradingError
 from data_source.yahoo_client import YahooClientError, fetch_trading_info
@@ -70,6 +71,8 @@ class GainerEntryResponse(BaseModel):
     foreign_sell: float
     swing_score: float | None = None
     recommendation: str | None = None
+    gorengan_score: float | None = None
+    gorengan_level: str | None = None
 
 
 class GainersResponse(BaseModel):
@@ -95,6 +98,24 @@ class RawIndicatorsResponse(BaseModel):
     candlestick_patterns: list[str]
 
 
+class GorenganFactors(BaseModel):
+    historical_pump_dump_risk: float
+    liquidity_risk: float
+    market_cap_risk: float
+    active_pump: float
+    mid_momentum: float
+    distribution_risk: float
+    turnover_gaps: float
+
+
+class GorenganResponse(BaseModel):
+    score: float
+    level: str
+    factors: GorenganFactors
+    warnings: list[str]
+    explanation: str
+
+
 class AnalisisResponse(BaseModel):
     kode: str
     nama: str
@@ -104,6 +125,9 @@ class AnalisisResponse(BaseModel):
     trade_plan: TradePlanResponse | None
     raw_indicators: RawIndicatorsResponse | None
     capital_used: float
+    gorengan: GorenganResponse | None = None
+    buy_signal_validated: bool = False
+    validation_note: str | None = None
 
 
 class HistoryResponse(BaseModel):
@@ -119,8 +143,8 @@ class MarketStatusResponse(BaseModel):
 
 
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
-               GainersResponse, RawIndicatorsResponse, AnalisisResponse, HistoryResponse,
-               MarketStatusResponse):
+               GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
+               AnalisisResponse, HistoryResponse, MarketStatusResponse):
     _model.model_rebuild()
 
 
@@ -139,8 +163,9 @@ def _dailybar_to_historybar(b: Any) -> dict:
     }
 
 
-def analyze_stock(kode: str, capital: float) -> dict:
-    bars = fetch_trading_info(kode, length=config.HISTORY_LOOKBACK_DAYS)
+def analyze_stock(kode: str, capital: float, target_date: str | None = None,
+                  shares: float | None = None, listing_board: str | None = None) -> dict:
+    bars = fetch_trading_info(kode, length=config.HISTORY_LOOKBACK_DAYS, target_date=target_date)
 
     if len(bars) < config.MIN_TRADING_DAYS:
         raise InsufficientDataError(
@@ -158,7 +183,7 @@ def analyze_stock(kode: str, capital: float) -> dict:
     ema_val = ind.ema_trend(close)
     adx_val = ind.adx(high, low, close)
     mfi_val = ind.mfi(high, low, close, volume)
-    rvol_val = ind.rvol(volume)
+    rvol_val = ind.rvol(volume, config.RVOL_WINDOW)
     donch = ind.donchian_channel(high, low)
     sr = ind.support_resistance_levels(high, low)
 
@@ -180,6 +205,13 @@ def analyze_stock(kode: str, capital: float) -> dict:
     }
 
     score_result = scoring.compute_score(score_input)
+
+    # Gorengan detection
+    gor_result = gorengan.compute_gorengan(
+        close=close, open_=open_, high=high, low=low, volume=volume,
+        atr_arr=atr_val, adx_arr=adx_val["adx"],
+        rvol_arr=rvol_val, shares=shares, listing_board=listing_board,
+    )
 
     if score_result["valid"] and score_result["recommendation"] != "HOLD":
         trade_plan = risk.build_trade_plan(
@@ -271,6 +303,13 @@ def analyze_stock(kode: str, capital: float) -> dict:
         "trade_plan": trade_plan,
         "raw_indicators": raw_indicators,
         "capital_used": capital,
+        "gorengan": gor_result,
+        "buy_signal_validated": config.SWING_BUY_VALIDATED,
+        "validation_note": (
+            "BUY belum terbukti edge independen lintas rezim (backtest: bullish WR "
+            "70.6% → bearish 27.3% di 6 saham likuid). SELL tervalidasi (~58% WR "
+            "konsisten 2 rezim)."
+        ),
     }
 
 
@@ -332,14 +371,18 @@ def get_market_status():
 
 
 @app.post("/scrape")
-def trigger_scrape(source: str | None = Query(None, pattern=r"^(yahoo|idx)$")):
+def trigger_scrape(
+    source: str | None = Query(None, pattern=r"^(yahoo|idx)$"),
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+):
     try:
         securities = get_or_fetch_securities_list()
-        gainers = scan_top_gainers(securities, force_source=source)
+        gainers = scan_top_gainers(securities, force_source=source, target_date=date)
+        date_label = f" untuk tanggal {date}" if date else ""
         return {
             "status": "ok",
             "count": len(gainers),
-            "message": f"Scrape berhasil. {len(gainers)} gainers ditemukan.",
+            "message": f"Scrape berhasil{date_label}. {len(gainers)} gainers ditemukan.",
         }
     except Exception as e:
         logging.error("Scrape gagal: %s", e)
@@ -363,12 +406,21 @@ def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
 
     data = cached["data"]
 
+    securities = get_or_fetch_securities_list()
+    sec_by_code = {s.code: s for s in securities}
+
     for entry in data:
         try:
-            result = analyze_stock(entry.code, config.DEFAULT_CAPITAL)
+            sec = sec_by_code.get(entry.code)
+            result = analyze_stock(entry.code, config.DEFAULT_CAPITAL,
+                                   shares=sec.shares if sec else None,
+                                   listing_board=sec.listing_board if sec else None)
             if result["score"]["valid"]:
                 entry.swing_score = result["score"]["swing_score"]
                 entry.recommendation = result["score"]["recommendation"]
+            if result.get("gorengan"):
+                entry.gorengan_score = result["gorengan"]["score"]
+                entry.gorengan_level = result["gorengan"]["level"]
             time.sleep(0.3)
         except Exception:
             continue
@@ -385,20 +437,23 @@ def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
 def get_analisis(
     kode: str,
     capital: float = Query(config.DEFAULT_CAPITAL, gt=0),
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
     kode = kode.strip().upper()
 
     securities = get_or_fetch_securities_list()
-    if not any(s.code == kode for s in securities):
+    sec = next((s for s in securities if s.code == kode), None)
+    if sec is None:
         raise HTTPException(
             status_code=404,
             detail=f"Kode saham {kode} tidak ditemukan di daftar efek IDX.",
         )
 
-    nama = next((s.name for s in securities if s.code == kode), kode)
+    nama = sec.name
 
     try:
-        result = analyze_stock(kode, capital)
+        result = analyze_stock(kode, capital, target_date=date,
+                               shares=sec.shares, listing_board=sec.listing_board)
     except InsufficientDataError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except (YahooClientError, IdxTradingError) as e:
@@ -415,6 +470,7 @@ def get_analisis(
 def get_history(
     kode: str,
     length: int = Query(config.HISTORY_LOOKBACK_DAYS, gt=0, le=config.MAX_HISTORY_QUERY_DAYS),
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
     kode = kode.strip().upper()
 
@@ -425,7 +481,7 @@ def get_history(
             detail=f"Kode saham {kode} tidak ditemukan di daftar efek IDX.",
         )
 
-    bars = fetch_trading_info(kode, length=length)
+    bars = fetch_trading_info(kode, length=length, target_date=date)
 
     if not bars:
         raise HTTPException(

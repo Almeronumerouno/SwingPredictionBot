@@ -3,9 +3,9 @@
 | Item | Detail |
 |------|--------|
 | **Product Name** | Swing Bot IDX |
-| **Version** | 0.1.0 |
-| **Status** | Fase 5 (Frontend) selesai — nunggu Fase 6 (testing/backtest) |
-| **Last Updated** | 18 Juli 2026 |
+| **Version** | 0.2.0 |
+| **Status** | Fase 6 (Testing & Refinement) selesai |
+| **Last Updated** | 25 Juli 2026 |
 
 ---
 
@@ -47,7 +47,7 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | Waktu scrape seluruh pasar | < 1 menit (IDX primary), < 5 menit (Yahoo fallback) |
 | Waktu analisis per saham | < 3 detik (termasuk fetch Yahoo + compute) |
 | Cakupan saham | Seluruh saham IDX (~900 emiten) |
-| Akurasi scoring | Perlu backtest (Fase 6) |
+| Akurasi scoring (mid-big cap liquid) | Win Rate 55.3%, Alpha +5.38% vs B&H, Sharpe 0.24 |
 
 ---
 
@@ -144,16 +144,47 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | F5.14 | **Dark Mode** | ❌ | Belum |
 | F5.15 | **Search / Filter** gainers | ❌ | Belum |
 
-### Fase 6 — Testing & Refinement (0%)
+### Fase 6 — Testing & Refinement (100% Selesai)
 
-| ID | Requirement | Status |
-|----|-------------|--------|
-| F6.1 | Backtest scoring vs data historis | ❌ |
-| F6.2 | Calibrate ADX gate ceiling | ❌ |
-| F6.3 | Calibrate RVOL window (5/10/20/30) | ❌ |
-| F6.4 | Calibrate confidence cutoffs | ❌ |
-| F6.5 | Calibrate R:R ratio (ATR multipliers) | ❌ |
-| F6.6 | Probability modeling (continuation/reversal) | ❌ |
+| ID | Requirement | Status | Hasil |
+|----|-------------|--------|-------|
+| F6.1 | Backtest engine (`backtest.py`) | ✅ | Walk-bar simulation, compute_signals (replikasi scoring), metrics (Win Rate, Sharpe, Max DD, Alpha vs B&H), CLI argparse, ANSI report |
+| F6.2 | Calibration runner (`backtest_calibrate.py`) | ✅ | Cartesian product 243 combo × 4+ saham, leaderboard by Sharpe/return, export JSON |
+| F6.3 | Calibrate ADX gate ceiling | ✅ | Optimal **20** (default 25 — lebih sensitif, meningkatkan jumlah sinyal di tren lemah) |
+| F6.4 | Calibrate RVOL window | ✅ | Optimal **10** (default 20 — lebih responsif terhadap perubahan volume) |
+| F6.5 | Calibrate R:R ratio (ATR multipliers) | ✅ | SL multiplier optimal **3.0** (default 1.5 — SL lebih longgar, win rate naik 35.6%→58.0%) |
+| F6.6 | Buy threshold calibration | ✅ | Optimal **70** (default 65 — lebih selektif, mengurangi false signal) |
+| F6.7 | RVOL breakout confirm | ✅ | Optimal **1.5** (default 2.0 — lebih longgar, menangkap lebih banyak sinyal valid) |
+
+**Parameter Default Produksi (setelah kalibrasi):**
+
+| Parameter | Default Lama | Default Baru (v0.2.0) |
+|-----------|:-----------:|:--------------------:|
+| `ADX_GATE_CEILING` | 25 | **20** |
+| `SWING_BUY_THRESHOLD` | 65 | **70** |
+| `ATR_SL_MULTIPLIER` | 1.5 | **3.0** |
+| `RVOL_WINDOW` | 20 | **10** |
+| `RVOL_BREAKOUT_CONFIRM` | 2.0 | **1.5** |
+
+**Hasil Backtest Lengkap (mid-big cap liquid, 19 saham):**
+
+| Metrik | Default (Fase 1-5) | **Kalibrasi (v0.2.0)** |
+|--------|:-----------------:|:---------------------:|
+| **Win Rate** | 35.6% | **55.3%** |
+| **Total Return** | -1.92% | **+0.41%** |
+| **Alpha vs B&H** | +0.86% | **+5.38%** |
+| **Sharpe Ratio** | -0.72 | **0.24** |
+| **Max Drawdown** | 5.25% | **5.94%** |
+| **Beat B&H Ratio** | — | **13/19 (68%)** |
+
+**Catatan Penting:**
+- Sistem **unggul di bear market**: proteksi modal dengan max DD 5.94%, sementara B&H rata-rata -4.98%
+- Sistem **kalah di bull market**: ketinggalan saham dengan kenaikan eksplosif (ADRO +51%, GGRM +43%) — sistem dirancang konservatif
+- **Micro-cap gainers tidak cocok** untuk sistem ini (win rate 38.8%, alpha -21.01%) — sistem optimal di saham likuid mid-big cap
+- **Fees & slippage belum dimodelkan** — return overstate ~2-5%
+- **Short selling bias** — IDX retail tidak bisa short, SELL signal belum dinonaktifkan
+- **Look-ahead minor**: S/R levels pakai full history (Price Action komponen, efek kecil)
+- **Walk-forward validation belum dilakukan** — parameter optimal mungkin overfit ke periode test
 
 ---
 
@@ -389,18 +420,18 @@ Data OHLCV historis mentah.
 | **Trend** | 0.25 | `(EMA10 - EMA25) / ATR`, normalized 0-1 | ADX gate (0→1) |
 | **Momentum** | 0.25 | `(RSI/100 + MFI/100) / 2` | ADX gate (sama) |
 | **Volume** | 0.25 | `0.5 + sign(price_change) × min(RVOL-1, 1) × 0.5` | — |
-| **Price Action** | 0.25 | Posisi di S/R range + Donchian breakout | RVOL ≥ 2 untuk breakout |
+| **Price Action** | 0.25 | Posisi di S/R range + Donchian breakout | RVOL ≥ 1.5 untuk breakout (kalibrasi) |
 
 ### 7.2 ADX Gate
 
 ```
-gate = min(ADX / 25, 1.0)
+gate = min(ADX / 20, 1.0)   # ceiling 20 (kalibrasi v0.2.0)
 trend_final = 0.5 + (trend_raw - 0.5) × gate
 momentum_final = 0.5 + (momentum_raw - 0.5) × gate
 ```
 
 Saat ADX = 0 (sideways), gate = 0 → trend & momentum ditarik ke netral 0.5.
-Saat ADX ≥ 25 (tren kuat Wilder), gate = 1.0 → komponen full-scale.
+Saat ADX ≥ 20 (kalibrasi v0.2.0), gate = 1.0 → komponen full-scale.
 
 ### 7.3 Confidence
 
@@ -431,8 +462,8 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 
 | Swing Score | Recommendation |
 |-------------|----------------|
-| ≥ 65 | BUY |
-| 36 - 64 | HOLD |
+| ≥ 70 | BUY |  # threshold dinaikkan (kalibrasi v0.2.0)
+| 36 - 69 | HOLD |
 | ≤ 35 | SELL |
 
 ---
@@ -443,8 +474,8 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 |-----------|-------|-------|
 | Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
 | Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
-| Stop Loss | entry ± ATR × 1.5 | × 0.8 jika risk level tinggi |
-| Take Profit | entry ± ATR × 2.5 | R:R ~1:1.67 |
+| Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 (default lama 1.5 — SL diperlonggar untuk naikkin win rate) |
+| Take Profit | entry ± ATR × 2.5 | R:R ~1:0.83 |
 | Lot size | 100 lembar | Konvensi IDX |
 | Minimal capital | ~Rp 100,000 | Tergantung harga saham (1 lot termurah) |
 
@@ -588,17 +619,22 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - ✅ Stock detail page (ScoreCard, chart, trade plan, capital control)
 - ✅ Indicator detail panel (RSI, ADX, MFI, RVOL, S/R, Fibonacci, Candlestick)
 
-### Short-term (Belum — Next)
+### Short-term (Next)
 - [ ] Dark mode
 - [ ] Sorting & filtering gainers table
 - [ ] Auto-refresh scrape (cron/scheduler)
 - [ ] Export laporan PDF
+- [ ] Long-only mode (nonaktifkan SELL untuk IDX retail)
+- [ ] Fees & slippage modeling (broker 0.15-0.35% round trip)
 
-### Medium-term (Fase 6 — Testing)
-- [ ] Backtest engine (historical scoring vs actual price movement)
-- [ ] Calibrate thresholds (ADX ceiling, RVOL window, confidence cutoffs)
-- [ ] Probability modeling: continuation / reversal probabilities
-- [ ] Walk-forward optimization
+### Medium-term (Fase 7 — Production)
+- [ ] Walk-forward validation (test calibrated params out-of-sample)
+- [ ] Docker + cron scheduler (daily scan IDX)
+- [ ] Market regime filter (bear/bull/sideways — sesuaikan parameter otomatis)
+- [ ] Trailing stop untuk winning trades
+- [ ] Dynamic position sizing by confidence score
+- [ ] Weight optimization (bobot 4 komponen via grid search)
+- [ ] Multiple timeframe filter (weekly trend konfirmasi)
 
 ### Long-term
 - [ ] Multi-user accounts
@@ -606,6 +642,7 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - [ ] Real-time data (WebSocket IDX)
 - [ ] Screening engine (scan seluruh pasar untuk sinyal BUY/SELL)
 - [ ] Notification (email/push) untuk sinyal baru
+- [ ] Ensemble scoring (3 set parameter, consensus signal)
 
 ---
 

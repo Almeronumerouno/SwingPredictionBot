@@ -12,13 +12,14 @@ import TechnicalIndicators from "@/components/technical-indicators";
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
+export const dynamic = 'force-dynamic';
 
 export default async function SahamPage({
   params,
   searchParams,
 }: {
   params: Promise<{ kode: string }>;
-  searchParams: Promise<{ capital?: string; length?: string }>;
+  searchParams: Promise<{ capital?: string; length?: string; date?: string }>;
 }) {
   const { kode } = await params;
   const sp = await searchParams;
@@ -28,8 +29,8 @@ export default async function SahamPage({
 
   try {
     [analisis, history] = await Promise.all([
-      fetchAnalisis(kode, sp.capital ? Number(sp.capital) : undefined),
-      fetchHistory(kode, sp.length ? Number(sp.length) : undefined),
+      fetchAnalisis(kode, sp.capital ? Number(sp.capital) : undefined, sp.date),
+      fetchHistory(kode, sp.length ? Number(sp.length) : undefined, sp.date),
     ]);
   } catch {
     notFound();
@@ -68,15 +69,15 @@ export default async function SahamPage({
             </div>
             <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
           </div>
-          <div className="md:text-right">
+          <div className="md:text-right flex flex-col md:items-end">
             <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir</p>
-            <div className="flex items-baseline gap-3 md:justify-end">
+            <div className="flex items-baseline gap-3 md:justify-end mb-2">
               <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
               <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                 {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
               </span>
             </div>
-            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Update: {analisis.last_updated}</p>
+
           </div>
         </div>
       </header>
@@ -84,13 +85,21 @@ export default async function SahamPage({
 
 
       {/* Score Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         <ScoreCard
           label="Swing Score"
           value={s.swing_score != null ? s.swing_score.toFixed(1) : "-"}
-          sub={s.swing_score != null ? (s.swing_score >= 70 ? "Sangat Bagus" : s.swing_score >= 50 ? "Cukup Baik" : s.swing_score >= 30 ? "Lemah" : "Sangat Lemah") : undefined}
-          positive={s.swing_score != null && s.swing_score >= 65}
+          sub={s.swing_score != null ? (s.swing_score >= 75 ? "Sangat Bagus" : s.swing_score >= 50 ? "Cukup Baik" : s.swing_score >= 30 ? "Lemah" : "Sangat Lemah") : undefined}
+          positive={s.swing_score != null && s.swing_score >= 75}
           negative={s.swing_score != null && s.swing_score <= 35}
+        />
+        <ScoreCard
+          label="Gorengan Score"
+          value={analisis.gorengan ? analisis.gorengan.score.toFixed(0) : "-"}
+          sub={analisis.gorengan ? (analisis.gorengan.level === "EXTREME" ? "Pump & Dump!" : analisis.gorengan.level === "HIGH" ? "Hati-hati" : analisis.gorengan.level === "MEDIUM" ? "Spekulatif" : "Normal") : undefined}
+          positive={analisis.gorengan != null && analisis.gorengan.level === "LOW"}
+          warning={analisis.gorengan != null && analisis.gorengan.level === "HIGH"}
+          negative={analisis.gorengan != null && analisis.gorengan.level === "EXTREME"}
         />
         <ScoreCard
           label="Confidence"

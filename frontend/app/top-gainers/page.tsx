@@ -57,7 +57,7 @@ export default async function TopGainersPage({
               </p>
             </div>
           </div>
-          <GainersTable data={gainers.data} />
+          <GainersTable data={gainers.data} date={date} />
         </section>
       ) : null}
     </>

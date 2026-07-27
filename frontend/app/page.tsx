@@ -1,19 +1,26 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import type { GainersResponse } from "@/types/api";
 import { fetchGainers } from "@/lib/api/gainers";
 import ScrapeButton from "@/components/scrape-button";
-
+import DateSelector from "@/components/date-selector";
+import SignalScreener from "@/components/signal-screener";
 const fmtIdr = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const pct = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(2)}%`;
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
+  const { date } = await searchParams;
   let gainers: GainersResponse | null = null;
   let error: string | null = null;
 
   try {
-    gainers = await fetchGainers();
+    gainers = await fetchGainers(date);
   } catch (e) {
     error = e instanceof Error ? e.message : "Gagal memuat data";
   }
@@ -29,14 +36,20 @@ export default async function DashboardPage() {
   return (
     <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-10 gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-1">Dashboard</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
+
+          </div>
           <p className="text-sm font-medium text-[var(--color-text-secondary)]">
-            Ringkasan pasar &amp; sinyal trading hari ini &middot; {gainers?.date ?? new Date().toISOString().slice(0, 10)}
+            Ringkasan seluruh saham gainer di Bursa Efek Indonesia hari ini, termasuk sinyal swing trading, volume, dan nilai transaksi.
           </p>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
+          <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <DateSelector selected={date || ""} basePath="/" />
+          </Suspense>
           <ScrapeButton />
         </div>
       </header>
@@ -114,7 +127,7 @@ export default async function DashboardPage() {
                     {pct(maxGainer.pct_change)}
                   </span>
                 </div>
-                <Link href={`/saham/${maxGainer.code}`} className="group block">
+                <Link prefetch={false} href={`/saham/${maxGainer.code}${date ? `?date=${date}` : ''}`} className="group block">
                   <p className="text-3xl font-extrabold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors tracking-tight">{maxGainer.code}</p>
                   <p className="text-sm font-medium text-[var(--color-text-secondary)] mt-1 truncate">{maxGainer.name}</p>
                 </Link>
@@ -129,7 +142,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <Link
-                  href={`/saham/${maxGainer.code}`}
+                  href={`/saham/${maxGainer.code}${date ? `?date=${date}` : ''}`}
                   className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
                   Lihat Analisis
@@ -138,46 +151,13 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* Buy Signals List */}
-            <div className="lg:col-span-2 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Sinyal Buy Terkuat</h2>
-                <Link href="/top-gainers" className="text-xs font-semibold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-colors">
-                  Lihat Semua →
-                </Link>
-              </div>
-              {topBuy.length === 0 ? (
-                <div className="px-6 py-10 text-center">
-                  <p className="text-sm font-medium text-[var(--color-text-muted)]">Belum ada sinyal buy hari ini.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-[var(--color-border)]">
-                  {topBuy.slice(0, 5).map((g, i) => (
-                    <Link key={g.code} href={`/saham/${g.code}`} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[var(--color-muted-bg)]/50 transition-colors group">
-                      <span className="w-7 h-7 rounded-lg bg-[var(--color-muted-bg)] flex items-center justify-center text-xs font-bold text-[var(--color-text-muted)]">{i + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">{g.code}</p>
-                        <p className="text-xs font-medium text-[var(--color-text-muted)] truncate">{g.name}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold tabular-nums text-[var(--color-text-primary)]">{fmtIdr(g.close)}</p>
-                        <p className="text-xs font-semibold tabular-nums text-[var(--color-up)]">{pct(g.pct_change)}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 pl-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-up)]/10 text-[var(--color-up)] border border-[var(--color-up)]/20 text-xs font-bold tabular-nums">
-                          ▲ {g.swing_score?.toFixed(0) ?? "-"}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Signal Screener */}
+            <SignalScreener data={data} date={date} />
           </div>
 
           {/* Quick Access */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link href="/top-gainers" className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <Link href={`/top-gainers${date ? `?date=${date}` : ''}`} className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[var(--color-up)]/10 flex items-center justify-center group-hover:bg-[var(--color-up)]/20 transition-colors">
                   <svg className="w-6 h-6 text-[var(--color-up)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

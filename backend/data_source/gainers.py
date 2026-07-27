@@ -107,14 +107,18 @@ def _fetch_one_for_scan_yahoo(code: str) -> Optional[GainerEntry]:
         return None
 
 
-def _scan_via_idx() -> list[GainerEntry]:
+def _scan_via_idx(target_date: Optional[str] = None) -> list[GainerEntry]:
     """Strategi utama: 1x call GetStockSummary -> sort by %change.
     Coba hari ini dulu, kalau kosong (libur / EOD blm ready) mundur max 3 hari ke belakang cari data terakhir yang ada.
+    Jika target_date diberikan (format YYYY-MM-DD), gunakan tanggal tersebut sebagai titik awal.
     """
-    today = date.today()
+    if target_date:
+        start = date.fromisoformat(target_date)
+    else:
+        start = date.today()
     raw = []
     for offset in range(config.IDX_FALLBACK_MAX_DAYS):
-        d = today - timedelta(days=offset)
+        d = start - timedelta(days=offset)
         date_str = d.strftime("%Y%m%d")
         raw = fetch_daily_stock_summary(date_str)
         if raw:
@@ -165,7 +169,8 @@ def _scan_via_yahoo(securities: list[Security]) -> list[GainerEntry]:
 
 
 def scan_top_gainers(securities: Optional[list[Security]] = None,
-                     force_source: Optional[str] = None) -> list[GainerEntry]:
+                     force_source: Optional[str] = None,
+                     target_date: Optional[str] = None) -> list[GainerEntry]:
     """
     Strategi utama: 1x call IDX GetStockSummary -> sort by pct_change.
     Kalau IDX gagal, fallback ke scan paralel Yahoo Finance (~900 request).
@@ -174,6 +179,7 @@ def scan_top_gainers(securities: Optional[list[Security]] = None,
         securities: daftar Security (di-fetch otomatis kalau None).
         force_source: "yahoo" -> paksa Yahoo, "idx" -> paksa IDX,
                       None -> auto (IDX dulu, fallback Yahoo).
+        target_date: format YYYY-MM-DD, jika diberikan maka scrape untuk tanggal tersebut.
     """
     scraped_at = datetime.now(WIB)
     top_n: list[GainerEntry] = []
@@ -185,13 +191,13 @@ def scan_top_gainers(securities: Optional[list[Security]] = None,
         source = "Yahoo (paksa)"
     elif force_source == "idx":
         try:
-            top_n = _scan_via_idx()
+            top_n = _scan_via_idx(target_date=target_date)
             source = "IDX (paksa)"
         except (IdxTradingError, Exception) as e:
             raise
     else:
         try:
-            top_n = _scan_via_idx()
+            top_n = _scan_via_idx(target_date=target_date)
             source = "IDX"
         except (IdxTradingError, Exception) as e:
             print(f"[WARN] IDX GetStockSummary gagal, fallback ke Yahoo: {e}")
@@ -201,13 +207,14 @@ def scan_top_gainers(securities: Optional[list[Security]] = None,
             source = "Yahoo (fallback)"
 
     print(f"[INFO] Top gainers diambil dari {source}: {len(top_n)} saham")
-    _cache_gainers(top_n, scraped_at)
+    _cache_gainers(top_n, scraped_at, cache_date=target_date)
     return top_n
 
 
-def _cache_gainers(entries: list[GainerEntry], scraped_at: datetime) -> None:
+def _cache_gainers(entries: list[GainerEntry], scraped_at: datetime, cache_date: Optional[str] = None) -> None:
     _ensure_cache_dir()
-    path = config.DAILY_GAINERS_CACHE_FILE.format(date=scraped_at.date().isoformat())
+    file_date = cache_date or scraped_at.date().isoformat()
+    path = config.DAILY_GAINERS_CACHE_FILE.format(date=file_date)
     payload = {
         "scraped_at": scraped_at.isoformat(),
         "data": [asdict(e) for e in entries],

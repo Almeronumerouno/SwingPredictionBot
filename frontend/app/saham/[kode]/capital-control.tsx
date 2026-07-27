@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 function fmt(n: string) {
@@ -15,17 +15,23 @@ function unfmt(s: string) {
 
 export default function CapitalControl({ kode, capital }: { kode: string; capital?: number }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [modal, setModal] = useState(capital ? fmt(String(capital)) : "10.000.000");
   const [length, setLength] = useState("250");
 
   const apply = () => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     const modalNum = parseInt(unfmt(modal), 10);
     const lengthNum = Number(length);
 
     if (modalNum && modalNum !== 10000000) params.set("capital", String(modalNum));
+    else params.delete("capital");
+    
     if (lengthNum && lengthNum !== 250) params.set("length", String(lengthNum));
-    router.replace(`/saham/${kode}?${params.toString()}`);
+    else params.delete("length");
+    
+    const qs = params.toString();
+    router.replace(`/saham/${kode}${qs ? `?${qs}` : ""}`);
   };
 
   return (

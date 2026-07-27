@@ -1,20 +1,46 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 
 const POPULAR_STOCKS = ["BBCA", "BMRI", "BBNI", "BBRI", "TLKM", "ASII"];
 
-export default function AnalisisPage() {
-  const [code, setCode] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
+function AnalisisContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  
+  const initialDate = searchParams.get("date") || "";
+  const [code, setCode] = useState("");
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync date changes to URL so that back button restores it
+  function handleDateChange(newDate: string) {
+    setSelectedDate(newDate);
+    const params = new URLSearchParams(searchParams.toString());
+    if (newDate) {
+      params.set("date", newDate);
+    } else {
+      params.delete("date");
+    }
+    const qs = params.toString();
+    router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const kode = code.trim().toUpperCase();
-    if (kode) router.push(`/saham/${kode}`);
+    if (kode) {
+      const dateParam = selectedDate ? `?date=${selectedDate}` : "";
+      router.push(`/saham/${kode}${dateParam}`);
+    }
+  }
+
+  function navigateStock(stock: string) {
+    const dateParam = selectedDate ? `?date=${selectedDate}` : "";
+    return `/saham/${stock}${dateParam}`;
   }
 
   return (
@@ -29,6 +55,36 @@ export default function AnalisisPage() {
       </div>
 
       <div className="w-full max-w-xl">
+        {/* Date Picker */}
+        <div className="flex items-center justify-center gap-3 mb-5">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+            <svg className="w-4 h-4 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm font-semibold text-[var(--color-text-secondary)]">Tanggal Data:</span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              className="h-8 px-2 text-sm font-bold border-none bg-transparent text-[var(--color-text-primary)] focus:outline-none focus:ring-0 cursor-pointer"
+            />
+            {selectedDate && (
+              <button
+                onClick={() => handleDateChange("")}
+                className="ml-1 w-5 h-5 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-muted-bg)] transition-colors"
+                title="Reset ke hari ini"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+        </div>
+
+        {/* Search bar */}
         <form onSubmit={handleSubmit} className="relative group">
           <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-[var(--color-up)]/20 rounded-2xl blur-xl transition-opacity duration-500 ${isFocused ? 'opacity-100' : 'opacity-0'}`}></div>
           <div className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md focus-within:shadow-lg focus-within:border-[var(--color-primary)]/30 p-2 flex items-center">
@@ -65,8 +121,9 @@ export default function AnalisisPage() {
           <div className="flex flex-wrap justify-center gap-3">
             {POPULAR_STOCKS.map((stock) => (
               <Link
+                prefetch={false}
                 key={stock}
-                href={`/saham/${stock}`}
+                href={navigateStock(stock)}
                 className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 hover:shadow-sm transition-all"
               >
                 {stock}
@@ -76,5 +133,13 @@ export default function AnalisisPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AnalisisPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm font-medium text-[var(--color-text-muted)]">Memuat...</div>}>
+      <AnalisisContent />
+    </Suspense>
   );
 }

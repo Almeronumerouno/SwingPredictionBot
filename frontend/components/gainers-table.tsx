@@ -30,7 +30,7 @@ function SignalBadge({ rec, score }: { rec: string | null; score: number | null 
   );
 }
 
-export default function GainersTable({ data }: { data: GainerEntry[] }) {
+export default function GainersTable({ data, date }: { data: GainerEntry[], date?: string }) {
   if (!data.length) {
     return (
       <div className="border border-[var(--color-border)] rounded-xl p-12 bg-[var(--color-surface)] shadow-sm flex flex-col items-center justify-center text-center">
@@ -40,6 +40,8 @@ export default function GainersTable({ data }: { data: GainerEntry[] }) {
     );
   }
   
+  const qs = date ? `?date=${date}` : "";
+
   return (
     <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
@@ -66,7 +68,8 @@ export default function GainersTable({ data }: { data: GainerEntry[] }) {
                 </td>
                 <td className="py-3 px-5 whitespace-nowrap">
                   <Link
-                    href={`/saham/${g.code}`}
+                    prefetch={false}
+                    href={`/saham/${g.code}${qs}`}
                     className="font-bold text-[var(--color-text-primary)] hover:text-[var(--color-primary)] transition-colors"
                   >
                     {g.code}

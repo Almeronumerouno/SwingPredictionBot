@@ -1,0 +1,140 @@
+"""
+Config terpusat. Semua nilai sensitif (token dll) diambil dari environment
+variable / file .env, TIDAK di-hardcode di source code.
+
+Cara pakai:
+1. Copy file `.env.example` jadi `.env`
+2. Isi TELEGRAM_BOT_TOKEN dengan token dari @BotFather
+3. Jalankan bot seperti biasa (python bot.py)
+"""
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
+_BACKEND_DIR = Path(__file__).resolve().parent
+
+# ---- Telegram ----
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+
+# ---- Network / Request ----
+IDX_REQUEST_TIMEOUT = 15
+IDX_REQUEST_RETRIES = 3
+IDX_REQUEST_USER_AGENT = "Mozilla/5.0"
+
+# ---- IDX Data Source ----
+# CATATAN: idx.co.id migrasi dari Umbraco ke Nuxt.js, endpoint lama
+# (GetSecuritiesStock, GetTradingInfoSS) sudah 404. Endpoint baru di bawah
+# ini ditemukan & dikonfirmasi jalan oleh testing manual (Juli 2026).
+IDX_BASE_URL = "https://www.idx.co.id"
+IDX_SECURITIES_ENDPOINT = "/primary/StockData/GetSecuritiesStock"
+IDX_STOCK_SUMMARY_ENDPOINT = "/primary/TradingSummary/GetStockSummary"
+IDX_TRADING_INFO_SS_ENDPOINT = "/primary/ListedCompany/GetTradingInfoSS"
+IDX_SESSION_INIT_PATH = "/id"
+
+# Data trading historis TIDAK LAGI dari IDX langsung (endpoint lama mati),
+# sekarang pakai Yahoo Finance (lihat data_source/yahoo_client.py).
+# Kode saham IDX perlu ditambah suffix ".JK" untuk query ke Yahoo Finance.
+YAHOO_TICKER_SUFFIX = ".JK"
+
+# Berapa hari kalender historis buat kalkulasi indikator.
+# ADX(14) butuh warm-up dobel: DX butuh 14 bar, ADX butuh 14 bar lagi ->
+# mulai valid di bar ke-27, stabil beneran di ~150 bar (forum Wilder).
+# Makanya HISTORY_LOOKBACK_DAYS dinaikin dari 60 jadi 250 (kalender),
+# MIN_TRADING_DAYS = 150 (trading day) sebagai threshold guard.
+HISTORY_LOOKBACK_DAYS = 250
+MIN_TRADING_DAYS = 150
+# Jumlah worker paralel saat scan seluruh saham buat nentuin Top Gainers
+# (jangan set terlalu tinggi biar tidak dianggap serangan / kena rate limit)
+SCAN_MAX_WORKERS = 8
+
+# Jeda (detik) antar request dalam 1 worker, sebagai etika scraping
+SCAN_REQUEST_DELAY = 0.5
+
+# Berapa saham yang dianggap "Top Gainers" untuk dianalisis
+TOP_GAINERS_COUNT = 15
+IDX_FALLBACK_MAX_DAYS = 3
+FALLBACK_SCAN_LENGTH = 5
+
+# ---- Risk ----
+ATR_SL_MULTIPLIER = 3.0       # v0.2.0: dinaikkan dari 1.5 (kalibrasi: win rate 35.6%→55.3%)
+ATR_TP_MULTIPLIER = 2.5       # R:R ~1:0.83
+RISK_PER_TRADE_PCT = 0.01    # 1% capital per trade
+
+# ---- Scoring ----
+SCORE_WEIGHTS = {"trend": 0.25, "momentum": 0.25, "volume": 0.25, "price_action": 0.25}
+ADX_GATE_CEILING = 20         # v0.2.0: diturunkan dari 25 (kalibrasi: lebih sensitif)
+RVOL_WINDOW = 10              # v0.2.0: diturunkan dari 20 (kalibrasi: lebih responsif)
+RVOL_BREAKOUT_CONFIRM = 1.5   # v0.2.0: diturunkan dari 2.0 (kalibrasi: lebih longgar)
+SWING_BUY_THRESHOLD = 75      # experimental — BUY belum tervalidasi edge independen
+                               # lintas rezim (backtest: bullish WR 70.6% → bearish
+                               # 27.3% di 6 saham likuid). Threshold tinggi minimalisir
+                               # false positive, tapi tetap not validated.
+SWING_SELL_THRESHOLD = 35     # validated edge (58-65% WR, konsisten 2 rezim)
+SWING_BUY_VALIDATED = False   # Fase 6.5: BUY belum punya edge independen
+SWING_SELL_VALIDATED = True   # SELL tervalidasi cross-regime
+RISK_ATR_LOOKBACK = 50
+RISK_HIGH_CUTOFF = 1.5
+RISK_LOW_CUTOFF = 0.8
+CONFIDENCE_LOW_CUTOFF = 0.4     # < 0.4 → Rendah
+CONFIDENCE_HIGH_CUTOFF = 0.75   # > 0.75 → Tinggi, sisanya Sedang
+
+# ---- Gorengan Detection ----
+GORENGAN_PUMP_PCT = 80       # min % naik dari low ke peak utk dianggap pump
+GORENGAN_DUMP_PCT = 40       # min % turun dari peak utk dianggap dump
+GORENGAN_SWING_EXTREME = 150 # swing 20d dianggap ekstrem (buat hist P&D)
+GORENGAN_VOL_SPIKE_HIGH = 5  # RVOL Z-score mapping (unused — keep for ref)
+GORENGAN_VOL_SPIKE_MED = 3
+GORENGAN_VOL_SPIKE_LOW = 1.5
+GORENGAN_ATR_HIGH = 3        # ATR ratio mapping (unused)
+GORENGAN_ATR_MED = 2
+GORENGAN_ATR_LOW = 1.2
+GORENGAN_LIQ_HIGH = 20e9     # median daily value dianggap likuid
+GORENGAN_LIQ_MED = 10e9
+GORENGAN_LIQ_LOW = 3e9
+GORENGAN_LIQ_MIN = 1e9
+GORENGAN_MCAP_HIGH = 500e9   # market cap threshold: <500B = score 100
+GORENGAN_MCAP_MED = 2e12     # <2T = score 60
+GORENGAN_MCAP_LOW = 10e12    # <10T = score 25
+GORENGAN_TURNOVER_HIGH = 0.15# turnover >15% float = score 100
+GORENGAN_TURNOVER_MED = 0.08 # >8% = score 60
+GORENGAN_TURNOVER_LOW = 0.03 # >3% = score 25
+GORENGAN_GAP_COUNT = 2       # minimal gap-up dalam 5 hari terakhir
+GORENGAN_GAP_PCT = 2         # gap-up threshold (%)
+GORENGAN_ZSCORE_HIGH = 3.0   # Z-score threshold (unused)
+GORENGAN_ZSCORE_MED = 2.0
+GORENGAN_ZSCORE_LOW = 1.0
+
+# ---- Active Pump — raw thresholds (BUKAN Z-score) ----
+GORENGAN_RVOL_EXTREME = 5.0    # RVOL >5 → score 100
+GORENGAN_RVOL_HIGH = 3.0       # RVOL >3 → score 70
+GORENGAN_RVOL_MODERATE = 1.5   # RVOL >1.5 → score 30
+GORENGAN_MOMENTUM_EXTREME = 25 # 5d return >25% → score 100
+GORENGAN_MOMENTUM_HIGH = 12    # 5d return >12% → score 70
+GORENGAN_MOMENTUM_MODERATE = 7 # 5d return >7% → score 40
+GORENGAN_MOMENTUM_LOW = 3      # 5d return >3% → score 20
+GORENGAN_MOMENTUM_10D_EXTREME = 35
+GORENGAN_MOMENTUM_10D_HIGH = 18
+GORENGAN_MOMENTUM_10D_MODERATE = 10
+GORENGAN_MOMENTUM_10D_LOW = 5
+GORENGAN_VOLA_EXTREME = 3.0    # 5d ATR / 14d baseline >3 → score 100
+GORENGAN_VOLA_HIGH = 2.0       # >2 → score 70
+GORENGAN_VOLA_MODERATE = 1.5   # >1.5 → score 40
+
+# ---- Level thresholds (diturunin biar lebih sensitif) ----
+GORENGAN_LEVEL_EXTREME = 65
+GORENGAN_LEVEL_HIGH = 45
+GORENGAN_LEVEL_MEDIUM = 20
+
+# ---- API ----
+API_CORS_ORIGINS = ["http://localhost:3000"]
+DEFAULT_CAPITAL = 10_000_000
+MAX_HISTORY_QUERY_DAYS = 365
+
+# Lokasi cache lokal — absolute path, selalu di dalam folder backend/
+CACHE_DIR = str(_BACKEND_DIR / "cache")
+SECURITIES_LIST_CACHE_FILE = os.path.join(CACHE_DIR, "securities_list.json")
+DAILY_GAINERS_CACHE_FILE = os.path.join(CACHE_DIR, "gainers_{date}.json")
+STOCK_HISTORY_CACHE_FILE = os.path.join(CACHE_DIR, "history_{code}.json")

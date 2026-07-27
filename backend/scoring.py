@@ -128,13 +128,21 @@ def _nearest_level(
 
 # Step 10 — Confidence (two-factor: agreement + strength of evidence)
 def _confidence(scores: dict, swing_score: float,
-                gate: float, rvol: float) -> str:
+                gate: float, rvol: float,
+                recommendation: str | None = None) -> str:
     """
     confidence = agreement_score * strength_factor
 
     agreement_score: fraksi komponen yang searah majority swing.
     strength_factor: rata-rata gate (ADX-based) & rvol_strength.
+
+    BUY belum tervalidasi edge independen (backtest Fase 6.5: WR 27-38%
+    di bearish, gak konsisten bullish vs bearish). Confidence BUY
+    diturunkan 1 tier dari hasil kalkulasi normal.
+    SELL tetap pake logic normal (edge tervalidasi 58% WR cross-regime).
     """
+    tier_map = {"tinggi": "sedang", "sedang": "rendah", "rendah": "rendah"}
+
     values = [scores[k] for k in ("trend", "momentum", "volume", "price_action")]
     majority = 1.0 if swing_score > 50.0 else -1.0
     aligned = sum(1 for v in values if (v > 0.5) == (majority > 0))
@@ -145,10 +153,15 @@ def _confidence(scores: dict, swing_score: float,
 
     raw = agreement_score * strength_factor
     if raw >= config.CONFIDENCE_HIGH_CUTOFF:
-        return "tinggi"
+        tier = "tinggi"
     elif raw >= config.CONFIDENCE_LOW_CUTOFF:
-        return "sedang"
-    return "rendah"
+        tier = "sedang"
+    else:
+        tier = "rendah"
+
+    if recommendation == "BUY":
+        tier = tier_map[tier]
+    return tier
 
 
 # Step 10 — Risk Level
@@ -283,7 +296,7 @@ def compute_score(data: ScoreInput) -> dict:
     # Step 10 — Confidence & Risk
     gate = float(_gate_adx(adx_arr)[i])
     rvol_today = float(rvol_arr[i]) if not np.isnan(rvol_arr[i]) else 0.0
-    confidence = _confidence(components, swing_score, gate, rvol_today)
+    confidence = _confidence(components, swing_score, gate, rvol_today, recommendation=rec)
     risk_level = _risk_level(atr_arr)
 
     return {

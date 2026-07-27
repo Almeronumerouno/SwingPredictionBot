@@ -70,7 +70,7 @@ def _to_yahoo_ticker(code: str) -> str:
     return code + config.YAHOO_TICKER_SUFFIX
 
 
-def fetch_trading_info(code: str, length: int = 60) -> list[DailyBar]:
+def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] = None) -> list[DailyBar]:
     """
     Ambil data trading harian untuk satu kode saham dari Yahoo Finance.
 
@@ -81,6 +81,7 @@ def fetch_trading_info(code: str, length: int = 60) -> list[DailyBar]:
                 buffer lebih banyak dari hari kerja yang sebenarnya
                 dibutuhkan, mis. minta 90 hari kalender untuk dapat ~60
                 hari kerja).
+        target_date: format YYYY-MM-DD. Jika ada, data diambil hingga tanggal ini.
 
     Returns:
         List DailyBar terurut dari yang PALING LAMA ke PALING BARU
@@ -88,8 +89,14 @@ def fetch_trading_info(code: str, length: int = 60) -> list[DailyBar]:
         tidak ditemukan / tidak ada data (mis. baru IPO, atau delisted).
     """
     ticker = _to_yahoo_ticker(code)
-    end = date.today() + timedelta(days=1)
-    start = date.today() - timedelta(days=length)
+    
+    if target_date:
+        end_d = date.fromisoformat(target_date)
+    else:
+        end_d = date.today()
+        
+    end = end_d + timedelta(days=1)
+    start = end_d - timedelta(days=length)
 
     try:
         df = yf.Ticker(ticker).history(start=start.isoformat(), end=end.isoformat(), interval="1d")

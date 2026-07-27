@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 const navItems = [
   {
@@ -34,9 +35,40 @@ const navItems = [
   },
 ];
 
-export default function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
+  const qs = date ? `?date=${date}` : "";
 
+  return (
+    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      {navItems.map((item) => {
+        const isActive =
+          item.href === "/"
+            ? pathname === "/"
+            : pathname.startsWith(item.href);
+
+        return (
+          <Link
+            key={item.href}
+            href={`${item.href}${qs}`}
+            className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
+              isActive
+                ? "bg-[var(--color-muted-bg)] text-[var(--color-primary)]"
+                : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]/60 hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            {item.icon}
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export default function Sidebar() {
   return (
     <aside className="w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col h-screen sticky top-0">
       <div className="p-6 flex items-center gap-3 border-b border-[var(--color-border)]">
@@ -45,29 +77,9 @@ export default function Sidebar() {
         </div>
         <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
       </div>
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
-                isActive
-                  ? "bg-[var(--color-muted-bg)] text-[var(--color-primary)]"
-                  : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]/60 hover:text-[var(--color-text-primary)]"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <Suspense fallback={<div className="flex-1 p-4"></div>}>
+        <SidebarContent />
+      </Suspense>
     </aside>
   );
 }
