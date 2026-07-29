@@ -3,9 +3,9 @@
 | Item | Detail |
 |------|--------|
 | **Product Name** | Swing Bot IDX |
-| **Version** | 0.2.0 |
-| **Status** | Fase 6 (Testing & Refinement) selesai |
-| **Last Updated** | 25 Juli 2026 |
+| **Version** | 0.3.0-wip |
+| **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
+| **Last Updated** | 27 Juli 2026 |
 
 ---
 
@@ -48,6 +48,9 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | Waktu analisis per saham | < 3 detik (termasuk fetch Yahoo + compute) |
 | Cakupan saham | Seluruh saham IDX (~900 emiten) |
 | Akurasi scoring (mid-big cap liquid) | Win Rate 55.3%, Alpha +5.38% vs B&H, Sharpe 0.24 |
+| TP_HIT rate | 40.4% |
+| TP multiplier | 3.0 (v0.3.0 — naik dari 2.5) |
+| R:R rata-rata | 0.83 (target v0.3.0: >1.0) |
 
 ---
 
@@ -109,9 +112,9 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | ID | Requirement | Rumus | Sumber |
 |----|-------------|-------|--------|
 | F3.1 | **Stop Loss** | entry ± ATR × 1.5 (0.8 × multiplier jika risk tinggi) | `risk.py:10` |
-| F3.2 | **Take Profit** | entry ± ATR × 2.5 (R:R ~1:1.67) | `risk.py:20` |
-| F3.3 | **Position Sizing** | capital × 25% / entry_price, rounded ke lot (100 lembar) | `risk.py:28` |
-| F3.4 | **Fallback sizing** | Jika 25% < 1 lot, coba 50% capital | `risk.py:51` |
+| F3.2 | **Take Profit** | entry ± ATR × 3.0 (R:R 1:1, naik dari 2.5) | `risk.py:20` |
+| F3.3 | **Position Sizing** | 100% capital / entry_price, rounded ke lot | `risk.py:28` |
+| F3.4 | **Fallback sizing** | Jika 100% < 1 lot, return 0 | `risk.py:51` |
 | F3.5 | **Risk info** | Hitung risk aktual, tampilkan sebagai info (bukan warning) | `risk.py:55` |
 
 ### Fase 4 — API Layer (100% Selesai)
@@ -182,9 +185,9 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 - Sistem **kalah di bull market**: ketinggalan saham dengan kenaikan eksplosif (ADRO +51%, GGRM +43%) — sistem dirancang konservatif
 - **Micro-cap gainers tidak cocok** untuk sistem ini (win rate 38.8%, alpha -21.01%) — sistem optimal di saham likuid mid-big cap
 - **Fees & slippage belum dimodelkan** — return overstate ~2-5%
-- **Short selling bias** — IDX retail tidak bisa short, SELL signal belum dinonaktifkan
+- **Long-only mode** (v0.3.0) — SELL hanya advisory, short entry dinonaktifkan
 - **Look-ahead minor**: S/R levels pakai full history (Price Action komponen, efek kecil)
-- **Walk-forward validation belum dilakukan** — parameter optimal mungkin overfit ke periode test
+- **Walk-forward**: Sprint 1A sedang dibangun — semua parameter baru wajib divalidasi OOS
 
 ---
 
@@ -475,7 +478,9 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 | Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
 | Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
 | Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 (default lama 1.5 — SL diperlonggar untuk naikkin win rate) |
-| Take Profit | entry ± ATR × 2.5 | R:R ~1:0.83 |
+| Take Profit | entry ± ATR × **3.0** | R:R 1:1 (v0.3.0 — naik dari 2.5) |
+| Long-only mode | **Default: aktif** | SELL advisory, short entry dinonaktifkan |
+| Breakeven stop | entry + 1.0 ATR → SL ke entry | v0.3.0 — melindungi modal setelah profit |
 | Lot size | 100 lembar | Konvensi IDX |
 | Minimal capital | ~Rp 100,000 | Tergantung harga saham (1 lot termurah) |
 
@@ -619,30 +624,29 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - ✅ Stock detail page (ScoreCard, chart, trade plan, capital control)
 - ✅ Indicator detail panel (RSI, ADX, MFI, RVOL, S/R, Fibonacci, Candlestick)
 
-### Short-term (Next)
+### Short-term (v0.3.0 — Fase 7)
+- [ ] **S1A** Walk-forward harness skeleton (`walkforward.py`)
+- [ ] **S1B** Fix R:R — TP multiplier 3.0 (naik dari 2.5)
+- [ ] **S1C** Breakeven stop (1.0 ATR) — SL ke entry setelah profit
+- [ ] **S1D** Long-only mode (SELL advisory, short entry dinonaktifkan)
+- [ ] **S2** Rekonsiliasi position sizing (100%) + validasi OOS S1
+- [ ] **S3** Regime detection (SMA200+ADX) + adaptive weights + sizing
 - [ ] Dark mode
 - [ ] Sorting & filtering gainers table
-- [ ] Auto-refresh scrape (cron/scheduler)
-- [ ] Export laporan PDF
-- [ ] Long-only mode (nonaktifkan SELL untuk IDX retail)
-- [ ] Fees & slippage modeling (broker 0.15-0.35% round trip)
 
-### Medium-term (Fase 7 — Production)
-- [ ] Walk-forward validation (test calibrated params out-of-sample)
+### S4+ (Post v0.3.0 — Ditunda)
+- [ ] Full scale-out (50/30/20 + trailing)
+- [ ] Dynamic ATR multiplier (by volatility regime)
+- [ ] XGBoost feature weighting
+- [ ] Ensemble scoring (3 parameter sets, voting)
+- [ ] HMM regime detection (if SMA200+ADX insufficient)
 - [ ] Docker + cron scheduler (daily scan IDX)
-- [ ] Market regime filter (bear/bull/sideways — sesuaikan parameter otomatis)
-- [ ] Trailing stop untuk winning trades
-- [ ] Dynamic position sizing by confidence score
-- [ ] Weight optimization (bobot 4 komponen via grid search)
-- [ ] Multiple timeframe filter (weekly trend konfirmasi)
-
-### Long-term
+- [ ] Fees & slippage modeling (broker 0.15-0.35% round trip)
 - [ ] Multi-user accounts
 - [ ] Watchlist / portfolio tracking
 - [ ] Real-time data (WebSocket IDX)
 - [ ] Screening engine (scan seluruh pasar untuk sinyal BUY/SELL)
 - [ ] Notification (email/push) untuk sinyal baru
-- [ ] Ensemble scoring (3 set parameter, consensus signal)
 
 ---
 

@@ -8,9 +8,15 @@ import PriceChart from "@/components/price-chart";
 import CapitalControl from "./capital-control";
 import BackButton from "@/components/back-button";
 import TechnicalIndicators from "@/components/technical-indicators";
+import { Suspense } from "react";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+const fmtDate = (d: string) => {
+  const [y, m, day] = d.split("-");
+  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +76,7 @@ export default async function SahamPage({
             <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
           </div>
           <div className="md:text-right flex flex-col md:items-end">
-            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir</p>
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span></p>
             <div className="flex items-baseline gap-3 md:justify-end mb-2">
               <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
               <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
@@ -89,8 +95,8 @@ export default async function SahamPage({
         <ScoreCard
           label="Swing Score"
           value={s.swing_score != null ? s.swing_score.toFixed(1) : "-"}
-          sub={s.swing_score != null ? (s.swing_score >= 75 ? "Sangat Bagus" : s.swing_score >= 50 ? "Cukup Baik" : s.swing_score >= 30 ? "Lemah" : "Sangat Lemah") : undefined}
-          positive={s.swing_score != null && s.swing_score >= 75}
+          sub={s.swing_score != null ? (s.swing_score >= 70 ? "Sangat Bagus" : s.swing_score >= 50 ? "Cukup Baik" : s.swing_score >= 30 ? "Lemah" : "Sangat Lemah") : undefined}
+          positive={s.swing_score != null && s.swing_score >= 70}
           negative={s.swing_score != null && s.swing_score <= 35}
         />
         <ScoreCard
@@ -188,7 +194,9 @@ export default async function SahamPage({
               </div>
             </div>
           )}
-          <CapitalControl kode={kode} capital={sp.capital ? Number(sp.capital) : undefined} />
+          <Suspense fallback={<div className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <CapitalControl kode={kode} capital={sp.capital ? Number(sp.capital) : undefined} />
+          </Suspense>
         </div>
       </div>
 

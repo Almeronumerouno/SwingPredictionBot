@@ -25,6 +25,7 @@ import numpy as np
 
 import config as CFG
 import indicators as ind
+import regime as regime_mod
 from data_source.yahoo_client import fetch_trading_info
 
 
@@ -42,9 +43,11 @@ class BacktestConfig:
     atr_tp_multiplier: float = CFG.ATR_TP_MULTIPLIER
     rvol_breakout_confirm: float = CFG.RVOL_BREAKOUT_CONFIRM
     rvol_window: int = CFG.RVOL_WINDOW
-    position_pct: float = 0.25
+    position_pct: float = CFG.DEFAULT_POSITION_PCT
     fee_pct: float = 0.25
-    long_only: bool = False
+    long_only: bool = CFG.LONG_ONLY_MODE
+    breakeven_trigger: float = CFG.BREAKEVEN_TRIGGER
+    trailing_stop_multiplier: float = 0.0  # 0=disabled, >0 trail by N×ATR below peak
 
 
 # ──────────────────────────────────────────────
@@ -125,7 +128,7 @@ def _nearest_level(price: float, levels: list, below: bool = True) -> float | No
         return min(candidates) if candidates else None
 
 
-def _calc_sl(entry: float, atr: float, direction: str, risk_level: str, cfg: BacktestConfig) -> float:
+def _calc_sl(entry: float, atr: float, direction: str, risk_level: str, cfg: BacktestConfig, regime: str = "bull") -> float:
     mult = cfg.atr_sl_multiplier
     if risk_level == "tinggi":
         mult *= 0.8
@@ -191,15 +194,6 @@ def _confidence(components: dict, swing_score: float, gate: float, rvol: float, 
 # ──────────────────────────────────────────────
 
 def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
-    """
-    Compute swing_score dan recommendation untuk SETIAP bar (bukan cuma
-    index terakhir). Semua parameter scoring diambil dari cfg, bukan config
-    module — biar kalibrasi bisa override lewat BacktestConfig.
-
-    Returns dict dengan key:
-      swing_scores (np.ndarray), recommendations (np.ndarray of str),
-      trend/momentum/volume/price_action (np.ndarray), gate (np.ndarray)
-    """
     close = data["close"]
     rsi = data["rsi"]
     atr_arr = data["atr"]
@@ -213,33 +207,26 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
     high = data.get("high")
     low = data.get("low")
 
-    w = CFG.SCORE_WEIGHTS
     n = len(close)
 
-    # ── ADX Gate (full array) ──
     gate = np.minimum(adx_arr / cfg.adx_gate_ceiling, 1.0)
 
-    # ── Trend Score ──
     spread_atr = (ema_fast - ema_slow) / np.where(atr_arr > 0, atr_arr, np.nan)
     en = np.clip((spread_atr + 3.0) / 6.0, 0.0, 1.0)
     trend_scores = 0.5 + (en - 0.5) * gate
 
-    # ── Momentum Score ──
     raw_mom = (rsi / 100.0 + mfi_arr / 100.0) / 2.0
     momentum_scores = 0.5 + (raw_mom - 0.5) * gate
 
-    # ── Volume Score ──
     sign = np.where(close > np.roll(close, 1), 1.0, -1.0)
     sign[0] = 0.0
     clamped = np.clip(rvol_arr - 1.0, 0.0, 1.0)
     volume_scores = 0.5 + sign * clamped * 0.5
 
-    # ── Price Action Score (loop — PIT S/R per bar) ──
     pa_scores = np.full(n, np.nan)
     for i in range(n):
         if np.isnan(close[i]):
             continue
-
         if high is not None and low is not None and i >= 30:
             sr = ind.support_resistance_levels(high[:i+1], low[:i+1])
             sup_list = sr["support"]
@@ -247,7 +234,6 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
         else:
             sup_list = []
             res_list = []
-
         sup = _nearest_level(close[i], sup_list, below=True)
         res = _nearest_level(close[i], res_list, below=False)
         if sup is not None and res is not None and res > sup:
@@ -262,20 +248,30 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
         else:
             pa_scores[i] = base
 
-    # ── Swing Score ──
-    swing_scores = 100.0 * (
-        w["trend"] * trend_scores
-        + w["momentum"] * momentum_scores
-        + w["volume"] * volume_scores
-        + w["price_action"] * pa_scores
-    )
-
-    # ── Recommendation ──
+    regimes = regime_mod.regime_series(close, adx_arr)
+    swing_scores = np.full(n, np.nan)
     recs = np.full(n, "HOLD", dtype=object)
-    buy_mask = swing_scores >= cfg.swing_buy_threshold
-    sell_mask = swing_scores <= cfg.swing_sell_threshold
-    recs[buy_mask] = "BUY"
-    recs[sell_mask] = "SELL"
+
+    for i in range(n):
+        if np.isnan(trend_scores[i]) or np.isnan(momentum_scores[i]) or np.isnan(volume_scores[i]) or np.isnan(pa_scores[i]):
+            continue
+        profile = regime_mod.get_regime_profile(regimes[i])
+        w = profile.weights
+        raw = 100.0 * (
+            w["trend"] * trend_scores[i]
+            + w["momentum"] * momentum_scores[i]
+            + w["volume"] * volume_scores[i]
+            + w["price_action"] * pa_scores[i]
+        )
+        effective = raw * profile.multiplier
+        swing_scores[i] = round(effective, 1)
+
+        if swing_scores[i] >= 70:
+            recs[i] = "BUY"
+        elif swing_scores[i] <= profile.sell_threshold:
+            recs[i] = "SELL"
+        else:
+            recs[i] = "HOLD"
 
     return {
         "swing_scores": swing_scores,
@@ -285,6 +281,7 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
         "volume": volume_scores,
         "price_action": pa_scores,
         "gate": gate,
+        "regimes": regimes,
     }
 
 
@@ -480,6 +477,11 @@ def run_backtest(
                 "entry_equity": current_equity,
                 "confidence": conf,
                 "risk_level": risk_lvl,
+                "breakeven_bar": -1,
+                "breakeven_applied": False,
+                "high_water_mark": entry_price,
+                "low_water_mark": entry_price,
+                "atr_entry": atr_i,
             }
 
         # ── Exit check ──
@@ -487,6 +489,33 @@ def run_backtest(
             direction = pos["direction"]
             exit_reason = None
             exit_price_candidate = None
+
+            # Breakeven: baru efek mulai bar berikutnya (cegah same-bar exit)
+            trigger = pos["atr_entry"] * bt_config.breakeven_trigger
+            be_bar = pos.get("breakeven_bar", -1)
+            if be_bar < 0:
+                if direction == "BUY" and high[i] >= pos["entry_price"] + trigger:
+                    pos["breakeven_bar"] = i
+                elif direction == "SELL" and low[i] <= pos["entry_price"] - trigger:
+                    pos["breakeven_bar"] = i
+            if be_bar >= 0 and i > be_bar and not pos.get("breakeven_applied"):
+                pos["stop_loss"] = max(pos["stop_loss"], pos["entry_price"]) if direction == "BUY" else min(pos["stop_loss"], pos["entry_price"])
+                pos["breakeven_applied"] = True
+
+            # ATR Trailing Stop
+            trail_mult = bt_config.trailing_stop_multiplier
+            if trail_mult > 0:
+                atr_i = pos["atr_entry"]
+                if direction == "BUY":
+                    hwm = max(pos.get("high_water_mark", close[i]), close[i])
+                    pos["high_water_mark"] = hwm
+                    trail_sl = hwm - trail_mult * atr_i
+                    pos["stop_loss"] = max(pos["stop_loss"], trail_sl)
+                else:
+                    lwm = min(pos.get("low_water_mark", close[i]), close[i])
+                    pos["low_water_mark"] = lwm
+                    trail_sl = lwm + trail_mult * atr_i
+                    pos["stop_loss"] = min(pos["stop_loss"], trail_sl)
 
             if direction == "BUY":
                 if low[i] <= pos["stop_loss"]:
@@ -751,6 +780,7 @@ Contoh:
     parser.add_argument("--fee-pct", type=float, default=None)
     parser.add_argument("--long-only", action="store_true",
                         help="Nonaktifkan short entry (SELL cuma jadi exit signal)")
+    parser.add_argument("--breakeven-trigger", type=float, default=None)
 
     args = parser.parse_args()
 
@@ -775,6 +805,8 @@ Contoh:
         bt_config.fee_pct = args.fee_pct
     if args.long_only:
         bt_config.long_only = True
+    if args.breakeven_trigger is not None:
+        bt_config.breakeven_trigger = args.breakeven_trigger
 
     results: list[BacktestMetrics] = []
     for code in args.codes:

@@ -271,6 +271,29 @@ def donchian_channel(high: np.ndarray, low: np.ndarray, period: int = 20) -> dic
     return {"upper": upper, "lower": lower, "mid": mid}
 
 
+def bollinger_bands(close: np.ndarray, period: int = 20, std_mult: float = 2.0) -> dict:
+    sma = np.full_like(close, np.nan)
+    upper = np.full_like(close, np.nan)
+    lower = np.full_like(close, np.nan)
+    for i in range(period - 1, len(close)):
+        window = close[i - period + 1 : i + 1]
+        m = float(np.nanmean(window))
+        sd = float(np.nanstd(window, ddof=1))
+        sma[i] = m
+        upper[i] = m + std_mult * sd
+        lower[i] = m - std_mult * sd
+    return {"upper": upper, "lower": lower, "mid": sma}
+
+
+def drawdown_from_high(high: np.ndarray, close: np.ndarray, period: int = 20) -> np.ndarray:
+    dd = np.full_like(close, np.nan)
+    for i in range(period - 1, len(close)):
+        recent_high = float(np.nanmax(high[i - period + 1 : i + 1]))
+        if recent_high > 0:
+            dd[i] = 1.0 - close[i] / recent_high
+    return dd
+
+
 # ---------------------------------------------------------------------------
 # Price Action: Swing High / Swing Low (fractal N-bar)
 # ---------------------------------------------------------------------------
@@ -372,16 +395,15 @@ def fibonacci_extension(swing_low_a: float, swing_high_b: float) -> dict:
 # Price Action: Candlestick Patterns (Single, Double, Triple)
 # ---------------------------------------------------------------------------
 
-def _trend_direction(close: np.ndarray, lookback: int = 5) -> np.ndarray:
-    """Return "up" / "down" / "neutral" per bar based on SMA comparison."""
+def _trend_direction(close: np.ndarray, lookback: int = 10) -> np.ndarray:
     close = np.asarray(close, dtype=float)
     n = len(close)
     trend = np.full(n, "neutral", dtype=object)
     for i in range(lookback, n):
         sma = np.mean(close[i - lookback:i])
-        if close[i] > sma * 1.015:
+        if close[i] > sma:
             trend[i] = "up"
-        elif close[i] < sma * 0.985:
+        elif close[i] < sma:
             trend[i] = "down"
     return trend
 
@@ -457,13 +479,13 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
     )
     out["long_legged_doji"] = ll_doji
 
-    # Hamer (downtrend) / Hanging Man (uptrend)
+    # Hammer (downtrend) / Hanging Man (uptrend)
     hammer_shape = _bool_arr()
     with np.errstate(divide="ignore", invalid="ignore"):
         hammer_shape[valid_range] = (
             (body[valid_range] > 0)
             & (lower_shadow[valid_range] >= shadow_ratio * body[valid_range])
-            & (upper_shadow[valid_range] <= body[valid_range])
+            & (upper_shadow[valid_range] <= body[valid_range] * 0.5)
         )
     hammer = _bool_arr()
     hanging_man = _bool_arr()
@@ -482,7 +504,7 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
         inv_shape[valid_range] = (
             (body[valid_range] > 0)
             & (upper_shadow[valid_range] >= shadow_ratio * body[valid_range])
-            & (lower_shadow[valid_range] <= body[valid_range])
+            & (lower_shadow[valid_range] <= body[valid_range] * 0.5)
         )
     inv_hammer = _bool_arr()
     shooting_star = _bool_arr()
@@ -557,12 +579,12 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
         c_bull = c_close > c_open
         c_bear = c_close < c_open
 
-        # Engulfing
+        # Engulfing (STRICT: current body must FULLY contain previous body)
         if p_bear and c_bull:
-            if c_body_low <= p_body_low and c_body_high >= p_body_high:
+            if c_body_low < p_body_low and c_body_high > p_body_high:
                 bullish_engulfing[i] = True
         if p_bull and c_bear:
-            if c_body_low <= p_body_low and c_body_high >= p_body_high:
+            if c_body_low < p_body_low and c_body_high > p_body_high:
                 bearish_engulfing[i] = True
 
         # Harami
@@ -592,13 +614,13 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
             if c_open > p_high and c_close < midpoint and c_close > p_open:
                 dark_cloud[i] = True
 
-        # Tweezer Top
-        if trend[i] == "up":
+        # Tweezer Top (previous bullish, current bearish, same high)
+        if p_bull and c_bear:
             if abs(c_high - p_high) / max(c_high, p_high) <= 0.01:
                 tweezer_top[i] = True
 
-        # Tweezer Bottom
-        if trend[i] == "down":
+        # Tweezer Bottom (previous bearish, current bullish, same low)
+        if p_bear and c_bull:
             if abs(c_low - p_low) / max(c_low, p_low) <= 0.01:
                 tweezer_bottom[i] = True
 
@@ -678,16 +700,16 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
         b3_hi = max(o3, c3_c)
         b3_lo = min(o3, c3_c)
 
-        # Morning Star
+        # Morning Star — second candle gaps below first body (h2 < b1_hi)
         if b1_bear and b3_bull:
             c2_small = full_range[c2] > 0 and (_body_pct(c2) <= 0.3 or b2_body < b1_body * 0.3)
-            if c2_small and l2 < l1 and c3_c > (o1 + c1_c) / 2.0:
+            if c2_small and h2 < b1_hi and c3_c > (o1 + c1_c) / 2.0:
                 morning_star[c3] = True
 
-        # Evening Star
+        # Evening Star — second candle gaps above first body (l2 > b1_lo)
         if b1_bull and b3_bear:
             c2_small = full_range[c2] > 0 and (_body_pct(c2) <= 0.3 or b2_body < b1_body * 0.3)
-            if c2_small and h2 > h1 and c3_c < (o1 + c1_c) / 2.0:
+            if c2_small and l2 > b1_lo and c3_c < (o1 + c1_c) / 2.0:
                 evening_star[c3] = True
 
         # Abandoned Baby Bullish
@@ -732,29 +754,54 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
             if b3_bear and c3_c < c2_c:
                 three_outside_down[c3] = True
 
+    # ─────────────────────────────────
+    #  FIVE-CANDLE PATTERNS (separate loop)
+    # ─────────────────────────────────
+
+    for i in range(4, n):
+        p_open, p_high, p_low, p_close = open_[i - 4], high[i - 4], low[i - 4], close[i - 4]
+        c_open, c_high, c_low, c_close = open_[i], high[i], low[i], close[i]
+
+        p_body_hi = max(p_open, p_close)
+        p_body_lo = min(p_open, p_close)
+        p_bull = p_close > p_open
+        p_bear = p_close < p_open
+        c_bull = c_close > c_open
+        c_bear = c_close < c_open
+
         # Rising Three Methods
-        if b1_bull and b3_bull and _body_pct(c1) >= 0.4 and _body_pct(c3) >= 0.4:
-            candles_between = True
-            for j in range(1, 3):
-                if i - j <= 0:
+        # 1: long bullish, 2-4: small bearish inside 1's range, 5: bullish > 1's close
+        if p_bull and c_bull:
+            p_body_pct = abs(p_close - p_open) / (p_high - p_low) if (p_high - p_low) > 0 else 0.5
+            c_body_pct = abs(c_close - c_open) / (c_high - c_low) if (c_high - c_low) > 0 else 0.5
+            if p_body_pct < 0.4 or c_body_pct < 0.4:
+                continue
+            inside = True
+            for inner in [i - 3, i - 2, i - 1]:
+                if not (p_body_lo <= min(open_[inner], close[inner])
+                        and max(open_[inner], close[inner]) <= p_body_hi
+                        and close[inner] < open_[inner]):
+                    inside = False
                     break
-                cj = i - j
-                if close[cj] > o1 or close[cj] < l1 or open_[cj] > o1 or open_[cj] < l1:
-                    candles_between = False
-            if candles_between and c3_c > c1_c:
-                rising_three[c3] = True
+            if inside and c_close > p_close:
+                rising_three[i] = True
 
         # Falling Three Methods
-        if b1_bear and b3_bear and _body_pct(c1) >= 0.4 and _body_pct(c3) >= 0.4:
-            candles_between = True
-            for j in range(1, 3):
-                if i - j <= 0:
+        # 1: long bearish, 2-4: small bullish inside 1's range, 5: bearish < 1's close
+        if p_bear and c_bear:
+            p_body_pct = abs(p_close - p_open) / (p_high - p_low) if (p_high - p_low) > 0 else 0.5
+            c_body_pct = abs(c_close - c_open) / (c_high - c_low) if (c_high - c_low) > 0 else 0.5
+            if p_body_pct < 0.4 or c_body_pct < 0.4:
+                continue
+            inside = True
+            for inner in [i - 3, i - 2, i - 1]:
+                if not (p_body_lo <= min(open_[inner], close[inner])
+                        and max(open_[inner], close[inner]) <= p_body_hi
+                        and close[inner] > open_[inner]):
+                    inside = False
                     break
-                cj = i - j
-                if close[cj] < o1 or close[cj] > h1 or open_[cj] < o1 or open_[cj] > h1:
-                    candles_between = False
-            if candles_between and c3_c < c1_c:
-                falling_three[c3] = True
+            if inside and c_close < p_close:
+                falling_three[i] = True
 
     out["morning_star"] = morning_star
     out["evening_star"] = evening_star

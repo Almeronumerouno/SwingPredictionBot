@@ -3,154 +3,175 @@
 | Item | Detail |
 |------|--------|
 | **Target Version** | v0.3.0 |
-| **Status** | Perencanaan |
+| **Status** | Sprint 1 — Walk-Forward + Quick Win |
 | **Last Updated** | 27 Juli 2026 |
 
 ## 1. Ringkasan
 
-Berdasarkan riset ekstensif dari paper akademik (Lopez de Prado 2018, Kaminski & Lo 2014, Li et al. 2026), GitHub repositori (mlfinlab, mefai-signal-engine, TradingbotAI), dan analisis 20-saham backtest, berikut prioritas improvement.
+Berdasarkan riset paper akademik (Lopez de Prado 2018, Kaminski & Lo 2014), GitHub repositori, dan analisis backtest, berikut prioritas improvement yang sudah diurutkan berdasarkan dependensi validasi.
 
-## 2. Prioritas P1: Exit Strategy Enhancement
+**Aturan utama:** Setiap sprint hanya jalan setelah sprint sebelumnya divalidasi OOS via walk-forward harness. Tidak ada parameter baru yang ditumpuk sebelum divalidasi.
 
-Dampak tertinggi dengan kompleksitas terendah.
+## 2. Sprint 1 — Fondasi Validasi + Quick Win
 
-### 2.1 Partial Profit Taking (Scale Out)
+### 2.1 S1A: Walk-Forward Harness Skeleton
 
-| Stage | Aksi | Stop Management |
-|-------|------|----------------|
-| Entry | Full posisi | SL awal 3.0× ATR |
-| T1 (+1.0× ATR) | Close **50%** | Pindah SL ke breakeven |
-| T2 (+2.0× ATR) | Close **30%** | Trailing stop 0.5× ATR dari high |
-| Sisa 20% | Biarkan running | Trail sampai kena atau timeout 20 hari |
+Ekstensi `backtest.py` → modul `walkforward.py` terpisah.
 
-**Referensi:** BreakOrb 28.7M test — TP Trail optimal di **43.3% strategi**. SnapPChart: Scale-out unggul di 2/3 skenario.
+**Design:**
+- Ambil data historis per saham (OHLCV)
+- Split ke N rolling window dengan ukuran tetap
+- Setiap window: train (6 bulan) → optimize parameter → test OOS (3 bulan)
+- Purge: hapus 20 hari sebelum test window dari training
+- Embargo: gap 20 hari antara train dan test
+- Concat **semua** OOS trade dari seluruh (saham × window) jadi 1 equity curve final
+- Output: metrik OOS (Win Rate, Sharpe, Return, Max DD, Parameter Stability)
 
-### 2.2 Dynamic ATR Multiplier
+**Purge & Embargo (Lopez de Prado, "Advances in Financial ML"):**
 
-```python
-base_sl = 3.0
-if volatility_regime == "HIGH": sl *= 0.8
-elif volatility_regime == "LOW": sl *= 1.2
+```
+Train ──────────┤ gap ├── Test ──────────
+                20d   20d
 ```
 
-## 3. Prioritas P2: Adaptive Threshold & Regime Filter
+### 2.2 S1B: Fix R:R Ratio
 
-### 3.1 Dynamic Threshold
+**Masalah:** R:R rata-rata 0.83 (TP 2.5 ATR, SL 3.0 ATR). EV = 0.55 × 2.5 - 0.45 × 3.0 = 0.04 ATR/trade.
 
-Threshold adaptif berdasarkan volatilitas 30 hari:
+**Solusi:** Naikkan `ATR_TP_MULTIPLIER` dari 2.5 ke **3.0** → R:R 1:1.
 
-```python
-vol = std(close_returns[-30:])
-baseline_vol = mean(std(close_returns[-252:]))
-vol_ratio = vol / baseline_vol
+Dampak teoritis pada EV (dengan asumsi rough order WR dan TP hit rate serupa):
+- EV baru = 0.55 × 3.0 - 0.45 × 3.0 = **0.30 ATR/trade** (7.5× lipat)
 
-if vol_ratio > 1.5:  # High volatility
-    buy_threshold = 65  # Lebih longgar
-elif vol_ratio < 0.7:  # Low volatility
-    buy_threshold = 75  # Lebih ketat
-else:  # Normal
-    buy_threshold = 70
-```
+### 2.3 S1C: Breakeven Stop Rule
 
-**Referensi:** Rony-Hossain — **40-60% reduksi false positive**, 25-35% improvement true positive.
+Parameter baru: `BREAKEVEN_TRIGGER = 1.0`.
 
-### 3.2 Market Regime Detection
+Begitu harga mencapai entry + 1.0 ATR, SL dipindah ke entry price. Trade berikutnya risk-free.
+
+**Justifikasi:**
+- Melindungi modal setelah profit tercapai
+- Tidak ada downside risk tambahan
+- 1 parameter saja — mudah divalidasi
+- Didukung literatur sebagai cara paling murah naikkin expectancy
+
+### 2.4 S1D: Long-Only Mode
+
+Default: `LONG_ONLY_MODE = True`.
+
+**Alasan:**
+- SELL sinyal paling tervalidasi (58% WR) tapi kebanyakan retail IDX tidak punya akses short-selling
+- Jika tidak diperbaiki, dashboard akan merekomendasikan trade yang tidak bisa dieksekusi
+- Solusi: SELL tetap tampil di scoring sebagai advisory/exit signal, trade plan tidak dibuat
+
+**Implementasi:**
+- Toggle di config, 0 parameter tuning
+- SELL → `trade_plan = None`, `validation_note` menjelaskan
+- BELL → tetap dihitung scoring-nya (informasi tetap berguna untuk exit)
+
+## 3. Sprint 2 — Rekonsiliasi & Validasi
+
+**Rekonsiliasi Position Sizing:**
+- Dokumen (PRD/README) bilang 25%, kode `risk.py` pakai 100%
+- Luruskan: pilih 100% — frontend CapitalControl sudah handle input user
+- Update semua dokumentasi agar konsisten
+
+**Validasi S1:**
+- Jalanin walk-forward harness untuk konfigurasi v0.2.0 (baseline OOS)
+- Jalanin harness untuk v0.3.0 (R:R fix + breakeven + long-only)
+- Bandingkan metrik OOS — hanya lanjut jika improvement signifikan
+
+## 4. Sprint 3 — Adaptive Threshold & Regime Filter
+
+### 4.1 Market Regime Detection (Simple — SMA200 + ADX)
 
 ```python
 def detect_regime(close, adx):
     sma200 = mean(close[-200:])
     trend = "bull" if close[-1] > sma200 else "bear"
-    strength = "strong" if adx[-1] > 25 else "weak"
-    volatility = "high" if atr_ratio > 1.5 else "normal"
-    return f"{trend}_{strength}_{volatility}"
+    if adx[-1] < 20:
+        trend = "sideways"
+    return trend
 ```
 
-**Regime-based rules:**
+Sengaja tidak pakai HMM — sample terlalu kecil (19 saham × 250 hari) untuk estimasi transition probability yang stabil.
 
-| Regime | Action | Position Size |
-|--------|--------|--------------|
-| bull_strong | Full swing trading | 100% |
-| bull_weak | Hanya BUY signal kuat | 75% |
-| bear_strong | Short-only (atau skip) | 50% |
-| bear_weak | Mean-reversion preferred | 25% |
-| sideways (ADX<20) | Skip trend signal | 0% |
+### 4.2 Regime-Dependent Component Weights
 
-**Referensi:** LedgerMind — 78% sinyal reversal di ADX>25 adalah FALSE. TrustyBull — ~70% strategi gagal di regime berbeda.
+| Regime | Trend | Momentum | Volume | PA |
+|--------|:-----:|:--------:|:-----:|:--:|
+| **Bull** | 0.35 | 0.25 | 0.15 | 0.25 |
+| **Sideways** | 0.15 | 0.15 | 0.25 | **0.45** |
+| **Bear** | 0.15 | **0.30** | 0.30 | 0.25 |
 
-### 3.3 Regime-Dependent Component Weights
+### 4.3 Regime-Dependent Buy Threshold
 
-| Regime | Trend | Momentum | Volume | Price Action |
-|--------|-------|----------|--------|-------------|
-| Bull Strong | 0.35 | 0.25 | 0.15 | 0.25 |
-| Bull Weak | 0.20 | 0.20 | 0.35 | 0.25 |
-| Bear | 0.15 | 0.30 | 0.30 | 0.25 |
-| Sideways | 0.15 | 0.15 | 0.25 | 0.45 |
+| Regime | Buy Threshold | Position Size |
+|--------|:------------:|:------------:|
+| Bull | 75 | 100% |
+| Sideways | 70 | 50% |
+| Bear | N/A (long-only) | 25% |
 
-## 4. Prioritas P3: Walk-Forward Validation
+### 4.4 Circuit Breaker
 
-Implementasi walk-forward optimization untuk mencegah overfitting:
+Kurangi posisi size 50% setelah 2 loss beruntun. Reset setelah 1 winning trade.
+
+## 5. Sprint 4+ — Enhancement Lanjutan (Ditunda)
+
+### 5.1 Full Scale Out (50/30/20 + Trailing)
+
+| Stage | Trigger | Aksi | Stop |
+|-------|---------|------|------|
+| Entry | Signal BUY | Full posisi | SL 3.0 ATR |
+| T1 | +1.0 ATR | Close 50% | SL ke breakeven |
+| T2 | +2.0 ATR | Close 30% | Trail 0.5 ATR |
+| Sisa | — | Running | Trail sampai kena |
+
+Hanya dikerjakan jika:
+- Sprint 1-3 sudah selesai dan divalidasi OOS
+- Ada bukti bahwa scale-out memberikan improvement signifikan dibanding breakeven rule saja
+
+### 5.2 Dynamic ATR Multiplier
 
 ```python
-# 6 bulan train → 3 bulan test → roll
-windows = [
-    (0, 126),     # train: Jan-Jun
-    (126, 189),   # test: Jul-Sep
-    (63, 189),    # train: Apr-Sep
-    (189, 252),   # test: Oct-Dec
-    ...
-]
-
-# Purge: hapus 20 hari sebelum/ sesudah test dari training
-# Embargo: gap 20 hari antara train dan test
+if volatility_regime == "HIGH": sl *= 0.8
+elif volatility_regime == "LOW": sl *= 1.2
 ```
 
-**Referensi:** Lopez de Prado "Advances in Financial ML", mlfinlab. Metrik validasi: concatenated OOS equity curve.
+### 5.3 XGBoost Feature Weighting
 
-## 5. Prioritas P4: Machine Learning Enhancement
+Gunakan XGBoost classifier untuk menentukan bobot optimal komponen scoring. Ditunda karena:
+- Butuh data lebih banyak (sample 19 saham terlalu kecil)
+- Butuh walk-forward yang matang sebagai validasi
+- Manfaat mungkin marginal setelah regime filter diimplementasi
 
-### 5.1 XGBoost Feature Weighting
+### 5.4 Ensemble Scoring
 
-Gunakan XGBoost classifier untuk menentukan bobot optimal tiap komponen scoring:
+Kombinasi 3 set parameter, voting untuk sinyal final.
 
-```
-Features: RSI, MFI, ADX, RVOL, EMA_spread, ATR_ratio, S/R_position, Donchian_breakout
-Target: next_5d_return > ATR (binary classification)
-```
+### 5.5 HMM Regime Detection
 
-**Referensi:** `gammarinaldi/ml-trading-random-forest-xgboost` — 83% improvement dari optimasi. `mefai-signal-engine` — production-grade ML scoring.
-
-### 5.2 Ensemble Scoring
-
-Kombinasi 3 set parameter, voting untuk sinyal final:
-
-```python
-configs = [
-    {"trend_weight": 0.35, "momentum_weight": 0.25, ...},  # Conservative
-    {"trend_weight": 0.25, "momentum_weight": 0.35, ...},  # Aggressive
-    {"trend_weight": 0.20, "momentum_weight": 0.20, ...},  # Balanced
-]
-# Consensus: minimal 2/3 setuju
-```
+Pengganti SMA200+ADX jika terbukti regime filter saat ini masih kurang akurat.
 
 ## 6. Target Performance (v0.3.0)
 
-| Metrik | Current (v0.2.0) | Target (v0.3.0) |
-|--------|-----------------|-----------------|
-| Win Rate | 55.3% | >60% |
-| TP_HIT rate | 40.4% | >55% |
-| Sharpe Ratio | 0.24 | >0.50 |
-| Max Drawdown | 5.94% | <5% |
-| Alpha vs B&H | +5.38% | >+8% |
-| Avg R:R | 0.83 | >1.2 |
+| Metrik | v0.2.0 | Target S1-S2 | Target S3 | Target S4+ |
+|--------|:------:|:------------:|:---------:|:----------:|
+| Win Rate | 55.3% | 55-58% | >60% | >62% |
+| TP_HIT rate | 40.4% | >50% | >55% | >60% |
+| R:R rata-rata | 0.83 | 1.0+ | 1.2+ | 1.5+ |
+| Sharpe | 0.24 | 0.30-0.40 | >0.50 | >0.60 |
+| Max DD | 5.94% | <5.5% | <5% | <4.5% |
+| Alpha vs B&H | +5.38% | +6-7% | >+8% | >+10% |
 
 ## 7. Timeline Estimasi
 
-| Task | Complexity | Waktu | Dependency |
+| Task | Complexity | Waktu | Dependensi |
 |------|-----------|-------|-----------|
-| Partial Profit Taking + Trailing | Rendah | 2 hari | — |
-| Dynamic Threshold | Rendah | 1 hari | — |
-| Market Regime Filter | Rendah | 1-2 hari | — |
-| Dynamic Weights | Sedang | 2-3 hari | Regime Filter |
-| Walk-Forward Validation | Sedang | 3-4 hari | — |
-| XGBoost Scoring | Tinggi | 5-7 hari | Walk-Forward |
-| Ensemble Scoring | Tinggi | 3-5 hari | XGBoost |
+| S1A: Walk-forward harness | Sedang | 3-4 hari | — |
+| S1B: Fix R:R (TP 3.0) | Rendah | <1 hari | S1A |
+| S1C: Breakeven stop | Rendah | 1 hari | S1A |
+| S1D: Long-only mode | Rendah | <1 hari | — |
+| S2: Rekonsiliasi + validasi | Rendah | 1-2 hari | S1A–D |
+| S3: Regime detection + adaptive | Rendah-Sedang | 2-3 hari | S2 |
+| S4+: Scale-out, trailing, ML | Tinggi | 5-10 hari | S3 |

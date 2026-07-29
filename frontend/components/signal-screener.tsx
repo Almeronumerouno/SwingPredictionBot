@@ -18,12 +18,12 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
   const filteredData = useMemo(() => {
     let filtered = data;
     
-    // Apply category filter
+    // Apply category filter using backend recommendation
     if (activeTab === "buy") {
-      filtered = filtered.filter(g => (g.swing_score ?? 0) >= 75);
+      filtered = filtered.filter(g => g.recommendation === "BUY");
       filtered.sort((a, b) => (b.swing_score ?? 0) - (a.swing_score ?? 0));
     } else {
-      filtered = filtered.filter(g => (g.swing_score ?? 100) < 35);
+      filtered = filtered.filter(g => g.recommendation === "SELL");
       filtered.sort((a, b) => (a.swing_score ?? 100) - (b.swing_score ?? 100));
     }
 
@@ -68,7 +68,7 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Signal Buy (&gt; 75)
+              Signal Buy
             </button>
             <button
               onClick={() => { setActiveTab("sell"); setPage(1); }}
@@ -78,7 +78,7 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Signal Sell (&lt; 35)
+              Signal Sell
             </button>
           </div>
           

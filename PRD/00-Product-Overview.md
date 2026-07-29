@@ -3,8 +3,8 @@
 | Item | Detail |
 |------|--------|
 | **Product Name** | Swing Bot IDX |
-| **Version** | 0.2.0 |
-| **Status** | Fase 6 (Testing & Refinement) selesai. Memasuki Fase 7 (Production Readiness) |
+| **Version** | 0.3.0-wip |
+| **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
 | **Last Updated** | 27 Juli 2026 |
 
 ## 1. Ringkasan
@@ -36,15 +36,17 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 
 ### 4.2 Success Metrics
 
-| Metrik | Target | Current (v0.2.0) |
-|--------|--------|-----------------|
+| Metrik | Target v0.3.0 | Current (v0.2.0) |
+|--------|:-------------:|:-----------------:|
 | Waktu scrape seluruh pasar | < 1 menit (IDX) | ~3 detik (IDX) |
 | Waktu analisis per saham | < 3 detik | ~1-2 detik |
 | Cakupan saham | Seluruh IDX (~900 emiten) | ~900 emiten |
-| Win Rate (mid-big cap liquid) | >55% | 55.3% |
-| Alpha vs B&H | >+5% | +5.38% |
-| Sharpe Ratio | >0.20 | 0.24 |
-| TP_HIT rate | >50% | 40.4% |
+| Win Rate (mid-big cap liquid) | **>60%** | 55.3% |
+| Alpha vs B&H | **>+8%** | +5.38% |
+| Sharpe Ratio | **>0.50** | 0.24 |
+| TP_HIT rate | **>55%** | 40.4% |
+| R:R rata-rata | **>1.2** | 0.83 |
+| Max DD | **<5%** | 5.94% |
 
 ## 5. Target Audience
 
@@ -65,30 +67,42 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | 4 | API Layer (`api.py`, FastAPI) | **100%** |
 | 5 | Frontend Dashboard (Next.js) | **100%** |
 | 6 | Testing & Refinement (Backtest + Kalibrasi) | **100%** |
-| **7** | **Production Readiness (target)** | **0%** |
+| **7** | **Production Readiness** | **Dalam pengerjaan** |
 
-## 7. Hasil Backtest Final (v0.2.0)
+### Sprint Plan Fase 7
+
+| Sprint | Item | Status |
+|--------|------|--------|
+| S1A | Walk-forward harness skeleton | **Belum** |
+| S1B | Fix R:R — TP multiplier 3.0 | **Belum** |
+| S1C | Breakeven stop (1.0 ATR) | **Belum** |
+| S1D | Long-only mode (SELL advisory) | **Belum** |
+| S2 | Rekonsiliasi sizing + validasi OOS | **Belum** |
+| S3 | Regime detection + adaptive weights | **Belum** |
+| S4+ | Scale-out, trailing, ML | **Ditunda** |
+
+## 7. Hasil Backtest v0.2.0 (Baseline)
 
 ### Parameter Optimal (Kalibrasi 243 combo × 19 saham)
 
 | Parameter | Default | Kalibrasi |
 |-----------|:-------:|:---------:|
 | ADX gate ceiling | 25 | **20** |
-| Swing buy threshold | 65 | **70** (experimental: 75) |
+| Swing buy threshold | 65 | **75** (experimental) |
 | ATR SL multiplier | 1.5 | **3.0** |
+| ATR TP multiplier | 2.5 | **3.0** (v0.3.0) |
 | RVOL window | 20 | **10** |
 | RVOL breakout confirm | 2.0 | **1.5** |
 
 ### Performa 19 Mid-Big Cap Liquid (Des 2025 — Jul 2026)
 
-| Metrik | Default | Kalibrasi |
-|--------|:-------:|:---------:|
-| Win Rate | 35.6% | **55.3%** |
-| Total Return | -1.92% | **+0.41%** |
-| Alpha vs B&H | +0.86% | **+5.38%** |
-| Sharpe Ratio | -0.72 | **0.24** |
-| Max Drawdown | 5.25% | **5.94%** |
-| Beat B&H | — | **13/19 (68%)** |
+| Metrik | v0.2.0 | Target S1-S2 | Target S3 |
+|--------|:------:|:------------:|:---------:|
+| Win Rate | 55.3% | 55-58% | >60% |
+| Total Return | +0.41% | +1-3% | >5% |
+| Alpha vs B&H | +5.38% | +6-7% | >+8% |
+| Sharpe Ratio | 0.24 | 0.30-0.40 | >0.50 |
+| Max Drawdown | 5.94% | <5.5% | <5% |
 
 ### Outcome Distribution (141 sinyal, 20 saham)
 
@@ -101,8 +115,7 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 ## 8. Catatan Penting
 
 - **BUY belum tervalidasi** edge independen lintas rezim (bullish WR 70.6% → bearish 27.3%)
-- **SELL tervalidasi** (~58% WR konsisten 2 rezim)
+- **SELL tervalidasi** (~58% WR konsisten 2 rezim) — long-only mode aktif secara default
 - **Micro-cap gainers tidak cocok** — sistem optimal di saham likuid mid-big cap
 - **Fees & slippage belum dimodelkan** — return overstate ~2-5%
-- **Look-ahead minor**: S/R levels pakai full history (efek kecil)
-- **Walk-forward validation belum dilakukan** — parameter optimal mungkin overfit
+- **Walk-forward validation adalah prasyarat** untuk semua perubahan parameter baru — mencegah overfitting bertumpuk

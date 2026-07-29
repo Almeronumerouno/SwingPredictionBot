@@ -27,12 +27,12 @@ class BacktestConfig:
     swing_buy_threshold: int = 75
     swing_sell_threshold: int = 35
     atr_sl_multiplier: float = 3.0
-    atr_tp_multiplier: float = 2.5
+    atr_tp_multiplier: float = 3.0
     rvol_breakout_confirm: float = 1.5
     rvol_window: int = 10
-    position_pct: float = 0.25
+    position_pct: float = 1.0
     fee_pct: float = 0.25
-    long_only: bool = False
+    long_only: bool = True
     max_holding_days: int = 20
 ```
 
@@ -113,22 +113,75 @@ Grid search 243 combo × 19 saham mid-big cap liquid.
 | Sharpe | -0.72 | **0.24** |
 | Max DD | 5.25% | **5.94%** |
 
-## 9. Identified Issues
+## 9. Walk-Forward Validation (Sprint 1A)
 
-| Issue | Impact | Proposed Fix |
-|-------|--------|-------------|
-| No walk-forward validation | Parameter overfit ke periode test | Implementasi walk-forward dengan purge + embargo |
-| Fee model sederhana | Return overstate ~2-5% | Tambah slippage model (broker 0.15-0.35%) |
-| S/R look-ahead minor | S/R pakai full history | PIT (point-in-time) S/R di backtest |
-| Short selling bias | IDX retail tidak bisa short | Long-only mode perlu di-default |
-| No regime filter | Performa tidak konsisten antar regime | Implementasi regime detection |
+### 9.1 Tujuan
 
-## 10. Future Improvements
+Mencegah overfitting — parameter optimal dari kalibrasi in-sample (Fase 6) mungkin tidak bekerja di data baru. Walk-forward validation mensimulasikan deployment realistis: train → optimize → test OOS → roll.
 
-- [ ] **Walk-forward validation** — 6 bulan train → 3 bulan test → roll
+### 9.2 Design
+
+**Modul baru:** `backend/walkforward.py`
+
+```
+Window 1: Train (6 bln) │purge│embargo│ Test (3 bln) │
+                         20d   20d
+Window 2:                │ Train (6 bln) │purge│embargo│ Test (3 bln) │
+                                                  20d   20d
+Window 3:                                   │ Train (6 bln) │...
+```
+
+Purge (Lopez de Prado, 2018): hapus 20 hari sebelum test untuk menghindari leak dari data overlap.
+Embargo: gap 20 hari antara train dan test — menghilangkan serial correlation spillover.
+
+### 9.3 Metrik Final
+
+Concat **semua** OOS trade dari seluruh (saham × window) jadi 1 equity curve:
+
+| Metrik | Sumber | Notes |
+|--------|--------|-------|
+| OOS Win Rate | Concat trade OOS | Bukan rata-rata per-saham |
+| OOS Sharpe | Equity curve harian OOS | Risk-adjusted return |
+| OOS Return | Equity curve total | Net return |
+| OOS Max DD | Equity curve | Drawdown maksimal |
+| Parameter Stability | Stdev parameter antar window | Parameter yang stabil = sinyal bagus |
+
+### 9.4 Penerapan
+
+- Sprint 1A menulis skeleton harness (split, purge, embargo, concat)
+- Setelah S1B-S1D diimplementasi, harness dijalankan untuk membandingkan baseline v0.2.0 vs v0.3.0
+- Setiap sprint berikutnya (S3, S4+) wajib divalidasi lewat harness yang sama
+- **Tidak ada parameter baru yang ditumpuk tanpa validasi OOS**
+
+## 10. Identified Issues
+
+| Issue | Impact | Status |
+|-------|--------|--------|
+| Walk-forward belum ada | Parameter overfit ke periode test | **Sprint 1A** |
+| Fee model sederhana | Return overstate ~2-5% | Belum dijadwalkan |
+| S/R look-ahead minor | S/R pakai full history | PIT di backtest |
+| Short selling bias | IDX retail tidak bisa short | **Sprint 1D** |
+| R:R 0.83 | EV rendah (0.04 ATR/trade) | **Sprint 1B** |
+| No exit flexibility | Satu TP/SL untuk semua trade | **Sprint 1C** |
+| No regime filter | Performa tidak konsisten | **Sprint 3** |
+
+## 11. Roadmap Sprint
+
+| Sprint | Item | Kode |
+|--------|------|------|
+| **S1A** | Walk-forward harness skeleton | `walkforward.py` |
+| **S1B** | Fix R:R — TP multiplier 3.0 | `config.py`, `backtest.py` |
+| **S1C** | Breakeven stop (1.0 ATR) | `backtest.py`, `risk.py` |
+| **S1D** | Long-only mode | `config.py`, `risk.py`, `api.py` |
+| S2 | Rekonsiliasi sizing + validasi OOS | — |
+| S3 | Regime detection + adaptive weights | `scoring.py`, `regime.py` |
+| S4+ | Scale-out, trailing, ML | — |
+
+## 12. Future Improvements (Post v0.3.0)
+
 - [ ] **Purged cross-validation** — Lopez de Prado CPCV
 - [ ] **Multiple timeframe filter** — weekly trend confirmation
-- [ ] **Market regime backtest** — split hasil per regime
-- [ ] **Weight optimization** — grid search bobot 4 komponen
 - [ ] **Monte Carlo simulation** — distribusi return estimasi
 - [ ] **Deflated Sharpe Ratio** — overfit detection
+- [ ] **Full fee & slippage modeling** — broker 0.15-0.35% round trip
+- [ ] **PIT S/R levels** — point-in-time di backtest

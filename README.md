@@ -13,6 +13,7 @@ Swing trading signal generator untuk Bursa Efek Indonesia (IDX). Data dari IDX l
 | 4 | API Layer (`api.py`, FastAPI) | **100%** |
 | 5 | Frontend Dashboard (Next.js) | **100%** |
 | 6 | Testing & Refinement | **100%** |
+| **7** | **Production Readiness** (v0.3.0-wip) | **Sprint 1 berjalan** |
 
 ### Hasil Backtest (Fase 6)
 
@@ -51,6 +52,18 @@ python backtest.py BBCA --adx-ceiling 20 --buy-threshold 70 --sl-multiplier 3.0
 # Kalibrasi otomatis
 python backtest_calibrate.py
 ```
+
+### Fase 7 — Sprint Plan
+
+| Sprint | Item | Status |
+|--------|------|--------|
+| S1A | Walk-forward harness skeleton (`walkforward.py`) | ❌ |
+| S1B | Fix R:R — TP multiplier 3.0 | ❌ |
+| S1C | Breakeven stop rule (1.0 ATR) | ❌ |
+| S1D | Long-only mode (SELL advisory) | ❌ |
+| S2 | Rekonsiliasi sizing + validasi OOS S1 | ❌ |
+| S3 | Regime detection (SMA200+ADX) + adaptive weights | ❌ |
+| S4+ | Scale-out, trailing, ML (ditunda) | ❌ |
 
 ### Fase 5 Checklist
 
@@ -135,13 +148,15 @@ Awalnya direncanakan bot Telegram (Fase 4), tapi diubah jadi **dashboard web**:
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
+| Position sizing | 100% dari capital input user | Frontend CapitalControl handle kendali modal |
 | Risk per trade | Bervariasi — ditampilkan sebagai "Risiko aktual X%" | Tergantung jarak SL |
-| Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 (default lama 1.5) |
-| Take Profit | entry ± ATR × 2.5 | R:R ~1:0.83 |
+| Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 |
+| Take Profit | entry ± ATR × **3.0** | v0.3.0 — R:R 1:1 (naik dari 2.5) |
+| Breakeven trigger | entry + ATR × **1.0** | v0.3.0 — SL ke entry setelah profit tercapai |
+| Long-only mode | **Default: aktif** | SELL advisory — short entry dinonaktifkan |
 | Lot size | 100 lembar | Konvensi IDX |
 
-**Perubahan penting**: Sejak 18 Juli 2026, position sizing diubah dari risk-based 1% (terlalu konservatif untuk modal retail) menjadi **capital-based 25%**. Risk aktual dihitung dan ditampilkan sebagai informasi, bukan peringatan.
+**v0.3.0 changes:** R:R fix → TP 3.0 (dari 2.5); breakeven stop baru; long-only mode default; sizing reconciled ke 100% (dokumen konsisten dengan kode). Semua perubahan divalidasi via walk-forward harness sebelum rilis.
 
 ## Setup
 

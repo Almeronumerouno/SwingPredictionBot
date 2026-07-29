@@ -50,7 +50,9 @@ export default async function DashboardPage({
           <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/" />
           </Suspense>
-          <ScrapeButton />
+          <Suspense fallback={<div className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <ScrapeButton />
+          </Suspense>
         </div>
       </header>
 

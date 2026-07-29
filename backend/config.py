@@ -58,28 +58,41 @@ TOP_GAINERS_COUNT = 15
 IDX_FALLBACK_MAX_DAYS = 3
 FALLBACK_SCAN_LENGTH = 5
 
-# ---- Risk ----
-ATR_SL_MULTIPLIER = 3.0       # v0.2.0: dinaikkan dari 1.5 (kalibrasi: win rate 35.6%→55.3%)
-ATR_TP_MULTIPLIER = 2.5       # R:R ~1:0.83
-RISK_PER_TRADE_PCT = 0.01    # 1% capital per trade
+# ---- Risk / Trade Plan ----
+ATR_SL_MULTIPLIER = 3.0       # v0.2.0: dinaikkan dari 1.5
+ATR_TP_MULTIPLIER = 2.5       # baseline; 3.0 diuji terpisah sebagai eksperimen
+BREAKEVEN_TRIGGER = 999.0     # disabled — degrades TP_HIT & WR (tested 1.0/1.2/1.5/2.0)
+LONG_ONLY_MODE = False        # SELL tetap jadi entry signal (validated 58% WR)
+DEFAULT_POSITION_PCT = 1.0    # v0.3.0: 100% dari capital input user
+RISK_PER_TRADE_PCT = 0.01     # 1% capital per trade
 
 # ---- Scoring ----
 SCORE_WEIGHTS = {"trend": 0.25, "momentum": 0.25, "volume": 0.25, "price_action": 0.25}
-ADX_GATE_CEILING = 20         # v0.2.0: diturunkan dari 25 (kalibrasi: lebih sensitif)
-RVOL_WINDOW = 10              # v0.2.0: diturunkan dari 20 (kalibrasi: lebih responsif)
-RVOL_BREAKOUT_CONFIRM = 1.5   # v0.2.0: diturunkan dari 2.0 (kalibrasi: lebih longgar)
-SWING_BUY_THRESHOLD = 75      # experimental — BUY belum tervalidasi edge independen
-                               # lintas rezim (backtest: bullish WR 70.6% → bearish
-                               # 27.3% di 6 saham likuid). Threshold tinggi minimalisir
-                               # false positive, tapi tetap not validated.
-SWING_SELL_THRESHOLD = 35     # validated edge (58-65% WR, konsisten 2 rezim)
-SWING_BUY_VALIDATED = False   # Fase 6.5: BUY belum punya edge independen
-SWING_SELL_VALIDATED = True   # SELL tervalidasi cross-regime
+ADX_GATE_CEILING = 20
+RVOL_WINDOW = 10
+RVOL_BREAKOUT_CONFIRM = 1.5
+SWING_BUY_THRESHOLD = 72
+SWING_SELL_THRESHOLD = 35
+SWING_BUY_VALIDATED = False
+SWING_SELL_VALIDATED = True
 RISK_ATR_LOOKBACK = 50
 RISK_HIGH_CUTOFF = 1.5
 RISK_LOW_CUTOFF = 0.8
-CONFIDENCE_LOW_CUTOFF = 0.4     # < 0.4 → Rendah
-CONFIDENCE_HIGH_CUTOFF = 0.75   # > 0.75 → Tinggi, sisanya Sedang
+CONFIDENCE_LOW_CUTOFF = 0.4
+CONFIDENCE_HIGH_CUTOFF = 0.75
+
+# ---- Regime detection ----
+REGIME_SMA_PERIOD = 200
+REGIME_ADX_SIDEWAYS_CUTOFF = 20
+REGIME_MULTIPLIER_BULL = 1.0
+REGIME_MULTIPLIER_SIDEWAYS = 0.93
+REGIME_MULTIPLIER_BEAR = 0.90
+
+# ---- Walk-forward ----
+WF_TRAIN_DAYS = 63
+WF_TEST_DAYS = 21
+WF_PURGE_DAYS = 10
+WF_EMBARGO_DAYS = 10
 
 # ---- Gorengan Detection ----
 GORENGAN_PUMP_PCT = 80       # min % naik dari low ke peak utk dianggap pump
@@ -127,6 +140,11 @@ GORENGAN_VOLA_MODERATE = 1.5   # >1.5 → score 40
 GORENGAN_LEVEL_EXTREME = 65
 GORENGAN_LEVEL_HIGH = 45
 GORENGAN_LEVEL_MEDIUM = 20
+
+# ---- Data Freshness & Validity Gates ----
+MAX_DATA_STALE_DAYS = 5         # max days bar terakhir vs target date
+STAGNATION_LOOKBACK = 5         # hari buat deteksi harga stagnan
+STAGNATION_RANGE_PCT = 0.005    # 0.5% — min range harga dalam lookback
 
 # ---- API ----
 API_CORS_ORIGINS = ["http://localhost:3000"]

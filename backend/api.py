@@ -37,6 +37,7 @@ class ScoreResponse(BaseModel):
     recommendation: str | None
     confidence: str | None
     risk_level: str | None
+    regime: str | None = None
 
 
 class TradePlanResponse(BaseModel):
@@ -172,6 +173,29 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
             f"Data historis {kode} cuma {len(bars)} hari, minimal {config.MIN_TRADING_DAYS}"
         )
 
+    ref_date = date.fromisoformat(target_date) if target_date else date.today()
+    last_bar_date = date.fromisoformat(bars[-1].date)
+    stale_days = (ref_date - last_bar_date).days
+    stale_reason = None
+    if stale_days > config.MAX_DATA_STALE_DAYS:
+        stale_reason = (
+            f"Data terakhir {kode} tanggal {bars[-1].date} "
+            f"({stale_days} hari yang lalu) — saham mungkin suspended atau delisting. "
+            "Sinyal tidak dihasilkan."
+        )
+    _invalid_stale = {
+        "kode": kode, "nama": "", "harga": 0.0,
+        "last_updated": bars[-1].date,
+        "score": {"valid": False, "swing_score": None, "components": None,
+                  "recommendation": None, "confidence": None,
+                  "risk_level": None, "regime": None},
+        "trade_plan": None, "raw_indicators": None,
+        "capital_used": capital, "gorengan": None,
+        "buy_signal_validated": False, "validation_note": stale_reason,
+    }
+    if stale_reason:
+        return _invalid_stale
+
     close = np.array([b.close for b in bars])
     open_ = np.array([b.open_price for b in bars])
     high = np.array([b.high for b in bars])
@@ -306,9 +330,8 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         "gorengan": gor_result,
         "buy_signal_validated": config.SWING_BUY_VALIDATED,
         "validation_note": (
-            "BUY belum terbukti edge independen lintas rezim (backtest: bullish WR "
-            "70.6% → bearish 27.3% di 6 saham likuid). SELL tervalidasi (~58% WR "
-            "konsisten 2 rezim)."
+            "BUY direkomendasikan hanya saat regime bull/sideways."
+            " SELL bersifat advisory (long-only mode aktif)."
         ),
     }
 

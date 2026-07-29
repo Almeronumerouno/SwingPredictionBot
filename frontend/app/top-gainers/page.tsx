@@ -28,7 +28,9 @@ export default async function TopGainersPage({
           <p className="text-sm font-medium text-[var(--color-text-secondary)]">Saham dengan kenaikan tertinggi hari ini &middot; Bursa Efek Indonesia</p>
         </div>
         <div className="flex items-center gap-3">
-          <ScrapeButton />
+          <Suspense fallback={<div className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <ScrapeButton />
+          </Suspense>
           <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DatePicker selected={date || ""} />
           </Suspense>

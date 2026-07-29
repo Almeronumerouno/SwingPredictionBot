@@ -3,7 +3,7 @@
 | Item | Detail |
 |------|--------|
 | **Modul** | `backend/risk.py` |
-| **Versi** | v0.2.0 |
+| **Versi** | v0.3.0-wip |
 | **Last Updated** | 27 Juli 2026 |
 
 ## 1. Ringkasan
@@ -14,10 +14,11 @@ Layer risk management menghitung Stop Loss, Take Profit, dan position sizing ber
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
+| Position sizing | 100% dari capital input user | Capital-based (frontend CapitalControl handle input) |
 | Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
 | Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 |
-| Take Profit | entry ± ATR × **2.5** | R:R ~1:0.83 |
+| Take Profit | entry ± ATR × **3.0** | v0.3.0: dinaikkan dari 2.5 (R:R 1:1) |
+| Breakeven trigger | entry + ATR × **1.0** | Saat profit 1 ATR, SL pindah ke entry |
 | Lot size | 100 lembar | Konvensi IDX |
 | Minimal capital | ~Rp 100,000 | Tergantung harga saham (1 lot termurah) |
 
@@ -31,9 +32,11 @@ if risk_level == "tinggi":
 
 ## 3. Position Sizing Logic
 
+Kode menggunakan 100% dari capital yang di-input user. Ini sengaja — frontend CapitalControl sudah memberikan kendali penuh ke user, backend tidak perlu memotong lagi.
+
 ```python
 cost_per_lot = entry_price * 100  # 1 lot = 100 lembar
-for deploy_pct in (1.0,):         # 100% modal (25% → 100% sejak 18 Jul 2026)
+for deploy_pct in (1.0,):         # 100% modal
     max_lots = int((capital * deploy_pct) // cost_per_lot)
     if max_lots >= 1:
         shares = max_lots * 100
@@ -48,55 +51,71 @@ return 0, None  # Tidak cukup modal untuk 1 lot
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `direction` | string | BUY / SELL |
+| `direction` | string | BUY / SELL (SELL hanya advisory jika long-only) |
 | `entry` | float | Harga entry (close terakhir) |
 | `stop_loss` | float | entry ± ATR × 3.0 (× 0.8 jika risk tinggi) |
-| `take_profit` | float | entry ± ATR × 2.5 |
-| `shares` | int | Jumlah lembar (kelipatan 100) |
+| `take_profit` | float | entry ± ATR × 3.0 |
+| `shares` | int | Jumlah lembar (kelipatan 100) — 0 jika SELL + long-only |
 | `lots` | int | shares / 100 |
-| `risk_reward_ratio` | float | reward / risk (rata-rata 0.83) |
-| `note` | string | Peringatan jika risiko > 1% modal |
+| `risk_reward_ratio` | float | reward / risk (1.0) |
+| `note` | string | Peringatan jika risiko > 1% modal, atau mode long-only aktif |
 
-## 5. Identified Issues (Current)
+## 5. Long-Only Mode
 
-| Issue | Impact | Proposed Solution |
-|-------|--------|-------------------|
-| R:R rata-rata 0.83 | Risk lebih besar dari reward | TP multiplier perlu dinaikkan (3.5× ATR?) |
-| No trailing stop | Sering kehilangan profit setelah TP | Implementasi TP Trail (50% exit, 50% trailing) |
-| No partial exit | Semua atau tidak sama sekali | Scale out 50/30/20 |
-| Fixed multiplier | Tidak adaptif terhadap volatilitas | Dynamic ATR multiplier berdasarkan Volatility Regime |
-| Single TP level | Harga sering nyaris TP lalu reversal | Multiple TP levels (T1, T2, T3) |
-
-## 6. Proposed Improvements (Fase 7)
-
-### 6.1 Partial Profit Taking (Scale Out)
-
-| Stage | Aksi | Stop Management |
-|-------|------|----------------|
-| Entry | Full posisi | SL awal 3.0× ATR |
-| T1 (+1.0× ATR) | Close **50%** | Pindah SL ke breakeven |
-| T2 (+2.0× ATR) | Close **30%** | Trailing stop 0.5× ATR dari high |
-| Sisa 20% | Biarkan running | Trail sampai kena atau timeout |
-
-### 6.2 TP Trail Method
-
-Begitu harga mencapai TP (2.5× ATR), exit 50%. Sisa 50% di-trail dengan stop 1.0× ATR di bawah harga tertinggi sejak entry.
-
-### 6.3 Dynamic ATR Multiplier
+Kebanyakan retail IDX tidak punya akses short-selling.
 
 ```
-ATR_SL_MULTIPLIER = base × vol_factor
-vol_factor = 
-  0.8 jika Volatility Regime = HIGH
-  1.0 jika Volatility Regime = NORMAL  
-  1.2 jika Volatility Regime = LOW
+LONG_ONLY_MODE = True  (config.py, default)
+
+Saat mode aktif:
+  - SELL signal → tidak ada trade plan (trade_plan = None)
+  - SELL tetap tampil di scoring sebagai sinyal exit/advisory
+  - Validation note: "Mode long-only aktif. SELL advisory — sinyal keluar
+    jika sudah memiliki posisi, bukan sinyal short entry."
 ```
 
-### 6.4 Circuit Breaker
+## 6. Sprint 1 (v0.3.0) — Quick Win
 
-Setelah 2 kerugian beruntun, posisi size dikurangi 50%. Reset setelah 1 winning trade.
+### 6.1 Fix R:R Ratio
 
-## 7. Backtest Outcome Distribution (Current)
+TP multiplier dinaikkan dari 2.5 ke **3.0** → R:R 1:1.
+
+Dampak teoritis:
+- Trade plan R:R = 1:1 (seimbang)
+- Expected Value naik dari 0.04 ATR menjadi 0.106 ATR per trade
+- TP hit rate mungkin turun (target lebih jauh), tapi tiap TP lebih berarti
+
+### 6.2 Breakeven Stop Rule
+
+Begitu harga menyentuh entry + 1.0 ATR, SL otomatis dipindah ke entry price.
+
+- Melindungi modal setelah profit tercapai
+- Tidak menambah downside risk
+- Parameter tunggal: `BREAKEVEN_TRIGGER = 1.0`
+
+## 7. Sprint 3 — Regime-Dependent Position Sizing
+
+Setelah base sizing direkonsiliasi (Sprint 2), sizing bervariasi per regime:
+
+| Regime | Position Size |
+|--------|:------------:|
+| Bull | 100% |
+| Sideways | 50% |
+| Bear | 25% |
+
+## 8. Roadmap Sprint (S1-S4)
+
+| Sprint | Item | Parameter Baru | Dependensi |
+|--------|------|:--------------:|------------|
+| **S1A** | Walk-forward harness | 0 | — |
+| **S1B** | Fix R:R (TP 3.0) | 1 | S1A |
+| **S1C** | Breakeven stop (1.0 ATR) | 1 | S1A |
+| **S1D** | Long-only mode | 0 | — |
+| **S2** | Rekonsiliasi sizing + validasi S1 | 0 | S1A–D |
+| **S3** | Regime detection + adaptive weights | 2-3 | S2 |
+| **S4+** | Full scale-out, trailing, ML | banyak | S3 |
+
+## 9. Backtest Outcome Distribution (v0.2.0 Baseline)
 
 | Label | Count | Percentage |
 |-------|-------|-----------|
@@ -104,4 +123,4 @@ Setelah 2 kerugian beruntun, posisi size dikurangi 50%. Reset setelah 1 winning 
 | SL_FIRST | 36 | 25.5% |
 | TIMEOUT | 48 | 34.0% |
 
-Target dengan partial exit + trailing: **TP_HIT rate > 55%**.
+**Target v0.3.0:** TP_HIT > 50% (S1-S2), > 55% (S3), > 60% (S4+).
