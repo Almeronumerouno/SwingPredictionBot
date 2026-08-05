@@ -412,6 +412,36 @@ Data OHLCV historis mentah.
 
 **Response 200:** `HistoryResponse` — array `bars` dengan `date`, `close`, `open`, `high`, `low`, `volume`.
 
+### 6.5 GET /recovery/{kode}
+
+Analisis mean-reversion: probabilitas saham yang turun ≥ X% di bawah previous close kembali menyentuh previous close dalam berbagai horizon (1D - 3M), plus exit plan (time-stop 63 hari trading).
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `drop_pct` | float | No | Otomatis (2.5× σ_daily) | Threshold drop (%). Setup aktif jika `(close/prev_close - 1) ≤ -drop_pct/100`. Auto di-clamp 2%–30% sesuai tier harga IDX (<200→30%, 200-5000→18%, ≥5000→13%) |
+| `date` | string | No | Data terbaru | Format `YYYY-MM-DD` |
+
+**Response 200:** `RecoveryResponse`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `kode` / `nama` | string | Kode & nama saham |
+| `valid` | bool | `false` jika bars < 150 |
+| `harga` / `ref_price` | float | Close terakhir & previous close |
+| `distance_pct` | float | Jarak dari previous close (%) |
+| `drop_pct` | float | Threshold yang dipakai (auto atau manual) |
+| `drop_source` | string | `auto` (dari volatilitas) / `manual` (param user) |
+| `in_setup` | bool | Apakah memenuhi threshold drop |
+| `gbm` | object | `mu_daily`, `sigma_daily`, `mu_annual`, `sigma_annual`, `p_hit_ever`, `probabilities[{horizon_days, p_hit}]` untuk 1/3/5/10/21/42/63 hari |
+| `empirical` | array | `{horizon_days, n_events, n_recovered, rate}` base rate historis saham ini |
+| `signal` | string | `POTENTIAL` / `WATCH` / `NO_SETUP` |
+| `signal_reason` | string | Penjelasan singkat + basis (empirical/GBM) |
+| `exit_plan` | object | `target` (previous close), `time_stop_days` (63), `stop_loss`, `note`; null jika NO_SETUP |
+
+**Response 404:** Kode saham tidak dikenal.
+
 ---
 
 ## 7. Scoring System Detail
@@ -583,6 +613,7 @@ Sidebar
 | Fibonacci levels | Progress bar display (Price Action) | Detail saham |
 | Candlestick patterns | Pattern cards dengan dynamic SVG (Price Action) | Detail saham |
 | Scrape timestamp | Stat card "Terakhir Diambil" | Detail saham |
+| Recovery / Mean Reversion (`/recovery/{kode}`) | RecoveryCard (signal badge, prob GBM bars, base rate empiris, exit plan) + RecoveryDropControl (`?drop_pct=`) | Detail saham |
 
 ### 11.2 Yang Belum Ditampilkan (Tersedia di Backend)
 
@@ -593,7 +624,7 @@ Sidebar
 | Fitur | Keterangan |
 |-------|------------|
 | MACD | Belum diimplementasi di indicators.py |
-| Probability continuation/reversal | Placeholder (butuh backtest) |
+| Probability continuation | Belum ada (recovery/reversal sudah ada via `/recovery/{kode}`) |
 
 ---
 
@@ -629,6 +660,7 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - [ ] **S1B** Fix R:R — TP multiplier 3.0 (naik dari 2.5)
 - [ ] **S1C** Breakeven stop (1.0 ATR) — SL ke entry setelah profit
 - [ ] **S1D** Long-only mode (SELL advisory, short entry dinonaktifkan)
+- [x] **S1E** Fitur Mean Reversion / Recovery — endpoint `/recovery/{kode}`, model GBM FPT + base rate empiris, exit plan time-stop 63 hari, card frontend (`?drop_pct=`) — validasi walk-forward: GBM under-predict (Brier 63d 0.372), sinyal memakai empirical saat `n_events ≥ 5`
 - [ ] **S2** Rekonsiliasi position sizing (100%) + validasi OOS S1
 - [ ] **S3** Regime detection (SMA200+ADX) + adaptive weights + sizing
 - [ ] Dark mode

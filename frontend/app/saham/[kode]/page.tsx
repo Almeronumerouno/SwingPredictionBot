@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
 import { fetchAnalisis } from "@/lib/api/analisis";
 import { fetchHistory } from "@/lib/api/history";
-import type { AnalisisResponse, HistoryResponse } from "@/types/api";
+import { fetchRecovery } from "@/lib/api/recovery";
+import type { AnalisisResponse, HistoryResponse, RecoveryResponse } from "@/types/api";
 import ScoreCard from "@/components/score-card";
 import TradePlanCard from "@/components/trade-plan-card";
 import PriceChart from "@/components/price-chart";
 import CapitalControl from "./capital-control";
+import RecoveryDropControl from "@/components/recovery-drop-control";
+import RecoveryCard from "@/components/recovery-card";
 import BackButton from "@/components/back-button";
 import TechnicalIndicators from "@/components/technical-indicators";
 import { Suspense } from "react";
@@ -27,13 +30,14 @@ export default async function SahamPage({
   searchParams,
 }: {
   params: Promise<{ kode: string }>;
-  searchParams: Promise<{ capital?: string; length?: string; date?: string }>;
+  searchParams: Promise<{ capital?: string; length?: string; date?: string; drop_pct?: string }>;
 }) {
   const { kode } = await params;
   const sp = await searchParams;
 
   let analisis: AnalisisResponse;
   let history: HistoryResponse;
+  let recovery: RecoveryResponse | null = null;
 
   try {
     [analisis, history] = await Promise.all([
@@ -42,6 +46,12 @@ export default async function SahamPage({
     ]);
   } catch {
     notFound();
+  }
+
+  try {
+    recovery = await fetchRecovery(kode, sp.drop_pct ? Number(sp.drop_pct) : undefined, sp.date);
+  } catch {
+    recovery = null;
   }
 
   const s = analisis.score;
@@ -203,8 +213,14 @@ export default async function SahamPage({
           <Suspense fallback={<div className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <CapitalControl kode={kode} capital={sp.capital ? Number(sp.capital) : undefined} />
           </Suspense>
+          <Suspense fallback={<div className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <RecoveryDropControl kode={kode} dropPct={sp.drop_pct ? Number(sp.drop_pct) : undefined} />
+          </Suspense>
         </div>
       </div>
+
+      {/* Recovery / Mean Reversion */}
+      {recovery && <RecoveryCard data={recovery} />}
 
       {/* Technical Indicators */}
       <TechnicalIndicators data={analisis.raw_indicators} />

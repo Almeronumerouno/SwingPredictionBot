@@ -106,6 +106,52 @@ export interface HistoryResponse {
   bars: HistoryBar[]
 }
 
+export interface RecoveryProbability {
+  horizon_days: number
+  p_hit: number
+}
+
+export interface RecoveryEmpirical {
+  horizon_days: number
+  n_events: number
+  n_recovered: number
+  rate: number | null
+}
+
+export interface RecoveryGbm {
+  mu_daily: number
+  sigma_daily: number
+  mu_annual: number
+  sigma_annual: number
+  p_hit_ever: number
+  probabilities: RecoveryProbability[]
+}
+
+export interface RecoveryExitPlan {
+  target: number
+  time_stop_days: number
+  stop_loss: number
+  note: string
+}
+
+export interface RecoveryResponse {
+  kode: string
+  nama: string
+  valid: boolean
+  harga: number | null
+  ref_price: number | null
+  last_updated: string
+  distance_pct: number | null
+  drop_pct: number
+  drop_source: "auto" | "manual"
+  in_setup: boolean
+  gbm: RecoveryGbm | null
+  empirical: RecoveryEmpirical[]
+  signal: string
+  signal_reason: string
+  exit_plan: RecoveryExitPlan | null
+}
+
 export interface Candle {
   time: string
   open: number

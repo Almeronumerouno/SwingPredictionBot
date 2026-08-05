@@ -94,6 +94,26 @@ WF_TEST_DAYS = 21
 WF_PURGE_DAYS = 10
 WF_EMBARGO_DAYS = 10
 
+# ---- Recovery ke Previous Price (Mean Reversion) ----
+RECOVERY_DROP_DEFAULT = 5.0        # X% di bawah previous close sebagai setup
+RECOVERY_HORIZONS_DAYS = [1, 3, 5, 10, 21, 42, 63]  # horizon trading day (1D → 3 bulan)
+RECOVERY_HISTORY_LOOKBACK_DAYS = 500  # kalender; estimasi mu/sigma & base rate lebih stabil
+RECOVERY_MIN_BARS = 150            # minimal bar agar estimasi GBM valid
+RECOVERY_MU_LOOKBACK_DAYS = 63     # drift diestimasi dari 3 bulan terakhir (momentum kini)
+RECOVERY_SIGMA_LOOKBACK_DAYS = 252 # vol diestimasi dari 1 tahun terakhir
+RECOVERY_SIGNAL_P_MIN = 0.60       # sinyal POTENTIAL jika P(hit ≤ 21d) ≥ 60%
+RECOVERY_SIGNAL_HORIZON_DAYS = 21  # horizon acuan sinyal (~1 bulan)
+RECOVERY_TIME_STOP_DAYS = 63       # time stop: exit jika target belum tercapai (~3 bulan)
+RECOVERY_SL_DISTANCE_MULT = 2.0    # SL = entry - 2x jarak ke previous close
+
+# Auto-drop: threshold dihitung dari volatilitas saham biar setup bermakna per saham
+RECOVERY_AUTO_SIGMA_MULT = 2.5     # threshold auto = mult x sigma_daily
+RECOVERY_AUTO_MIN = 2.0            # floor (%)
+# Cap bervariasi sesuai batas fluktuasi harian IDX (auto reject), biar cocok utk semua tier harga
+RECOVERY_AUTO_CAP_UNDER_200 = 30.0     # harga < Rp 200 (limit ±35%)
+RECOVERY_AUTO_CAP_200_TO_5000 = 18.0   # Rp 200 - <Rp 5000 (limit ±20%)
+RECOVERY_AUTO_CAP_AT_5000 = 13.0       # harga >= Rp 5000 (limit ±15%)
+
 # ---- Gorengan Detection ----
 GORENGAN_PUMP_PCT = 80       # min % naik dari low ke peak utk dianggap pump
 GORENGAN_DUMP_PCT = 40       # min % turun dari peak utk dianggap dump

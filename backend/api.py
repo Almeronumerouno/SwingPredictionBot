@@ -18,6 +18,7 @@ import indicators as ind
 import risk
 import scoring
 import gorengan
+import recovery
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.idx_trading import IdxTradingError
 from data_source.yahoo_client import YahooClientError, fetch_trading_info
@@ -136,6 +137,52 @@ class HistoryResponse(BaseModel):
     bars: list[HistoryBar]
 
 
+class RecoveryProbability(BaseModel):
+    horizon_days: int
+    p_hit: float
+
+
+class RecoveryEmpirical(BaseModel):
+    horizon_days: int
+    n_events: int
+    n_recovered: int
+    rate: float | None
+
+
+class RecoveryGbm(BaseModel):
+    mu_daily: float
+    sigma_daily: float
+    mu_annual: float
+    sigma_annual: float
+    p_hit_ever: float
+    probabilities: list[RecoveryProbability]
+
+
+class RecoveryExitPlan(BaseModel):
+    target: float
+    time_stop_days: int
+    stop_loss: float
+    note: str
+
+
+class RecoveryResponse(BaseModel):
+    kode: str
+    nama: str
+    valid: bool
+    harga: float | None
+    ref_price: float | None
+    last_updated: str
+    distance_pct: float | None
+    drop_pct: float
+    drop_source: str
+    in_setup: bool
+    gbm: RecoveryGbm | None
+    empirical: list[RecoveryEmpirical]
+    signal: str
+    signal_reason: str
+    exit_plan: RecoveryExitPlan | None
+
+
 class MarketStatusResponse(BaseModel):
     is_open: bool
     message: str
@@ -145,7 +192,9 @@ class MarketStatusResponse(BaseModel):
 
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
-               AnalisisResponse, HistoryResponse, MarketStatusResponse):
+               AnalisisResponse, HistoryResponse, MarketStatusResponse,
+               RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
+               RecoveryExitPlan, RecoveryResponse):
     _model.model_rebuild()
 
 
@@ -516,3 +565,37 @@ def get_history(
         "kode": kode,
         "bars": [_dailybar_to_historybar(b) for b in bars],
     }
+
+
+@app.get("/recovery/{kode}", response_model=RecoveryResponse)
+def get_recovery(
+    kode: str,
+    drop_pct: float | None = Query(None, gt=0, le=50),
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+):
+    """
+    Probabilitas harga kembali ke previous close (mean reversion).
+
+    Model GBM first-passage time (CDF Inverse Gaussian) + base rate empiris
+    dari history saham. drop_pct None = otomatis dari volatilitas saham.
+    Hanya relevan saat harga di bawah previous close.
+    """
+    kode = kode.strip().upper()
+
+    securities = get_or_fetch_securities_list()
+    sec = next((s for s in securities if s.code == kode), None)
+    if sec is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Kode saham {kode} tidak ditemukan di daftar efek IDX.",
+        )
+
+    try:
+        bars = fetch_trading_info(kode, length=config.RECOVERY_HISTORY_LOOKBACK_DAYS, target_date=date)
+    except (YahooClientError, IdxTradingError) as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Gagal ambil data untuk {kode}: {e}",
+        )
+
+    return recovery.build_recovery_analysis(kode, sec.name, bars, drop_pct=drop_pct)

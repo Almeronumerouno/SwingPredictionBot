@@ -61,9 +61,37 @@ python backtest_calibrate.py
 | S1B | Fix R:R — TP multiplier 3.0 | ❌ |
 | S1C | Breakeven stop rule (1.0 ATR) | ❌ |
 | S1D | Long-only mode (SELL advisory) | ❌ |
+| S1E | **Fitur Mean Reversion / Recovery** (`/recovery/{kode}` + card detail) | ✅ |
 | S2 | Rekonsiliasi sizing + validasi OOS S1 | ❌ |
 | S3 | Regime detection (SMA200+ADX) + adaptive weights | ❌ |
 | S4+ | Scale-out, trailing, ML (ditunda) | ❌ |
+
+### Fitur Mean Reversion / Recovery (Sprint 1)
+
+Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa peluangnya balik ke previous close dalam 1 hari sampai 1 bulan?"*
+
+- **Metode**: model GBM analitik (first-passage time, CDF Inverse Gaussian via `math.erf`, tanpa dependensi baru) + base rate empiris saham tsb (event = close turun ≥ X% di bawah previous close dalam 500 hari terakhir).
+- **Signal**:
+  - `POTENTIAL` — P(recovery ≤ 21 hari) ≥ 60%
+  - `WATCH` — probabilitas menengah
+  - `NO_SETUP` — belum turun cukup jauh atau data tidak valid
+  - Sinyal memakai **empirical base rate** saat `n_events ≥ 5` (lebih kalibrasi dari GBM), fallback ke GBM.
+- **Exit plan** (bila entry): target = previous close, time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
+- **Validasi walk-forward** (BBCA BMRI BBRI ASII TLKM, 35 event, drop ≥ 5%): GBM **under-predict** peluang — Brier 1d 0.057 → 63d 0.372; pred vs aktual 3d: 7% vs 31%; 63d: 56% vs 73%. Karena itu sinyal mengutamakan base rate empiris.
+
+**Cara pakai:**
+```bash
+# API — tanpa param = threshold otomatis dari volatilitas saham
+curl "http://localhost:8000/recovery/BBCA"
+
+# API — manual override
+curl "http://localhost:8000/recovery/BBCA?drop_pct=5"
+
+# Validasi walk-forward
+python _validate_recovery.py BBCA BMRI BBRI ASII TLKM --drop 5 --length 800
+```
+
+Frontend: card "Mean Reversion / Recovery" di halaman detail saham + kontrol Recovery Setup (mode **Otomatis** = 2.5× σ_daily, clamp 2%–30% mengikuti tier harga IDX: <200→30%, 200-5000→18%, ≥5000→13%; atau **Manual** lewat `?drop_pct=`).
 
 ### Fase 5 Checklist
 
