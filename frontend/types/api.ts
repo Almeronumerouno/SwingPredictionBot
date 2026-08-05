@@ -85,6 +85,8 @@ export interface AnalisisResponse {
   nama: string
   harga: number
   last_updated: string
+  fetched_at?: string
+  data_delayed?: boolean
   score: ScoreResponse
   trade_plan: TradePlanResponse | null
   raw_indicators: RawIndicators | null

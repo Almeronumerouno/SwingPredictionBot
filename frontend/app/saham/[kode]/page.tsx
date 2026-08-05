@@ -22,6 +22,13 @@ const fmtDate = (d: string) => {
   const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
   return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
 };
+const fmtTime = (iso?: string, delayed?: boolean) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  if (delayed) d.setMinutes(d.getMinutes() - 15);
+  return `${d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB`;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -93,13 +100,26 @@ export default async function SahamPage({
               <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
             </div>
             <div className="md:text-right flex flex-col md:items-end">
-              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span></p>
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
+                Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span>
+              </p>
               <div className="flex items-baseline gap-3 md:justify-end mb-2">
                 <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
                 <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                   {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
                 </span>
               </div>
+              {analisis.data_delayed !== false && (
+                <p className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-1.5 md:justify-end no-print">
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Data dari Yahoo Finance
+                  {analisis.fetched_at
+                    ? ` diambil ${fmtTime(analisis.fetched_at)} (delay ±15 mnt → data ~${fmtTime(analisis.fetched_at, true)}), bukan live.`
+                    : " — delay ±15 menit dari harga real-time, bukan live."}
+                </p>
+              )}
             </div>
           </div>
         </header>

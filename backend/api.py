@@ -123,6 +123,8 @@ class AnalisisResponse(BaseModel):
     nama: str
     harga: float
     last_updated: str
+    fetched_at: str = ""
+    data_delayed: bool = True
     score: ScoreResponse
     trade_plan: TradePlanResponse | None
     raw_indicators: RawIndicatorsResponse | None
@@ -223,6 +225,9 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         )
 
     ref_date = date.fromisoformat(target_date) if target_date else date.today()
+    # Data historis (tanggal lampau) sudah final -> tidak delay; hanya hari ini/None
+    # yang bisa kena delay saat jam bursa berlangsung.
+    data_delayed = _is_data_delayed() if ref_date >= datetime.now(WIB).date() else False
     last_bar_date = date.fromisoformat(bars[-1].date)
     stale_days = (ref_date - last_bar_date).days
     stale_reason = None
@@ -235,6 +240,8 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
     _invalid_stale = {
         "kode": kode, "nama": "", "harga": 0.0,
         "last_updated": bars[-1].date,
+        "fetched_at": datetime.now(ZoneInfo("Asia/Jakarta")).isoformat(timespec="seconds"),
+        "data_delayed": data_delayed,
         "score": {"valid": False, "swing_score": None, "components": None,
                   "recommendation": None, "confidence": None,
                   "risk_level": None, "regime": None},
@@ -372,6 +379,8 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         "kode": kode,
         "harga": float(close[-1]),
         "last_updated": bars[-1].date,
+        "fetched_at": datetime.now(ZoneInfo("Asia/Jakarta")).isoformat(timespec="seconds"),
+        "data_delayed": data_delayed,
         "score": score_result,
         "trade_plan": trade_plan,
         "raw_indicators": raw_indicators,
@@ -390,6 +399,20 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
 # ---------------------------------------------------------------------------
 
 WIB = ZoneInfo("Asia/Jakarta")
+
+
+def _is_data_delayed() -> bool:
+    """
+    Data Yahoo dianggap masih bisa delay bila masih dalam jam bursa atau
+    belum final (~1 jam setelah penutupan sesi II, jadi sampai 17:00 WIB).
+    Akhir pekan & di luar jam itu data sudah final (tidak delay).
+    """
+    now = datetime.now(WIB)
+    if now.weekday() >= 5:
+        return False
+    start = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    end = now.replace(hour=17, minute=0, second=0, microsecond=0)
+    return start <= now < end
 
 
 def _market_is_open() -> bool:
