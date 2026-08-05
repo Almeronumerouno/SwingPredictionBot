@@ -10,6 +10,8 @@ import BackButton from "@/components/back-button";
 import TechnicalIndicators from "@/components/technical-indicators";
 import { Suspense } from "react";
 
+import DownloadPdfButton from "@/components/download-pdf-button";
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmtDate = (d: string) => {
@@ -62,31 +64,35 @@ export default async function SahamPage({
 
   return (
     <>
-      {/* Header */}
-      <header className="mb-6">
+      {/* Top Navigation */}
+      <div className="mb-6 no-print">
         <BackButton />
-        <div className="flex flex-col md:flex-row md:items-end justify-between mt-5 gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
-              <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${rekomendasi === "BUY" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : rekomendasi === "SELL" ? "bg-red-50 text-red-700 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
-                {rekomendasi}
-              </span>
-            </div>
-            <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
-          </div>
-          <div className="md:text-right flex flex-col md:items-end">
-            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span></p>
-            <div className="flex items-baseline gap-3 md:justify-end mb-2">
-              <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
-              <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
-              </span>
-            </div>
+      </div>
 
+      <div id="pdf-content" className="bg-[var(--color-bg)] pb-2 print:bg-white print:text-black">
+        {/* Header */}
+        <header className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
+                <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${rekomendasi === "BUY" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : rekomendasi === "SELL" ? "bg-red-50 text-red-700 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                  {rekomendasi}
+                </span>
+              </div>
+              <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
+            </div>
+            <div className="md:text-right flex flex-col md:items-end">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span></p>
+              <div className="flex items-baseline gap-3 md:justify-end mb-2">
+                <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
+                <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                  {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
 
 
@@ -203,8 +209,14 @@ export default async function SahamPage({
       {/* Technical Indicators */}
       <TechnicalIndicators data={analisis.raw_indicators} />
 
+      {/* Download PDF (Bottom) */}
+      <div className="mt-12 mb-4 flex justify-end no-print">
+        <DownloadPdfButton targetId="pdf-content" fileName={`Swingbot-${kode}-${analisis.last_updated}`} />
+      </div>
+
       {/* Footer spacing */}
       <div className="pb-8" />
+      </div>
     </>
   );
 }

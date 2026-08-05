@@ -70,10 +70,10 @@ function SidebarContent() {
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col h-screen sticky top-0">
+    <aside className="w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col h-screen sticky top-0 print:hidden">
       <div className="p-6 flex items-center gap-3 border-b border-[var(--color-border)]">
         <div className="w-8 h-8 relative flex-shrink-0">
-          <Image src="/logo.png" alt="Swingbot Logo" fill className="object-contain" priority />
+          <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
         </div>
         <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
       </div>
