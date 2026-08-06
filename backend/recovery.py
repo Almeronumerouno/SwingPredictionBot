@@ -29,6 +29,7 @@ from typing import Optional
 import numpy as np
 
 import config
+import indicators as ind
 
 
 # ---------------------------------------------------------------------------
@@ -242,6 +243,70 @@ def auto_drop_pct(sigma_daily: float, price: float) -> float:
     )
 
 
+def detect_accumulation(bars: list) -> dict:
+    """
+    Deteksi pola "akumulasi": banyak hari volume tinggi (RVOL >= ACCUM_HEAVY_RVOL)
+    dalam ACCUM_LOOKBACK_DAYS hari terakhir sambil harga MASIH DI BAWAH close
+    5 hari trading lalu (belum breakout).
+
+    Divalidasi walk-forward (24+ saham IDX, 2026): makin banyak hari "heavy" sambil
+    harga belum breakout, makin besar odds naik besar (breakout +10%/pump) dalam
+    5 hari ke depan -- pola khas "akumulasi lalu siap terbang" (kasus SOLA).
+
+    Returns dict params jika tak ada sinyal akumulasi (valid=False).
+    """
+    close = np.array([b.close for b in bars], dtype=float)
+    volume = np.array([b.volume for b in bars], dtype=float)
+
+    n = len(close)
+    need = config.ACCUM_RVOL_PERIOD + config.ACCUM_BELOW_LOOKBACK_DAYS
+    if n < need + 5:
+        return {"valid": False, "reason": "data terlalu pendek"}
+
+    rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)
+    heavy = rv >= config.ACCUM_HEAVY_RVOL
+
+    t = n - 1
+    lo = max(t - config.ACCUM_LOOKBACK_DAYS + 1, 0)
+    k = int(heavy[lo: t + 1].sum())
+    ref_idx = t - config.ACCUM_BELOW_LOOKBACK_DAYS
+    ref_price = float(close[ref_idx]) if ref_idx >= 0 else 0.0
+    price = float(close[t])
+
+    below = ref_price > 0 and price < ref_price
+    if not below or k < config.ACCUM_MIN_HEAVY_DAYS:
+        return {
+            "valid": False,
+            "k_heavy": k,
+            "heavy_days": config.ACCUM_MIN_HEAVY_DAYS,
+            "ready_to_fly": False,
+            "reason": "Belum pola akumulasi (kurang hari volume tinggi / sudah breakout).",
+        }
+
+    # Posisi relatif dalam jendela: berapa % di bawah level 5 hari lalu
+    dist_ref = (price - ref_price) / ref_price * 100.0
+
+    return {
+        "valid": True,
+        "ready_to_fly": True,
+        "k_heavy": k,
+        "heavy_days": config.ACCUM_MIN_HEAVY_DAYS,
+        "lookback_days": config.ACCUM_LOOKBACK_DAYS,
+        "rvol": float(rv[t]) if np.isfinite(rv[t]) else None,
+        "below_lookback_days": config.ACCUM_BELOW_LOOKBACK_DAYS,
+        "ref_price": round(ref_price, 2),
+        "distance_pct": round(dist_ref, 2),
+        "note": (
+f"{k} dari {config.ACCUM_LOOKBACK_DAYS} hari terakhir volume di atas "
+            f"{config.ACCUM_HEAVY_RVOL}x rata-rata (RVOL) sambil harga masih di bawah "
+            f"close {config.ACCUM_BELOW_LOOKBACK_DAYS} hari lalu = pola akumulasi -> "
+            f"probabilitas naik besar (breakout/pump) naik (validasi walk-forward)."
+        ),
+        "warning": "Harga di bawah level acuan sambil volume terkonsentrasi (heavy) - "
+                   "risiko tinggi breakout, tapi juga volatil; patuhi exit plan.",
+    }
+
+
 # ---------------------------------------------------------------------------
 # Analisis lengkap
 # ---------------------------------------------------------------------------
@@ -285,6 +350,8 @@ def build_recovery_analysis(
         "signal": "NO_SETUP",
         "signal_reason": "",
         "exit_plan": None,
+        "vs_lookbacks": [],
+        "accumulation": None,
     }
 
     if len(close) < config.RECOVERY_MIN_BARS:
@@ -362,6 +429,26 @@ def build_recovery_analysis(
 
     if in_setup:
         base["exit_plan"] = _build_exit_plan(price, ref_price)
+
+    # Posisi harga sekarang vs close N hari trading lalu (1D/1W/1M/3M)
+    lookbacks = []
+    for n in config.RECOVERY_VS_LOOKBACKS_DAYS:
+        if len(close) <= n:
+            continue
+        ref = float(close[-1 - n])
+        if ref <= 0:
+            continue
+        dist = (price - ref) / ref * 100.0
+        lookbacks.append({
+            "days": n,
+            "label": config.RECOVERY_VS_LABELS.get(n, f"{n}D"),
+            "ref_price": round(ref, 2),
+            "distance_pct": round(dist, 2),
+            "status": "above" if dist >= 0 else "below",
+        })
+    base["vs_lookbacks"] = lookbacks
+
+    base["accumulation"] = detect_accumulation(bars)
 
     base["valid"] = True
     return base

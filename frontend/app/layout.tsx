@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-screen bg-[var(--color-bg)] print:block print:min-h-0">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden print:block print:overflow-visible">
-          <main className="flex-1 w-full max-w-[1400px] px-8 py-8 print:p-0 print:w-auto print:max-w-none">
+          <main className="flex-1 w-full max-w-[1400px] px-4 py-6 pt-20 sm:px-6 lg:px-8 lg:py-8 lg:pt-8 print:p-0 print:w-auto print:max-w-none">
             {children}
           </main>
           <Footer />

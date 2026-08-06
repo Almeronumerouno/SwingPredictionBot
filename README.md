@@ -76,6 +76,8 @@ Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa pel
   - `WATCH` — probabilitas menengah
   - `NO_SETUP` — belum turun cukup jauh atau data tidak valid
   - Sinyal memakai **empirical base rate** saat `n_events ≥ 5` (lebih kalibrasi dari GBM), fallback ke GBM.
+- **Posisi vs Harga Acuan** — cek status harga sekarang vs close 1D/1W/1M/3M lalu (badge "Masih di Bawah" / "Udah di Atas" + jarak % per horizon).
+- **Volume & Akumulasi** — deteksi pola "akumulasi lalu siap terbang": banyak hari (≥ 3 dari 5) RVOL ≥ 2.0× sambil harga masih di bawah close 5 hari lalu → badge "Siap Terbang". Divalidasi walk-forward (24+ saham IDX, 2026): P(boom +10% dalam 5 hari) naik 4.4% (kontrol) → 10.9% (3 hari) → 33% (4 hari). Kasus nyata: SOLA 31 Jul–5 Ags (volume 19–25M, harga cekung 102→88) lalu 6 Ags melesat +14.5% dengan 114M.
 - **Exit plan** (bila entry): target = previous close, time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
 - **Validasi walk-forward** (BBCA BMRI BBRI ASII TLKM, 35 event, drop ≥ 5%): GBM **under-predict** peluang — Brier 1d 0.057 → 63d 0.372; pred vs aktual 3d: 7% vs 31%; 63d: 56% vs 73%. Karena itu sinyal mengutamakan base rate empiris.
 

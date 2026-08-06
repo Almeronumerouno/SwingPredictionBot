@@ -136,6 +136,29 @@ export interface RecoveryExitPlan {
   note: string
 }
 
+export interface RecoveryVsLookback {
+  days: number
+  label: string
+  ref_price: number
+  distance_pct: number
+  status: "above" | "below"
+}
+
+export interface RecoveryAccumulation {
+  valid: boolean
+  ready_to_fly: boolean
+  k_heavy: number
+  heavy_days: number
+  lookback_days: number
+  rvol: number | null
+  below_lookback_days: number
+  ref_price: number | null
+  distance_pct: number | null
+  note: string | null
+  warning: string | null
+  reason: string | null
+}
+
 export interface RecoveryResponse {
   kode: string
   nama: string
@@ -152,6 +175,8 @@ export interface RecoveryResponse {
   signal: string
   signal_reason: string
   exit_plan: RecoveryExitPlan | null
+  vs_lookbacks: RecoveryVsLookback[]
+  accumulation: RecoveryAccumulation | null
 }
 
 export interface Candle {

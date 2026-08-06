@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 
 const navItems = [
   {
@@ -35,7 +35,7 @@ const navItems = [
   },
 ];
 
-function SidebarContent() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const date = searchParams.get("date");
@@ -53,6 +53,7 @@ function SidebarContent() {
           <Link
             key={item.href}
             href={`${item.href}${qs}`}
+            onClick={onNavigate}
             className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
               isActive
                 ? "bg-[var(--color-muted-bg)] text-[var(--color-primary)]"
@@ -68,18 +69,104 @@ function SidebarContent() {
   );
 }
 
-export default function Sidebar() {
+function SidebarInner() {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const close = useCallback(() => setIsOpen(false), []);
+
   return (
-    <aside className="w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col h-screen sticky top-0 print:hidden">
-      <div className="p-6 flex items-center gap-3 border-b border-[var(--color-border)]">
-        <div className="w-8 h-8 relative flex-shrink-0">
-          <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
+    <>
+      {/* ===== Mobile Top Bar ===== */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-[var(--color-surface)] border-b border-[var(--color-border)] flex items-center justify-between px-4 print:hidden">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[var(--color-muted-bg)] transition-colors"
+          aria-label="Buka menu"
+        >
+          <svg className="w-6 h-6 text-[var(--color-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 relative flex-shrink-0">
+            <Image src="/logo.png" alt="Swingbot Logo" fill sizes="28px" className="object-contain" priority />
+          </div>
+          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-base">Swingbot</span>
         </div>
-        <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
+        {/* Spacer to balance the hamburger button */}
+        <div className="w-10" />
       </div>
-      <Suspense fallback={<div className="flex-1 p-4"></div>}>
-        <SidebarContent />
-      </Suspense>
-    </aside>
+
+      {/* ===== Mobile Backdrop ===== */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity print:hidden"
+          onClick={close}
+        />
+      )}
+
+      {/* ===== Mobile Drawer ===== */}
+      <aside
+        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-72 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transform transition-transform duration-300 ease-out print:hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="p-5 flex items-center justify-between border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 relative flex-shrink-0">
+              <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
+            </div>
+            <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
+          </div>
+          <button
+            onClick={close}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--color-muted-bg)] transition-colors"
+            aria-label="Tutup menu"
+          >
+            <svg className="w-5 h-5 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <Suspense fallback={<div className="flex-1 p-4"></div>}>
+          <SidebarContent onNavigate={close} />
+        </Suspense>
+      </aside>
+
+      {/* ===== Desktop Sidebar ===== */}
+      <aside className="hidden lg:flex w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex-col h-screen sticky top-0 print:hidden">
+        <div className="p-6 flex items-center gap-3 border-b border-[var(--color-border)]">
+          <div className="w-8 h-8 relative flex-shrink-0">
+            <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
+          </div>
+          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
+        </div>
+        <Suspense fallback={<div className="flex-1 p-4"></div>}>
+          <SidebarContent />
+        </Suspense>
+      </aside>
+    </>
   );
+}
+
+export default function Sidebar() {
+  return <SidebarInner />;
 }

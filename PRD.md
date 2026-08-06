@@ -439,6 +439,8 @@ Analisis mean-reversion: probabilitas saham yang turun ≥ X% di bawah previous 
 | `signal` | string | `POTENTIAL` / `WATCH` / `NO_SETUP` |
 | `signal_reason` | string | Penjelasan singkat + basis (empirical/GBM) |
 | `exit_plan` | object | `target` (previous close), `time_stop_days` (63), `stop_loss`, `note`; null jika NO_SETUP |
+| `vs_lookbacks` | array | `{days, label, ref_price, distance_pct, status}` — posisi harga sekarang vs close 1D/1W/1M/3M lalu (`above` = udah di atas acuan, `below` = masih di bawah) |
+| `accumulation` | object | Deteksi pola akumulasi "siap terbang": `{valid, ready_to_fly, k_heavy, heavy_days, lookback_days, rvol, below_lookback_days, ref_price, distance_pct, note, warning, reason}`. `ready_to_fly` true jika ≥3 dari 5 hari RVOL ≥ ACCUM_HEAVY_RVOL sambil harga masih di bawah close 5 hari lalu |
 
 **Response 404:** Kode saham tidak dikenal.
 
@@ -661,6 +663,8 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - [ ] **S1C** Breakeven stop (1.0 ATR) — SL ke entry setelah profit
 - [ ] **S1D** Long-only mode (SELL advisory, short entry dinonaktifkan)
 - [x] **S1E** Fitur Mean Reversion / Recovery — endpoint `/recovery/{kode}`, model GBM FPT + base rate empiris, exit plan time-stop 63 hari, card frontend (`?drop_pct=`) — validasi walk-forward: GBM under-predict (Brier 63d 0.372), sinyal memakai empirical saat `n_events ≥ 5`
+- [x] **S1F** Posisi vs Harga Acuan (1D/1W/1M/3M) + auto-drop threshold dari volatilitas (`RECOVERY_AUTO_*`, tier harga IDX)
+- [x] **S1G** Volume & Akumulasi — deteksi "akumulasi lalu siap terbang" (`ACCUM_*`): ≥3 dari 5 hari RVOL ≥ 2.0× sambil harga masih di bawah close 5 hari lalu. Validasi walk-forward 24+ saham: P(boom +10%/5d) 4.4% → 10.9% (3 hari) → 33.3% (4 hari)
 - [ ] **S2** Rekonsiliasi position sizing (100%) + validasi OOS S1
 - [ ] **S3** Regime detection (SMA200+ADX) + adaptive weights + sizing
 - [ ] Dark mode

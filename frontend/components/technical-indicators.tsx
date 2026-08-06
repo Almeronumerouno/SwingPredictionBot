@@ -139,7 +139,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-sm mt-6 overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center gap-3">
+      <div className="px-4 sm:px-6 py-4 border-b border-[var(--color-border)] flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
           <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
         </div>
@@ -149,7 +149,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Momentum & Oscillator Section */}
         <div className="mb-8">
           <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Momentum & Oscillator</h4>
@@ -260,7 +260,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
         </div>
 
         {/* Support / Resistance + Fibonacci */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* S/R */}
           <div>
             <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Support & Resistance</h4>

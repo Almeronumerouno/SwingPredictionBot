@@ -87,6 +87,112 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
               {data.signal_reason}
             </p>
 
+            {/* Posisi vs Harga Acuan */}
+            {data.vs_lookbacks && data.vs_lookbacks.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+                  Posisi vs Harga Acuan — udah balik atau masih di bawah?
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {data.vs_lookbacks.map((v) => {
+                    const above = v.status === "above";
+                    return (
+                      <div
+                        key={v.days}
+                        className={`rounded-lg border p-3 ${above ? "border-emerald-200 bg-emerald-50/60" : "border-red-200 bg-red-50/60"}`}
+                      >
+                        <div className="flex items-center justify-between mb-1.5 gap-2">
+                          <span className="text-xs font-bold text-[var(--color-text-primary)]">{v.label}</span>
+                          <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${above ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
+                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {above ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                              )}
+                            </svg>
+                            {above ? "Udah di Atas" : "Masih di Bawah"}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[var(--color-text-muted)] tabular-nums mb-1">Acuan {fmtIdr(v.ref_price)}</p>
+                        <p className={`text-sm font-bold tabular-nums ${above ? "text-emerald-600" : "text-red-500"}`}>
+                          {above ? "▲" : "▼"} {Math.abs(v.distance_pct).toFixed(2)}%
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Volume & Akumulasi */}
+            {data.accumulation && (
+              <div
+                className={`rounded-lg border p-4 ${
+                  data.accumulation.ready_to_fly
+                    ? "border-violet-300 bg-violet-50/70"
+                    : "border-[var(--color-border)] bg-[var(--color-surface)]"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                    data.accumulation.ready_to_fly ? "text-violet-700" : "text-[var(--color-text-muted)]"
+                  }`}>
+                    Volume & Akumulasi
+                  </p>
+                  {data.accumulation.ready_to_fly && (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-violet-100 text-violet-700 uppercase tracking-wide">
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7 7 7-7" />
+                      </svg>
+                      Siap Terbang
+                    </span>
+                  )}
+                </div>
+
+                {data.accumulation.ready_to_fly ? (
+                  <>
+                    <p className="text-xs leading-relaxed text-violet-900/80 mb-2.5">
+                      {data.accumulation.note}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Hari Volume Tinggi</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.k_heavy} / {data.accumulation.lookback_days} hari
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">RVOL Terakhir</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.rvol != null ? `${data.accumulation.rvol.toFixed(1)}x` : "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Acuan (5 hari lalu)</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.ref_price != null ? fmtIdr(data.accumulation.ref_price) : "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Masih di Bawah</p>
+                        <p className="text-sm font-bold tabular-nums text-red-500">
+                          ▼ {Math.abs(data.accumulation.distance_pct ?? 0).toFixed(2)}%
+                        </p>
+                      </div>
+                    </div>
+                    {data.accumulation.warning && (
+                      <p className="text-[11px] text-violet-800/60 mt-2.5 leading-relaxed">{data.accumulation.warning}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                    Belum terlihat pola akumulasi — tidak ada konsentrasi volume tinggi di harga yang masih di bawah acuan.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Exit plan */}
             {data.exit_plan && (
               <div className="border border-emerald-200 bg-emerald-50/60 rounded-lg p-4">

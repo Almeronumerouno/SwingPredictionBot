@@ -48,13 +48,13 @@ export default function GainersTable({ data, date }: { data: GainerEntry[], date
         <table className="w-full text-sm border-collapse text-left">
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-muted-bg)]/30">
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider whitespace-nowrap">Signal</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider whitespace-nowrap">Kode</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Nama</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Harga</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Change</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Volume</th>
-              <th className="py-3 px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Value</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider whitespace-nowrap">Signal</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider whitespace-nowrap">Kode</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider hidden md:table-cell">Nama</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Harga</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap">Change</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap hidden sm:table-cell">Volume</th>
+              <th className="py-3 px-3 sm:px-5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right whitespace-nowrap hidden lg:table-cell">Value</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
@@ -63,10 +63,10 @@ export default function GainersTable({ data, date }: { data: GainerEntry[], date
                 key={g.code}
                 className="group hover:bg-[var(--color-muted-bg)]/50 transition-colors duration-150"
               >
-                <td className="py-3 px-5 whitespace-nowrap">
+                <td className="py-3 px-3 sm:px-5 whitespace-nowrap">
                   <SignalBadge rec={g.recommendation} score={g.swing_score} />
                 </td>
-                <td className="py-3 px-5 whitespace-nowrap">
+                <td className="py-3 px-3 sm:px-5 whitespace-nowrap">
                   <Link
                     prefetch={false}
                     href={`/saham/${g.code}${qs}`}
@@ -75,13 +75,13 @@ export default function GainersTable({ data, date }: { data: GainerEntry[], date
                     {g.code}
                   </Link>
                 </td>
-                <td className="py-3 px-5 text-[var(--color-text-secondary)] truncate max-w-[220px] font-medium">{g.name}</td>
-                <td className="py-3 px-5 text-right tabular-nums text-[var(--color-text-primary)] font-medium">{fmtIdr(g.close)}</td>
-                <td className={`py-3 px-5 text-right tabular-nums font-bold ${g.pct_change >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
+                <td className="py-3 px-3 sm:px-5 text-[var(--color-text-secondary)] truncate max-w-[220px] font-medium hidden md:table-cell">{g.name}</td>
+                <td className="py-3 px-3 sm:px-5 text-right tabular-nums text-[var(--color-text-primary)] font-medium">{fmtIdr(g.close)}</td>
+                <td className={`py-3 px-3 sm:px-5 text-right tabular-nums font-bold ${g.pct_change >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
                   {pct(g.pct_change)}
                 </td>
-                <td className="py-3 px-5 text-right tabular-nums text-[var(--color-text-secondary)]">{fmt(g.volume)}</td>
-                <td className="py-3 px-5 text-right tabular-nums text-[var(--color-text-secondary)]">{fmtIdr(g.value)}</td>
+                <td className="py-3 px-3 sm:px-5 text-right tabular-nums text-[var(--color-text-secondary)] hidden sm:table-cell">{fmt(g.volume)}</td>
+                <td className="py-3 px-3 sm:px-5 text-right tabular-nums text-[var(--color-text-secondary)] hidden lg:table-cell">{fmtIdr(g.value)}</td>
               </tr>
             ))}
           </tbody>

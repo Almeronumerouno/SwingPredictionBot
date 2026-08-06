@@ -92,19 +92,19 @@ export default async function SahamPage({
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
+                <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
                 <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${rekomendasi === "BUY" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : rekomendasi === "SELL" ? "bg-red-50 text-red-700 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
                   {rekomendasi}
                 </span>
               </div>
-              <p className="text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
+              <p className="text-sm sm:text-base font-medium text-[var(--color-text-secondary)] mt-1.5">{analisis.nama}</p>
             </div>
             <div className="md:text-right flex flex-col md:items-end">
               <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
                 Harga Terakhir, <span className="font-semibold uppercase">{fmtDate(analisis.last_updated)}</span>
               </p>
               <div className="flex items-baseline gap-3 md:justify-end mb-2">
-                <p className="text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
+                <p className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
                 <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                   {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
                 </span>
@@ -127,7 +127,7 @@ export default async function SahamPage({
 
 
       {/* Score Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <ScoreCard
           label="Swing Score"
           value={s.swing_score != null ? s.swing_score.toFixed(1) : "-"}
@@ -168,7 +168,7 @@ export default async function SahamPage({
 
       {/* Score Components */}
       {s.components && (
-        <div className="border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm mb-8">
+        <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
@@ -210,9 +210,9 @@ export default async function SahamPage({
       )}
 
       {/* Chart + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="lg:col-span-2 h-full">
-          <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden h-full min-h-[400px]">
+          <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden h-full min-h-[300px] sm:min-h-[400px]">
             <PriceChart data={chartData} />
           </div>
         </div>

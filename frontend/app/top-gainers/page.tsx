@@ -22,12 +22,12 @@ export default async function TopGainersPage({
 
   return (
     <>
-      <header className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-1">Top Gainers</h1>
-          <p className="text-sm font-medium text-[var(--color-text-secondary)]">Saham dengan kenaikan tertinggi hari ini &middot; Bursa Efek Indonesia</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-1">Top Gainers</h1>
+          <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]">Saham dengan kenaikan tertinggi hari ini &middot; Bursa Efek Indonesia</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Suspense fallback={<div className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <ScrapeButton />
           </Suspense>
@@ -43,7 +43,7 @@ export default async function TopGainersPage({
         </div>
       ) : gainers ? (
         <section>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
             <div className="border border-[var(--color-border)] rounded-xl px-5 py-4 bg-[var(--color-surface)] shadow-sm">
               <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Tanggal Data</p>
               <p className="text-xl font-bold tabular-nums text-[var(--color-text-primary)] tracking-tight">{gainers.date}</p>

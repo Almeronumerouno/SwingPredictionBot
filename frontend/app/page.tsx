@@ -36,17 +36,16 @@ export default async function DashboardPage({
   return (
     <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-10 gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-8 lg:mb-10 gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
-
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
           </div>
-          <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+          <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]">
             Ringkasan seluruh saham gainer di Bursa Efek Indonesia hari ini, termasuk sinyal swing trading, volume, dan nilai transaksi.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/" />
           </Suspense>
@@ -63,7 +62,7 @@ export default async function DashboardPage({
       ) : (
         <>
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-8 lg:mb-10">
             <div className="group border border-[var(--color-border)] rounded-xl px-5 py-5 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-9 h-9 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
@@ -73,7 +72,7 @@ export default async function DashboardPage({
                 </div>
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total Saham</p>
               </div>
-              <p className="text-3xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{data.length}</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{data.length}</p>
               <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">saham gainer terdeteksi</p>
             </div>
 
@@ -86,7 +85,7 @@ export default async function DashboardPage({
                 </div>
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Sinyal Buy</p>
               </div>
-              <p className="text-3xl font-extrabold tabular-nums text-[var(--color-up)] tracking-tight">{topBuy.length}</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-[var(--color-up)] tracking-tight">{topBuy.length}</p>
               <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">rekomendasi beli aktif</p>
             </div>
 
@@ -99,7 +98,7 @@ export default async function DashboardPage({
                 </div>
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total Value</p>
               </div>
-              <p className="text-2xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{fmtIdr(totalValue)}</p>
+              <p className="text-lg sm:text-2xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{fmtIdr(totalValue)}</p>
               <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">volume transaksi: {fmt(totalVolume)}</p>
             </div>
 
@@ -112,13 +111,13 @@ export default async function DashboardPage({
                 </div>
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Rata-rata Change</p>
               </div>
-              <p className={`text-3xl font-extrabold tabular-nums tracking-tight ${avgChange >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>{pct(avgChange)}</p>
+              <p className={`text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight ${avgChange >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>{pct(avgChange)}</p>
               <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">dari seluruh gainer</p>
             </div>
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 lg:mb-10">
             
             {/* Top Pick - Featured */}
             {maxGainer && (
@@ -158,7 +157,7 @@ export default async function DashboardPage({
           </div>
 
           {/* Quick Access */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
             <Link href={`/top-gainers${date ? `?date=${date}` : ''}`} className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[var(--color-up)]/10 flex items-center justify-center group-hover:bg-[var(--color-up)]/20 transition-colors">

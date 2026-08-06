@@ -167,6 +167,29 @@ class RecoveryExitPlan(BaseModel):
     note: str
 
 
+class RecoveryVsLookback(BaseModel):
+    days: int
+    label: str
+    ref_price: float
+    distance_pct: float
+    status: str  # "above" = udah di atas harga acuan, "below" = masih di bawah
+
+
+class RecoveryAccumulation(BaseModel):
+    valid: bool
+    ready_to_fly: bool = False
+    k_heavy: int = 0
+    heavy_days: int = 0
+    lookback_days: int = 0
+    rvol: float | None = None
+    below_lookback_days: int = 0
+    ref_price: float | None = None
+    distance_pct: float | None = None
+    note: str | None = None
+    warning: str | None = None
+    reason: str | None = None
+
+
 class RecoveryResponse(BaseModel):
     kode: str
     nama: str
@@ -183,6 +206,8 @@ class RecoveryResponse(BaseModel):
     signal: str
     signal_reason: str
     exit_plan: RecoveryExitPlan | None
+    vs_lookbacks: list[RecoveryVsLookback] = []
+    accumulation: RecoveryAccumulation | None = None
 
 
 class MarketStatusResponse(BaseModel):
@@ -196,7 +221,7 @@ for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
                AnalisisResponse, HistoryResponse, MarketStatusResponse,
                RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
-               RecoveryExitPlan, RecoveryResponse):
+               RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse):
     _model.model_rebuild()
 
 
