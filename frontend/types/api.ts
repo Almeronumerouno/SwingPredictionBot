@@ -66,10 +66,32 @@ export interface RawIndicators {
 export interface GorenganFactors {
   historical_pump_dump_risk: number
   liquidity_risk: number
-  volume_anomaly: number
+  market_cap_risk: number
+  active_pump: number
+  mid_momentum: number
   distribution_risk: number
-  parabolic_move_risk: number
-  volatility_anomaly: number
+  turnover_gaps: number
+}
+
+export interface GorenganScannerEntry {
+  code: string
+  name: string
+  close: number
+  pct_change: number
+  volume: number
+  value: number
+  frequency: number
+  gorengan_score: number
+  gorengan_level: string
+  factors: GorenganFactors
+  warnings: string[]
+}
+
+export interface GorenganScannerResponse {
+  scraped_at: string
+  date: string
+  count: number
+  data: GorenganScannerEntry[]
 }
 
 export interface GorenganAnalysis {
@@ -148,11 +170,14 @@ export interface RecoveryAccumulation {
   valid: boolean
   ready_to_fly: boolean
   k_heavy: number
-  heavy_days: number
-  lookback_days: number
+  window_days: number
+  density_pct: number | null
   rvol: number | null
-  below_lookback_days: number
-  ref_price: number | null
+  max_rvol: number | null
+  ara_date: string | null
+  ara_ref_price: number | null
+  sma20: number | null
+  state_ma20: "above" | "breakout" | "below" | null
   distance_pct: number | null
   note: string | null
   warning: string | null

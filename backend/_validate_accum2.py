@@ -1,5 +1,10 @@
 """
-_validate_accum2.py — [v2 — FINAL, TERBUKTI] Validasi pola "akumulasi" versi user (SOLA Jul 30 -> Aug 6).
+_validate_accum2.py — [v2 — DIDIGANTI v3] Validasi pola "akumulasi" versi user (SOLA Jul 30 -> Aug 6).
+
+CATATAN: Konfig resmi di config.py TIDAK lagi memakai lookback=5/min-heavy=3/RVOL>=2.0.
+Versi produksi sekarang = _validate_accum3.py (versi bandar): jendela dinamis sejak ARA
+(+10% harian) + kepadatan >= 40% (min 2 hari heavy) + close >= SMA20. File ini dipertahankan
+sebagai rekam jejak v2 yang aslinya membuktikan pola "banyak hari RVOL tinggi + belum breakout".
 
 HASIL (24-27 saham IDX, drop >=5%, RVOL>=2.0):
   hari-heavy  n    b5      b10     up1

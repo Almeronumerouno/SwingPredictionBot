@@ -155,29 +155,50 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
                     <p className="text-xs leading-relaxed text-violet-900/80 mb-2.5">
                       {data.accumulation.note}
                     </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Hari Sejak ARA</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.window_days}d{data.accumulation.ara_date ? ` · ${data.accumulation.ara_date.slice(8, 10)}/${data.accumulation.ara_date.slice(5, 7)}` : ""}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Kepadatan Heavy</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.density_pct != null ? `${data.accumulation.density_pct.toFixed(0)}%` : "—"}
+                        </p>
+                      </div>
                       <div>
                         <p className="text-[10px] text-violet-700/70 mb-0.5">Hari Volume Tinggi</p>
                         <p className="text-sm font-bold tabular-nums text-violet-900">
-                          {data.accumulation.k_heavy} / {data.accumulation.lookback_days} hari
+                          {data.accumulation.k_heavy} hari
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-violet-700/70 mb-0.5">RVOL Terakhir</p>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">RVOL Maks (sejak ARA)</p>
                         <p className="text-sm font-bold tabular-nums text-violet-900">
-                          {data.accumulation.rvol != null ? `${data.accumulation.rvol.toFixed(1)}x` : "—"}
+                          {data.accumulation.max_rvol != null ? `${data.accumulation.max_rvol.toFixed(1)}x` : "—"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-violet-700/70 mb-0.5">Acuan (5 hari lalu)</p>
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">SMA20</p>
                         <p className="text-sm font-bold tabular-nums text-violet-900">
-                          {data.accumulation.ref_price != null ? fmtIdr(data.accumulation.ref_price) : "—"}
+                          {data.accumulation.state_ma20 === "breakout" ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-700">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                              </svg>
+                              baru cross
+                            </span>
+                          ) : data.accumulation.sma20 != null ? (
+                            `di atas ${fmtIdr(data.accumulation.sma20)}`
+                          ) : "—"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-violet-700/70 mb-0.5">Masih di Bawah</p>
-                        <p className="text-sm font-bold tabular-nums text-red-500">
-                          ▼ {Math.abs(data.accumulation.distance_pct ?? 0).toFixed(2)}%
+                        <p className="text-[10px] text-violet-700/70 mb-0.5">Level ARA (ref)</p>
+                        <p className="text-sm font-bold tabular-nums text-violet-900">
+                          {data.accumulation.ara_ref_price != null ? fmtIdr(data.accumulation.ara_ref_price) : "—"}
                         </p>
                       </div>
                     </div>
@@ -187,7 +208,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
                   </>
                 ) : (
                   <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
-                    Belum terlihat pola akumulasi — tidak ada konsentrasi volume tinggi di harga yang masih di bawah acuan.
+                    {data.accumulation.reason || "Belum terlihat pola akumulasi post-ARA."}
                   </p>
                 )}
               </div>

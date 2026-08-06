@@ -440,7 +440,7 @@ Analisis mean-reversion: probabilitas saham yang turun ≥ X% di bawah previous 
 | `signal_reason` | string | Penjelasan singkat + basis (empirical/GBM) |
 | `exit_plan` | object | `target` (previous close), `time_stop_days` (63), `stop_loss`, `note`; null jika NO_SETUP |
 | `vs_lookbacks` | array | `{days, label, ref_price, distance_pct, status}` — posisi harga sekarang vs close 1D/1W/1M/3M lalu (`above` = udah di atas acuan, `below` = masih di bawah) |
-| `accumulation` | object | Deteksi pola akumulasi "siap terbang": `{valid, ready_to_fly, k_heavy, heavy_days, lookback_days, rvol, below_lookback_days, ref_price, distance_pct, note, warning, reason}`. `ready_to_fly` true jika ≥3 dari 5 hari RVOL ≥ ACCUM_HEAVY_RVOL sambil harga masih di bawah close 5 hari lalu |
+| `accumulation` | object | Deteksi pola akumulasi post-ARA "siap terbang": `{valid, ready_to_fly, k_heavy, window_days, density_pct, rvol, max_rvol, ara_date, ara_ref_price, sma20, state_ma20, distance_pct, note, warning, reason}`. ARA (+`ACCUM_ARA_RISE_PCT`% harian) = puncak distribusi; `ready_to_fly` true jika harga MASIH DI BAWAH level ARA (belum recovery), kepadatan RVOL ≥ `ACCUM_HEAVY_RVOL` di seluruh jendela sejak ARA ≥ `ACCUM_DENSITY_PCT`% (min `ACCUM_MIN_HEAVY_DAYS` hari) DAN close ≥ SMA(`ACCUM_MA20_DAYS`). `state_ma20` = `above`/`breakout`/`below` |
 
 **Response 404:** Kode saham tidak dikenal.
 
@@ -664,7 +664,7 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - [ ] **S1D** Long-only mode (SELL advisory, short entry dinonaktifkan)
 - [x] **S1E** Fitur Mean Reversion / Recovery — endpoint `/recovery/{kode}`, model GBM FPT + base rate empiris, exit plan time-stop 63 hari, card frontend (`?drop_pct=`) — validasi walk-forward: GBM under-predict (Brier 63d 0.372), sinyal memakai empirical saat `n_events ≥ 5`
 - [x] **S1F** Posisi vs Harga Acuan (1D/1W/1M/3M) + auto-drop threshold dari volatilitas (`RECOVERY_AUTO_*`, tier harga IDX)
-- [x] **S1G** Volume & Akumulasi — deteksi "akumulasi lalu siap terbang" (`ACCUM_*`): ≥3 dari 5 hari RVOL ≥ 2.0× sambil harga masih di bawah close 5 hari lalu. Validasi walk-forward 24+ saham: P(boom +10%/5d) 4.4% → 10.9% (3 hari) → 33.3% (4 hari)
+- [x] **S1G** Volume & Akumulasi — deteksi "akumulasi post-ARA lalu siap terbang" versi bandar (`ACCUM_*`): ARA (+10% harian) = puncak distribusi/dump; jendela dinamis sejak ARA, kepadatan hari RVOL ≥ 2.0× ≥ 40% (min 2 hari) + close ≥ SMA20, dan wajib harga MASIH DI BAWAH level ARA (belum recovery). Validasi walk-forward 963 saham (sub-arm di bawah ARA): P(boom +10%/5d) 5.9% (kontrol) → 16.8% (n=2958), pump5 26.5% → 34.0%; fresh cross SMA20 lebih lemah (b10 36.4%) daripada sudah di atas (51.9%)
 - [ ] **S2** Rekonsiliasi position sizing (100%) + validasi OOS S1
 - [ ] **S3** Regime detection (SMA200+ADX) + adaptive weights + sizing
 - [ ] Dark mode

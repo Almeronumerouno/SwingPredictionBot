@@ -20,6 +20,82 @@ import scoring
 import gorengan
 import recovery
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
+from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
+from data_source.idx_trading import IdxTradingError
+from data_source.yahoo_client import YahooClientError, fetch_trading_info
+
+class InsufficientDataError(Exception):
+    """Data historis kurang dari HISTORY_LOOKBACK_DAYS."""
+
+
+# ---------------------------------------------------------------------------
+# Pydantic models
+# ---------------------------------------------------------------------------
+
+class ScoreResponse(BaseModel):
+    valid: bool
+    swing_score: float | None
+    components: dict | None
+    recommendation: str | None
+    confidence: str | None
+    risk_level: str | None
+    regime: str | None = None
+
+
+class TradePlanResponse(BaseModel):
+    direction: str
+    entry: float
+    stop_loss: float
+    take_profit: float
+    shares: int
+    lots: int
+    risk_reward_ratio: float | None
+    note: str | None = None
+
+
+class HistoryBar(BaseModel):
+    date: str
+    close: float
+    open: float
+    high: float
+    low: float
+    volume: float
+
+
+class GainerEntryResponse(BaseModel):
+    code: str
+    name: str
+    close: float
+    pct_change: float
+    volume: float
+    value: float
+    frequency: float
+    foreign_buy: float
+    foreign_sell: float
+    swing_score: float | None = None
+    recommendation: str | None = None
+    gorengan_score: float | None = None
+    gorengan_level: str | None = None
+
+
+class GainersResponse(BaseModel):
+    scraped_at: str
+    date: str
+    count: int
+    data: list[GainerEntryResponse]
+
+
+class RawIndicatorsResponse(BaseModel):
+    rsi: float | None
+    mfi: float | None
+    atr: float | None
+    adx: float | None
+    plus_di: float | None
+    minus_di: float | None
+    ema_fast: float | None
+    ema_slow: float | None
+    rvol: float | None
+from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
 from data_source.idx_trading import IdxTradingError
 from data_source.yahoo_client import YahooClientError, fetch_trading_info
 
@@ -110,6 +186,27 @@ class GorenganFactors(BaseModel):
     turnover_gaps: float
 
 
+class GorenganScannerEntryResponse(BaseModel):
+    code: str
+    name: str
+    close: float
+    pct_change: float
+    volume: float
+    value: float
+    frequency: float
+    gorengan_score: float
+    gorengan_level: str
+    factors: GorenganFactors
+    warnings: list[str]
+
+
+class GorenganScannerResponse(BaseModel):
+    scraped_at: str
+    date: str
+    count: int
+    data: list[GorenganScannerEntryResponse]
+
+
 class GorenganResponse(BaseModel):
     score: float
     level: str
@@ -179,11 +276,14 @@ class RecoveryAccumulation(BaseModel):
     valid: bool
     ready_to_fly: bool = False
     k_heavy: int = 0
-    heavy_days: int = 0
-    lookback_days: int = 0
+    window_days: int = 0
+    density_pct: float | None = None
     rvol: float | None = None
-    below_lookback_days: int = 0
-    ref_price: float | None = None
+    max_rvol: float | None = None
+    ara_date: str | None = None
+    ara_ref_price: float | None = None
+    sma20: float | None = None
+    state_ma20: str | None = None  # "above" | "breakout" | "below"
     distance_pct: float | None = None
     note: str | None = None
     warning: str | None = None
@@ -221,7 +321,8 @@ for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
                AnalisisResponse, HistoryResponse, MarketStatusResponse,
                RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
-               RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse):
+               RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
+               GorenganScannerEntryResponse, GorenganScannerResponse):
     _model.model_rebuild()
 
 
@@ -647,3 +748,52 @@ def get_recovery(
         )
 
     return recovery.build_recovery_analysis(kode, sec.name, bars, drop_pct=drop_pct)
+
+
+@app.post("/scrape/gorengan")
+def trigger_scrape_gorengan(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    """
+    Trigger scan seluruh bursa untuk mendeteksi saham gorengan.
+    Proses ini memakan waktu beberapa menit.
+    """
+    try:
+        results = scan_gorengan(target_date=date)
+        return {"status": "success", "count": len(results), "message": "Scrape gorengan selesai."}
+    except Exception as e:
+        logging.exception("Scrape gorengan gagal")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/gorengan", response_model=GorenganScannerResponse)
+def get_gorengan(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    """
+    Mengambil data saham gorengan yang sudah di-scrape hari ini atau tanggal tertentu.
+    """
+    cached = get_cached_gorengan(for_date=date)
+    if not cached:
+        raise HTTPException(
+            status_code=404,
+            detail="Data belum discrape hari ini. Silakan klik tombol 'Scrape Gorengan' terlebih dahulu.",
+        )
+
+    return {
+        "scraped_at": cached["scraped_at"],
+        "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
+        "count": len(cached["data"]),
+        "data": [
+            {
+                "code": e.code,
+                "name": e.name,
+                "close": e.close,
+                "pct_change": e.pct_change,
+                "volume": e.volume,
+                "value": e.value,
+                "frequency": e.frequency,
+                "gorengan_score": e.gorengan_score,
+                "gorengan_level": e.gorengan_level,
+                "factors": e.factors,
+                "warnings": e.warnings,
+            }
+            for e in cached["data"]
+        ],
+    }

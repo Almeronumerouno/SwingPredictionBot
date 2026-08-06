@@ -245,13 +245,30 @@ def auto_drop_pct(sigma_daily: float, price: float) -> float:
 
 def detect_accumulation(bars: list) -> dict:
     """
-    Deteksi pola "akumulasi": banyak hari volume tinggi (RVOL >= ACCUM_HEAVY_RVOL)
-    dalam ACCUM_LOOKBACK_DAYS hari terakhir sambil harga MASIH DI BAWAH close
-    5 hari trading lalu (belum breakout).
+    Deteksi pola "akumulasi post-ARA" (versi bandar) — siap terbang.
 
-    Divalidasi walk-forward (24+ saham IDX, 2026): makin banyak hari "heavy" sambil
-    harga belum breakout, makin besar odds naik besar (breakout +10%/pump) dalam
-    5 hari ke depan -- pola khas "akumulasi lalu siap terbang" (kasus SOLA).
+    Konsep:
+      - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) = hari melesat = puncak
+        distribusi/dump. Hari ARA TIDAK dihitung sebagai hari akumulasi.
+      - Setelah ARA, jendela akumulasi = SEMUA hari trading sejak ARA (dinamis,
+        bukan jendela tetap).
+      - Heavy = RVOL >= ACCUM_HEAVY_RVOL (vs rata2 ACCUM_RVOL_PERIOD hari sebelumnya).
+      - Sinyal terang = kepadatan heavy dalam jendela >= ACCUM_DENSITY_PCT dan
+        minimal ACCUM_MIN_HEAVY_DAYS hari heavy.
+      - Konfirmasi (versi bandar) = harga BERADA DI ATAS SMA(ACCUM_MA20_DAYS).
+        Validasi 963 saham: fresh cross (<=2d) lebih lemah (b10 36.4%) daripada
+        posisi sudah di atas (b10 51.9%) — konfirmasi = posisi, bukan momen cross.
+      - Syarat wajib: harga MASIH DI BAWAH level ARA (belum recovery). Saham yang
+        sudah di atas level ARA = fase recovery/distribusi — sinyal akumulasi
+        tidak bermakna (rec5/b5/b10 tinggi karena harga sudah di atas, pola tidak
+        membedakan dari kontrol).
+
+    Divalidasi walk-forward (963 saham IDX, 2026, _validate_accum3.py), sub-arm
+    yang MASIH DI BAWAH level ARA:
+      pola (density>=40%, min 2 heavy, close>=SMA20): rec5=48.7% b5=26.8%
+        b10=16.8% up1=34.0% (n=2958)
+      kontrol (density<40%): rec5=18.4% b5=9.6% b10=5.9% up1=26.5% (n=228459)
+      => pola akumulasi post-ARA memberi edge ~3x pada boom +10%/5d.
 
     Returns dict params jika tak ada sinyal akumulasi (valid=False).
     """
@@ -259,51 +276,126 @@ def detect_accumulation(bars: list) -> dict:
     volume = np.array([b.volume for b in bars], dtype=float)
 
     n = len(close)
-    need = config.ACCUM_RVOL_PERIOD + config.ACCUM_BELOW_LOOKBACK_DAYS
-    if n < need + 5:
+    if n < config.ACCUM_RVOL_PERIOD + config.ACCUM_MA20_DAYS + 5:
         return {"valid": False, "reason": "data terlalu pendek"}
 
     rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)
     heavy = rv >= config.ACCUM_HEAVY_RVOL
 
-    t = n - 1
-    lo = max(t - config.ACCUM_LOOKBACK_DAYS + 1, 0)
-    k = int(heavy[lo: t + 1].sum())
-    ref_idx = t - config.ACCUM_BELOW_LOOKBACK_DAYS
-    ref_price = float(close[ref_idx]) if ref_idx >= 0 else 0.0
-    price = float(close[t])
+    # SMA (posisi harga vs MA) — tanpa look-ahead
+    sma = np.full(n, np.nan)
+    if n >= config.ACCUM_MA20_DAYS:
+        cs = np.cumsum(np.concatenate(([0.0], close)))
+        sma[config.ACCUM_MA20_DAYS - 1:] = (
+            cs[config.ACCUM_MA20_DAYS:] - cs[:-config.ACCUM_MA20_DAYS]
+        ) / config.ACCUM_MA20_DAYS
 
-    below = ref_price > 0 and price < ref_price
-    if not below or k < config.ACCUM_MIN_HEAVY_DAYS:
+    # Cari ARA terakhir sebelum bar terakhir
+    t = n - 1
+    ara_idx = None
+    for i in range(t, 0, -1):
+        if close[i - 1] > 0 and close[i] >= close[i - 1] * (1.0 + config.ACCUM_ARA_RISE_PCT / 100.0):
+            ara_idx = i
+            break
+
+    if ara_idx is None:
         return {
             "valid": False,
-            "k_heavy": k,
-            "heavy_days": config.ACCUM_MIN_HEAVY_DAYS,
             "ready_to_fly": False,
-            "reason": "Belum pola akumulasi (kurang hari volume tinggi / sudah breakout).",
+            "reason": "Belum pernah ada ARA (+{}%) dalam history — tidak ada acuan distribusi.".format(
+                config.ACCUM_ARA_RISE_PCT),
         }
 
-    # Posisi relatif dalam jendela: berapa % di bawah level 5 hari lalu
-    dist_ref = (price - ref_price) / ref_price * 100.0
+    window = t - ara_idx  # hari trading setelah ARA (tanpa hari ARA itu sendiri)
+    if window < 1:
+        return {
+            "valid": False,
+            "ready_to_fly": False,
+            "k_heavy": int(heavy[t - 1:t + 1].sum()) if t >= 1 else 0,
+            "window_days": 0,
+            "density_pct": None,
+            "ara_date": str(bars[ara_idx].date)[:10],
+            "ara_ref_price": round(float(close[ara_idx]), 2),
+            "reason": "Hari ini hari ARA — belum ada jendela akumulasi.",
+        }
+
+    k = int(heavy[ara_idx + 1: t + 1].sum())
+    density_pct = k / window * 100.0
+
+    price = float(close[t])
+    above_ma = bool(np.isfinite(sma[t]) and price >= sma[t])
+    ma_price = float(sma[t]) if np.isfinite(sma[t]) else None
+
+    below = price < float(close[ara_idx])
+
+    dist_ara = (price - float(close[ara_idx])) / float(close[ara_idx]) * 100.0
+
+    ready = (
+        below
+        and density_pct >= config.ACCUM_DENSITY_PCT
+        and k >= config.ACCUM_MIN_HEAVY_DAYS
+        and above_ma
+    )
+
+    def _finite(v: float) -> float | None:
+        return float(v) if np.isfinite(v) else None
+
+    if not ready:
+        parts = []
+        if not below:
+            parts.append("harga SUDAH di atas level ARA (recovery/distribusi, bukan akumulasi)")
+        if density_pct < config.ACCUM_DENSITY_PCT or k < config.ACCUM_MIN_HEAVY_DAYS:
+            parts.append(f"kepadatan heavy {density_pct:.1f}% (min {config.ACCUM_DENSITY_PCT}%) "
+                         f"/ min {config.ACCUM_MIN_HEAVY_DAYS} hari")
+        if not above_ma:
+            parts.append(f"harga BELUM di atas SMA{config.ACCUM_MA20_DAYS}")
+        return {
+            "valid": False,
+            "ready_to_fly": False,
+            "k_heavy": k,
+            "window_days": window,
+            "density_pct": round(density_pct, 1),
+            "rvol": _finite(rv[t]),
+            "max_rvol": _finite(np.nanmax(rv[ara_idx + 1: t + 1])) if window else None,
+            "ara_date": str(bars[ara_idx].date)[:10],
+            "ara_ref_price": round(float(close[ara_idx]), 2),
+            "sma20": round(ma_price, 2) if ma_price is not None else None,
+            "state_ma20": "above" if above_ma else "below",
+            "distance_pct": round(dist_ara, 2),
+            "reason": "Belum pola akumulasi post-ARA — " + "; ".join(parts) + ".",
+        }
+
+    state_ma = "above"
+    if above_ma:
+        # deteksi fresh cross: salah satu dari 2 bar terakhir masih di bawah SMA
+        state_ma = "breakout" if (
+            (t - 1 >= 0 and np.isfinite(sma[t - 1]) and close[t - 1] < sma[t - 1])
+            or (t - 2 >= 0 and np.isfinite(sma[t - 2]) and close[t - 2] < sma[t - 2])
+        ) else "above"
 
     return {
         "valid": True,
         "ready_to_fly": True,
         "k_heavy": k,
-        "heavy_days": config.ACCUM_MIN_HEAVY_DAYS,
-        "lookback_days": config.ACCUM_LOOKBACK_DAYS,
-        "rvol": float(rv[t]) if np.isfinite(rv[t]) else None,
-        "below_lookback_days": config.ACCUM_BELOW_LOOKBACK_DAYS,
-        "ref_price": round(ref_price, 2),
-        "distance_pct": round(dist_ref, 2),
+        "window_days": window,
+        "density_pct": round(density_pct, 1),
+        "rvol": _finite(rv[t]),
+        "max_rvol": _finite(np.nanmax(rv[ara_idx + 1: t + 1])) if window else None,
+        "ara_date": str(bars[ara_idx].date)[:10],
+        "ara_ref_price": round(float(close[ara_idx]), 2),
+        "sma20": round(ma_price, 2) if ma_price is not None else None,
+        "state_ma20": state_ma,
+        "distance_pct": round(dist_ara, 2),
         "note": (
-f"{k} dari {config.ACCUM_LOOKBACK_DAYS} hari terakhir volume di atas "
-            f"{config.ACCUM_HEAVY_RVOL}x rata-rata (RVOL) sambil harga masih di bawah "
-            f"close {config.ACCUM_BELOW_LOOKBACK_DAYS} hari lalu = pola akumulasi -> "
-            f"probabilitas naik besar (breakout/pump) naik (validasi walk-forward)."
+            f"{k} dari {window} hari sejak ARA ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
+            f"= {bars[ara_idx].date}) volume di atas {config.ACCUM_HEAVY_RVOL}x rata-rata "
+            f"({config.ACCUM_DENSITY_PCT:.0f}% density) sambil harga masih DI BAWAH level "
+            f"ARA ({dist_ara:+.1f}%) dan di atas SMA{config.ACCUM_MA20_DAYS} = pola "
+            f"akumulasi post-ARA -> P(boom +10% dalam 5 hari) naik dari ~6% (kontrol) "
+            f"ke ~17% (validasi walk-forward 963 saham, hanya yang masih di bawah ARA)."
         ),
-        "warning": "Harga di bawah level acuan sambil volume terkonsentrasi (heavy) - "
-                   "risiko tinggi breakout, tapi juga volatil; patuhi exit plan.",
+        "warning": "Akumulasi post-ARA (harga belum recovery ke level ARA) + konfirmasi SMA20 "
+                   "— probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
     }
 
 
