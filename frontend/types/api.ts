@@ -164,6 +164,7 @@ export interface RecoveryVsLookback {
   ref_price: number
   distance_pct: number
   status: "above" | "below"
+  threshold_pct?: number | null
 }
 
 export interface RecoveryAccumulation {

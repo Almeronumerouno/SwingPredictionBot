@@ -531,12 +531,39 @@ def build_recovery_analysis(
         if ref <= 0:
             continue
         dist = (price - ref) / ref * 100.0
+
+        rets = []
+        for i in range(n, len(close)):
+            rets.append(close[i] / close[i - n] - 1.0)
+        
+        threshold_pct = None
+        if len(rets) > 1:
+            sigma_n = float(np.std(rets, ddof=1))
+            price_now = float(close[-1])
+            if price_now < 200:
+                cap = config.RECOVERY_AUTO_CAP_UNDER_200
+            elif price_now < 5000:
+                cap = config.RECOVERY_AUTO_CAP_200_TO_5000
+            else:
+                cap = config.RECOVERY_AUTO_CAP_AT_5000
+            
+            threshold_pct = round(
+                max(config.RECOVERY_AUTO_MIN, min(cap, config.RECOVERY_AUTO_SIGMA_MULT * sigma_n * 100.0)),
+                1,
+            )
+
+        if threshold_pct is not None:
+            status = "above" if dist >= -threshold_pct else "below"
+        else:
+            status = "above" if dist >= 0 else "below"
+
         lookbacks.append({
             "days": n,
             "label": config.RECOVERY_VS_LABELS.get(n, f"{n}D"),
             "ref_price": round(ref, 2),
             "distance_pct": round(dist, 2),
-            "status": "above" if dist >= 0 else "below",
+            "status": status,
+            "threshold_pct": threshold_pct,
         })
     base["vs_lookbacks"] = lookbacks
 

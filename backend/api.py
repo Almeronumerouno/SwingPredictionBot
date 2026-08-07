@@ -270,6 +270,7 @@ class RecoveryVsLookback(BaseModel):
     ref_price: float
     distance_pct: float
     status: str  # "above" = udah di atas harga acuan, "below" = masih di bawah
+    threshold_pct: float | None = None
 
 
 class RecoveryAccumulation(BaseModel):

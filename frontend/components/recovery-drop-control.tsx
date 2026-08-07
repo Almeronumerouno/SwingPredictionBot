@@ -1,13 +1,22 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function RecoveryDropControl({ kode, dropPct }: { kode: string; dropPct?: number }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<"auto" | "manual">(dropPct ? "manual" : "auto");
   const [drop, setDrop] = useState(dropPct ? String(dropPct) : "5");
+
+  useEffect(() => {
+    if (dropPct !== undefined) {
+      setMode("manual");
+      setDrop(String(dropPct));
+    } else {
+      setMode("auto");
+    }
+  }, [dropPct]);
 
   const apply = () => {
     const params = new URLSearchParams(searchParams.toString());

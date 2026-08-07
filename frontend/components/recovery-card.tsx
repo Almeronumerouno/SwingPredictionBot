@@ -1,4 +1,5 @@
 import type { RecoveryResponse } from "@/types/api";
+import RecoveryLookbackTiles from "./recovery-lookback-tiles";
 
 const fmtIdr = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -89,40 +90,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
 
             {/* Posisi vs Harga Acuan */}
             {data.vs_lookbacks && data.vs_lookbacks.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
-                  Posisi vs Harga Acuan — udah balik atau masih di bawah?
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {data.vs_lookbacks.map((v) => {
-                    const above = v.status === "above";
-                    return (
-                      <div
-                        key={v.days}
-                        className={`rounded-lg border p-3 ${above ? "border-emerald-200 bg-emerald-50/60" : "border-red-200 bg-red-50/60"}`}
-                      >
-                        <div className="flex items-center justify-between mb-1.5 gap-2">
-                          <span className="text-xs font-bold text-[var(--color-text-primary)]">{v.label}</span>
-                          <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${above ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
-                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {above ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                              )}
-                            </svg>
-                            {above ? "Udah di Atas" : "Masih di Bawah"}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-[var(--color-text-muted)] tabular-nums mb-1">Acuan {fmtIdr(v.ref_price)}</p>
-                        <p className={`text-sm font-bold tabular-nums ${above ? "text-emerald-600" : "text-red-500"}`}>
-                          {above ? "▲" : "▼"} {Math.abs(v.distance_pct).toFixed(2)}%
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <RecoveryLookbackTiles lookbacks={data.vs_lookbacks} />
             )}
 
             {/* Volume & Akumulasi */}
