@@ -60,12 +60,18 @@ def estimate_gbm_params(
     sigma_lookback: int = config.RECOVERY_SIGMA_LOOKBACK_DAYS,
 ) -> tuple[float, float]:
     """
-    Estimasi drift harian mu & vol harian sigma dari log-return.
+    Estimasi drift harian mu_log & vol harian sigma dari log-return.
 
-    mu   = mean(log-return mu_lookback terakhir) + 0.5*sigma^2  (drift GBM aritmetik)
+    mu_log = mean(log-return mu_lookback terakhir)   <- drift PROSES LOG-HARGA,
+        TANPA koreksi (audit #1): untuk GBM dS = mu_harga*S*dt + sigma*S*dW,
+        lemma Itô memberi d(ln S) = (mu_harga - 0.5*sigma^2)*dt + sigma*dW,
+        jadi mean(log_ret) ALREADY est. drift proses log-harga. Menambah
+        +0.5*sigma^2 (seperti versi lama) mengubahnya jadi drift harga
+        aritmetik — salah & over-optimis saat dipakai di first_passage_cdf.
     sigma = std(log-return sigma_lookback terakhir, ddof=1)
 
-    Returns (mu_daily, sigma_daily); (0.0, 0.0) jika data tidak cukup.
+    Returns (mu_daily_log, sigma_daily); (0.0, 0.0) jika data tidak cukup.
+    Gunakan `mu_arithmetic_daily()` untuk drift harga aritmetik (pelaporan).
     """
     close = np.asarray(close, dtype=float)
     valid = close[~np.isnan(close)]
@@ -82,11 +88,21 @@ def estimate_gbm_params(
         return 0.0, 0.0
 
     mu_window = log_ret[-mu_lookback:] if mu_lookback > 0 else log_ret
-    mu = float(np.mean(mu_window)) + 0.5 * sigma * sigma
-    if not np.isfinite(mu):
-        mu = 0.0
+    mu_log = float(np.mean(mu_window))
+    if not np.isfinite(mu_log):
+        mu_log = 0.0
 
-    return mu, sigma
+    return mu_log, sigma
+
+
+def mu_arithmetic_daily(mu_log: float, sigma: float) -> float:
+    """
+    Drift harga aritmetik (ekspektasi return harga per hari) dari drift
+    log-harga: mu_harga = mu_log + 0.5*sigma^2 (kebalikan koreksi Itô).
+    Dipakai HANYA untuk pelaporan (mu_daily/mu_annual ke user) — BUKAN
+    sebagai argumen drift di first_passage_cdf / p_hit_ever.
+    """
+    return mu_log + 0.5 * sigma * sigma
 
 
 # ---------------------------------------------------------------------------
@@ -223,12 +239,11 @@ def _build_exit_plan(price: float, ref_price: float) -> dict:
 
 def auto_drop_pct(sigma_daily: float, price: float) -> float:
     """
-    Threshold otomatis: 2.5 x sigma_daily, di-clamp floor 2% dan cap sesuai
-    tier harga saham (batas fluktuasi harian IDX / auto reject).
-
-    - harga < Rp 200       -> cap 30%   (IDX limit ±35%)
-    - Rp 200 - < Rp 5000   -> cap 18%   (IDX limit ±20%)
-    - harga >= Rp 5000     -> cap 13%   (IDX limit ±15%)
+    Threshold otomatis: 2.5 x sigma_daily, di-clamp floor 2% dan cap
+    mengikuti batas Auto Rejection BEI TERBARU (SK Kep-00003/BEI/04-2025):
+    ARB (batas turun) FLAT 15% untuk semua tier harga sejak April 2025.
+    Setup recovery berkaitan dengan PENURUNAN harga -> acuan = ARB, jadi
+    cap flat ~13% (margin di bawah 15%) untuk seluruh tier harga.
     """
     if price < 200:
         cap = config.RECOVERY_AUTO_CAP_UNDER_200
@@ -251,8 +266,13 @@ def detect_accumulation(bars: list) -> dict:
       - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) = hari melesat = puncak
         distribusi/dump. Hari ARA TIDAK dihitung sebagai hari akumulasi.
       - Setelah ARA, jendela akumulasi = SEMUA hari trading sejak ARA (dinamis,
-        bukan jendela tetap).
-      - Heavy = RVOL >= ACCUM_HEAVY_RVOL (vs rata2 ACCUM_RVOL_PERIOD hari sebelumnya).
+        bukan jendela tetap). Bila dalam <= ACCUM_RVOL_PERIOD hari muncul ARA kedua,
+        keduanya dianggap satu gelombang akumulasi (window di-anchor ke ARA pertama,
+        referensi harga = ARA terbaru/puncak).
+      - Heavy = volume >= ACCUM_HEAVY_RVOL x rata-rata volume ACCUM_RVOL_PERIOD hari
+        SEBELUM anchor ARA (baseline di-anchor pre-ARA, BUKAN rolling — biar lonjakan
+        volume hari ARA tidak ikut menaikkan baseline dan menyembunyikan akumulasi
+        ~20 hari pertama setelah ARA).
       - Sinyal terang = kepadatan heavy dalam jendela >= ACCUM_DENSITY_PCT dan
         minimal ACCUM_MIN_HEAVY_DAYS hari heavy.
       - Konfirmasi (versi bandar) = harga BERADA DI ATAS SMA(ACCUM_MA20_DAYS).
@@ -279,8 +299,7 @@ def detect_accumulation(bars: list) -> dict:
     if n < config.ACCUM_RVOL_PERIOD + config.ACCUM_MA20_DAYS + 5:
         return {"valid": False, "reason": "data terlalu pendek"}
 
-    rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)
-    heavy = rv >= config.ACCUM_HEAVY_RVOL
+    rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)  # rolling RVOL (utk display / max_rvol)
 
     # SMA (posisi harga vs MA) — tanpa look-ahead
     sma = np.full(n, np.nan)
@@ -290,13 +309,17 @@ def detect_accumulation(bars: list) -> dict:
             cs[config.ACCUM_MA20_DAYS:] - cs[:-config.ACCUM_MA20_DAYS]
         ) / config.ACCUM_MA20_DAYS
 
-    # Cari ARA terakhir sebelum bar terakhir
+    # Cari 2 ARA terakhir sebelum bar terakhir (ara_idx = terbaru, prev_ara_idx = sebelumnya)
     t = n - 1
     ara_idx = None
+    prev_ara_idx = None
     for i in range(t, 0, -1):
         if close[i - 1] > 0 and close[i] >= close[i - 1] * (1.0 + config.ACCUM_ARA_RISE_PCT / 100.0):
-            ara_idx = i
-            break
+            if ara_idx is None:
+                ara_idx = i
+            else:
+                prev_ara_idx = i
+                break
 
     if ara_idx is None:
         return {
@@ -306,7 +329,34 @@ def detect_accumulation(bars: list) -> dict:
                 config.ACCUM_ARA_RISE_PCT),
         }
 
-    window = t - ara_idx  # hari trading setelah ARA (tanpa hari ARA itu sendiri)
+    # Baseline volume "normal" DI-ANCHOR ke ACCUM_RVOL_PERIOD hari SEBELUM ARA (~1 bulan),
+    # bukan rolling yang ikut masuk volume hari ARA. Idenya: hari ARA = volume melonjak
+    # ekstrem; kalau dipakai di baseline, ~20 hari pertama setelah ARA volume "heavy"
+    # (>=2x) jadi paling-paling cuma ~1x => pola akumulasi langsung setelah ARA tidak
+    # pernah ke-detect. Dengan anchor pre-ARA, heavy = volume >= mult x rata2 normal.
+    # Multiple ARA: kalau ARA #2 terjadi dalam <= ACCUM_RVOL_PERIOD hari setelah ARA #1,
+    # dua-duanya milik pola akumulasi yang SAMA (bukan reset). Window di-anchor ke ARA #1
+    # supaya hari akumulasi di antara ARA #1 dan ARA #2 TIDAK dibuang; anti-look-ahead tetap
+    # terjaga karena anchor = ARA paling awal di "gelombang" terakhir. Referensi harga = tertinggi.
+    double_ara = prev_ara_idx is not None and (ara_idx - prev_ara_idx) <= config.ACCUM_RVOL_PERIOD
+    anchor_idx = prev_ara_idx if double_ara else ara_idx
+    ref_ara_idx = ara_idx  # harga acuan = ARA terbaru (puncak gelombang)
+
+    base_start = max(0, anchor_idx - config.ACCUM_RVOL_PERIOD)
+    pre_ara_avg = float(volume[base_start:anchor_idx].mean()) if anchor_idx > base_start else float("nan")
+    if np.isfinite(pre_ara_avg) and pre_ara_avg > 0:
+        heavy = volume >= config.ACCUM_HEAVY_RVOL * pre_ara_avg
+    else:
+        heavy = rv >= config.ACCUM_HEAVY_RVOL
+
+    ara_meta = {
+        "prev_ara_date": str(bars[prev_ara_idx].date)[:10] if prev_ara_idx is not None else None,
+        "prev_ara_ref_price": round(float(close[prev_ara_idx]), 2) if prev_ara_idx is not None else None,
+        "days_since_prev_ara": (ara_idx - prev_ara_idx) if prev_ara_idx is not None else None,
+        "double_ara": double_ara,
+    }
+
+    window = t - anchor_idx  # hari trading setelah ARA anchor (tanpa hari ARA itu sendiri)
     if window < 1:
         return {
             "valid": False,
@@ -316,26 +366,27 @@ def detect_accumulation(bars: list) -> dict:
             "density_pct": None,
             "ara_date": str(bars[ara_idx].date)[:10],
             "ara_ref_price": round(float(close[ara_idx]), 2),
+            "prev_ara_date": ara_meta["prev_ara_date"],
+            "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+            "double_ara": ara_meta["double_ara"],
             "reason": "Hari ini hari ARA — belum ada jendela akumulasi.",
         }
 
-    k = int(heavy[ara_idx + 1: t + 1].sum())
+    k = int(heavy[anchor_idx + 1: t + 1].sum())
     density_pct = k / window * 100.0
 
     price = float(close[t])
     above_ma = bool(np.isfinite(sma[t]) and price >= sma[t])
     ma_price = float(sma[t]) if np.isfinite(sma[t]) else None
 
-    below = price < float(close[ara_idx])
+    below = price < float(close[ref_ara_idx])
 
-    dist_ara = (price - float(close[ara_idx])) / float(close[ara_idx]) * 100.0
+    dist_ara = (price - float(close[ref_ara_idx])) / float(close[ref_ara_idx]) * 100.0
 
-    ready = (
-        below
-        and density_pct >= config.ACCUM_DENSITY_PCT
-        and k >= config.ACCUM_MIN_HEAVY_DAYS
-        and above_ma
-    )
+    density_ok = density_pct >= config.ACCUM_DENSITY_PCT
+    k_ok = k >= config.ACCUM_MIN_HEAVY_DAYS
+
+    ready = below and density_ok and k_ok and above_ma
 
     def _finite(v: float) -> float | None:
         return float(v) if np.isfinite(v) else None
@@ -344,7 +395,7 @@ def detect_accumulation(bars: list) -> dict:
         parts = []
         if not below:
             parts.append("harga SUDAH di atas level ARA (recovery/distribusi, bukan akumulasi)")
-        if density_pct < config.ACCUM_DENSITY_PCT or k < config.ACCUM_MIN_HEAVY_DAYS:
+        if not (density_ok and k_ok):
             parts.append(f"kepadatan heavy {density_pct:.1f}% (min {config.ACCUM_DENSITY_PCT}%) "
                          f"/ min {config.ACCUM_MIN_HEAVY_DAYS} hari")
         if not above_ma:
@@ -356,12 +407,18 @@ def detect_accumulation(bars: list) -> dict:
             "window_days": window,
             "density_pct": round(density_pct, 1),
             "rvol": _finite(rv[t]),
-            "max_rvol": _finite(np.nanmax(rv[ara_idx + 1: t + 1])) if window else None,
+            "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
             "ara_date": str(bars[ara_idx].date)[:10],
-            "ara_ref_price": round(float(close[ara_idx]), 2),
+            "ara_ref_price": round(float(close[ref_ara_idx]), 2),
+            "prev_ara_date": ara_meta["prev_ara_date"],
+            "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
+            "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+            "double_ara": double_ara,
             "sma20": round(ma_price, 2) if ma_price is not None else None,
             "state_ma20": "above" if above_ma else "below",
             "distance_pct": round(dist_ara, 2),
+            "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
+                      "above_ma": above_ma},
             "reason": "Belum pola akumulasi post-ARA — " + "; ".join(parts) + ".",
         }
 
@@ -380,17 +437,22 @@ def detect_accumulation(bars: list) -> dict:
         "window_days": window,
         "density_pct": round(density_pct, 1),
         "rvol": _finite(rv[t]),
-        "max_rvol": _finite(np.nanmax(rv[ara_idx + 1: t + 1])) if window else None,
+        "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
         "ara_date": str(bars[ara_idx].date)[:10],
-        "ara_ref_price": round(float(close[ara_idx]), 2),
+        "ara_ref_price": round(float(close[ref_ara_idx]), 2),
+        "prev_ara_date": ara_meta["prev_ara_date"],
+        "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
+        "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+        "double_ara": double_ara,
         "sma20": round(ma_price, 2) if ma_price is not None else None,
         "state_ma20": state_ma,
         "distance_pct": round(dist_ara, 2),
+        "gates": {"below": True, "density": True, "min_heavy": True, "above_ma": True},
         "note": (
             f"{k} dari {window} hari sejak ARA ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
-            f"= {bars[ara_idx].date}) volume di atas {config.ACCUM_HEAVY_RVOL}x rata-rata "
-            f"({config.ACCUM_DENSITY_PCT:.0f}% density) sambil harga masih DI BAWAH level "
-            f"ARA ({dist_ara:+.1f}%) dan di atas SMA{config.ACCUM_MA20_DAYS} = pola "
+            f"= {bars[ara_idx].date}) volume di atas {config.ACCUM_HEAVY_RVOL}x normal "
+            f"pre-ARA ({config.ACCUM_DENSITY_PCT:.0f}% density) sambil harga masih DI BAWAH "
+            f"level ARA ({dist_ara:+.1f}%) dan di atas SMA{config.ACCUM_MA20_DAYS} = pola "
             f"akumulasi post-ARA -> P(boom +10% dalam 5 hari) naik dari ~6% (kontrol) "
             f"ke ~17% (validasi walk-forward 963 saham, hanya yang masih di bawah ARA)."
         ),
@@ -409,6 +471,7 @@ def build_recovery_analysis(
     bars: list,
     drop_pct: float = config.RECOVERY_DROP_DEFAULT,
     last_updated: Optional[str] = None,
+    ref_days: Optional[int] = None,
 ) -> dict:
     """
     Analisis recovery ke previous close untuk satu saham.
@@ -419,6 +482,8 @@ def build_recovery_analysis(
         bars: list DailyBar (dari data_source.yahoo_client), urut lama->baru
         drop_pct: threshold drop X%; None = otomatis dari volatilitas saham
         last_updated: tanggal data terakhir (fallback ke bar terakhir)
+        ref_days: target acuan recovery dalam hari trading (1 = previous
+            close); None = previous close (close[-2], status quo)
 
     Returns:
         dict sesuai struktur RecoveryResponse di api.py
@@ -433,6 +498,7 @@ def build_recovery_analysis(
         "last_updated": last_updated or (bars[-1].date if bars else ""),
         "harga": float(close[-1]) if len(close) else 0.0,
         "ref_price": float(close[-2]) if len(close) > 1 else 0.0,
+        "ref_days": ref_days,
         "distance_pct": None,
         "drop_pct": drop_pct,
         "drop_source": "manual",
@@ -453,7 +519,18 @@ def build_recovery_analysis(
         )
         return base
 
-    # Auto-drop: threshold = 2.5 x sigma_daily, clamp 2%..cap(tier harga IDX)
+    if ref_days is not None:
+        if ref_days < 1:
+            base["signal_reason"] = "ref_days harus >= 1."
+            return base
+        if len(close) <= ref_days:
+            base["signal_reason"] = (
+                f"Data historis cuma {len(close)} bar, tidak cukup untuk acuan "
+                f"{ref_days} hari."
+            )
+            return base
+
+    # Auto-drop: threshold = 2.5 x sigma_daily, clamp 2%..cap 13% (flat — ARB flat 15%)
     params = None
     if drop_pct is None:
         params = estimate_gbm_params(close)
@@ -464,9 +541,13 @@ def build_recovery_analysis(
     base["drop_pct"] = drop_pct
 
     price = float(close[-1])
-    ref_price = float(close[-2])
+    if ref_days is not None:
+        ref_price = float(close[-1 - ref_days])
+    else:
+        ref_price = float(close[-2])
+    base["ref_price"] = ref_price
     if ref_price <= 0:
-        base["signal_reason"] = "Previous close tidak valid."
+        base["signal_reason"] = "Harga acuan tidak valid."
         return base
 
     distance_pct = (price - ref_price) / ref_price * 100.0
@@ -480,16 +561,20 @@ def build_recovery_analysis(
 
     if price < ref_price:
         a = math.log(ref_price / price)
-        mu, sigma = params if params else estimate_gbm_params(close)
+        # audit #1: estimate_gbm_params kini mengembalikan drift PROSES LOG-HARGA
+        # (mu_log). first_passage_cdf/p_hit_ever butuh drift proses LOG-harga,
+        # jadi pakai mu_log apa adanya — jangan tambah +0.5*sigma^2 (koreksi Itô).
+        mu_log, sigma = params if params else estimate_gbm_params(close)
+        mu_arith = mu_arithmetic_daily(mu_log, sigma)
         probs = [
-            {"horizon_days": h, "p_hit": round(first_passage_cdf(a, mu, sigma, h), 3)}
+            {"horizon_days": h, "p_hit": round(first_passage_cdf(a, mu_log, sigma, h), 3)}
             for h in config.RECOVERY_HORIZONS_DAYS
         ]
-        ever = p_hit_ever(mu, sigma, a)
+        ever = p_hit_ever(mu_log, sigma, a)
         base["gbm"] = {
-            "mu_daily": round(mu, 6),
+            "mu_daily": round(mu_arith, 6),
             "sigma_daily": round(sigma, 6),
-            "mu_annual": round(mu * 252, 4),
+            "mu_annual": round(mu_arith * 252, 4),
             "sigma_annual": round(sigma * math.sqrt(252), 4),
             "p_hit_ever": round(ever, 3),
             "probabilities": probs,
@@ -501,8 +586,9 @@ def build_recovery_analysis(
             (e for e in base["empirical"] if e["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
             None,
         )
-        # Walk-forward (5 saham IDX, 35 event) menunjukkan GBM under-predict;
-        # base rate empiris saham tsb lebih representatif saat sampel cukup.
+        # Base rate empiris saham tsb lebih representatif saat sampel cukup;
+        # fallback GBM (drift log diestimasi benar — audit #1) terkalibrasi,
+        # jadi tidak ada lagi bias sistematis over-optimis dari +0.5*sigma^2.
         if emp_signal and emp_signal["n_events"] >= 5 and emp_signal["rate"] is not None:
             p_signal = emp_signal["rate"]
             basis = f"empiris {emp_signal['n_events']} event historis"
@@ -552,10 +638,7 @@ def build_recovery_analysis(
                 1,
             )
 
-        if threshold_pct is not None:
-            status = "above" if dist >= -threshold_pct else "below"
-        else:
-            status = "above" if dist >= 0 else "below"
+        status = "above" if dist >= 0 else "below"
 
         lookbacks.append({
             "days": n,

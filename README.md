@@ -1,4 +1,4 @@
-# Swing Bot IDX — Swing Trading Signal System
+# Swingbot IDX — Swing Trading Signal System
 
 Swing trading signal generator untuk Bursa Efek Indonesia (IDX). Data dari IDX langsung (1 call = seluruh pasar), indikator teknis Wilder-class, scoring 4 komponen dengan ADX gating.
 
@@ -93,7 +93,7 @@ curl "http://localhost:8000/recovery/BBCA?drop_pct=5"
 python _validate_recovery.py BBCA BMRI BBRI ASII TLKM --drop 5 --length 800
 ```
 
-Frontend: card "Mean Reversion / Recovery" di halaman detail saham + kontrol Recovery Setup (mode **Otomatis** = 2.5× σ_daily, clamp 2%–30% mengikuti tier harga IDX: <200→30%, 200-5000→18%, ≥5000→13%; atau **Manual** lewat `?drop_pct=`).
+Frontend: card "Mean Reversion / Recovery" di halaman detail saham + kontrol Recovery Setup (mode **Otomatis** = 2.5× σ_daily, clamp 2%–13% flat semua tier — ARB flat 15% sejak April 2025; atau **Manual** lewat `?drop_pct=`).
 
 ### Fase 5 Checklist
 

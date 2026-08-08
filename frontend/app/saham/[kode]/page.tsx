@@ -37,7 +37,7 @@ export default async function SahamPage({
   searchParams,
 }: {
   params: Promise<{ kode: string }>;
-  searchParams: Promise<{ capital?: string; length?: string; date?: string; drop_pct?: string }>;
+  searchParams: Promise<{ capital?: string; length?: string; date?: string; drop_pct?: string; ref_days?: string }>;
 }) {
   const { kode } = await params;
   const sp = await searchParams;
@@ -56,7 +56,12 @@ export default async function SahamPage({
   }
 
   try {
-    recovery = await fetchRecovery(kode, sp.drop_pct ? Number(sp.drop_pct) : undefined, sp.date);
+    recovery = await fetchRecovery(
+      kode,
+      sp.drop_pct ? Number(sp.drop_pct) : undefined,
+      sp.date,
+      sp.ref_days ? Number(sp.ref_days) : undefined,
+    );
   } catch {
     recovery = null;
   }

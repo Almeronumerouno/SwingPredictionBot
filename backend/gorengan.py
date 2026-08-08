@@ -40,15 +40,21 @@ import config as CFG
 # ---------------------------------------------------------------------------
 
 def _zscore(arr: np.ndarray, lookback: int = 60) -> float:
+    """
+    Z-score observasi TERAKHIR terhadap baseline `lookback` observasi
+    SEBELUMNYA (audit #12: konsisten dengan konvensi `indicators.rvol()`
+    yang mengecualikan hari berjalan — menghindari self-referencing di mana
+    nilai ekstrem menarik mean/std baseline ke arah dirinya sendiri dan
+    meredam skor anomali).
+    """
     valid = arr[~np.isnan(arr)]
-    if len(valid) < lookback:
-        valid = valid
-    else:
-        valid = valid[-lookback:]
-    if len(valid) < 10:
+    if len(valid) < 11:
         return 0.0
-    mu = np.mean(valid)
-    sigma = np.std(valid, ddof=1)
+    baseline = valid[-lookback:-1] if len(valid) > lookback else valid[:-1]
+    if len(baseline) < 10:
+        return 0.0
+    mu = np.mean(baseline)
+    sigma = np.std(baseline, ddof=1)
     if sigma == 0:
         return 0.0
     return float((valid[-1] - mu) / sigma)

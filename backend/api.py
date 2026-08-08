@@ -19,6 +19,7 @@ import risk
 import scoring
 import gorengan
 import recovery
+import short_selling
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
 from data_source.idx_trading import IdxTradingError
@@ -50,81 +51,7 @@ class TradePlanResponse(BaseModel):
     shares: int
     lots: int
     risk_reward_ratio: float | None
-    note: str | None = None
-
-
-class HistoryBar(BaseModel):
-    date: str
-    close: float
-    open: float
-    high: float
-    low: float
-    volume: float
-
-
-class GainerEntryResponse(BaseModel):
-    code: str
-    name: str
-    close: float
-    pct_change: float
-    volume: float
-    value: float
-    frequency: float
-    foreign_buy: float
-    foreign_sell: float
-    swing_score: float | None = None
-    recommendation: str | None = None
-    gorengan_score: float | None = None
-    gorengan_level: str | None = None
-
-
-class GainersResponse(BaseModel):
-    scraped_at: str
-    date: str
-    count: int
-    data: list[GainerEntryResponse]
-
-
-class RawIndicatorsResponse(BaseModel):
-    rsi: float | None
-    mfi: float | None
-    atr: float | None
-    adx: float | None
-    plus_di: float | None
-    minus_di: float | None
-    ema_fast: float | None
-    ema_slow: float | None
-    rvol: float | None
-from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
-from data_source.idx_trading import IdxTradingError
-from data_source.yahoo_client import YahooClientError, fetch_trading_info
-
-class InsufficientDataError(Exception):
-    """Data historis kurang dari HISTORY_LOOKBACK_DAYS."""
-
-
-# ---------------------------------------------------------------------------
-# Pydantic models
-# ---------------------------------------------------------------------------
-
-class ScoreResponse(BaseModel):
-    valid: bool
-    swing_score: float | None
-    components: dict | None
-    recommendation: str | None
-    confidence: str | None
-    risk_level: str | None
-    regime: str | None = None
-
-
-class TradePlanResponse(BaseModel):
-    direction: str
-    entry: float
-    stop_loss: float
-    take_profit: float
-    shares: int
-    lots: int
-    risk_reward_ratio: float | None
+    risk_per_trade_pct: float | None = None
     note: str | None = None
 
 
@@ -283,6 +210,11 @@ class RecoveryAccumulation(BaseModel):
     max_rvol: float | None = None
     ara_date: str | None = None
     ara_ref_price: float | None = None
+    prev_ara_date: str | None = None
+    prev_ara_ref_price: float | None = None
+    days_since_prev_ara: int | None = None
+    double_ara: bool = False
+    gates: dict | None = None
     sma20: float | None = None
     state_ma20: str | None = None  # "above" | "breakout" | "below"
     distance_pct: float | None = None
@@ -297,6 +229,7 @@ class RecoveryResponse(BaseModel):
     valid: bool
     harga: float | None
     ref_price: float | None
+    ref_days: int | None = None
     last_updated: str
     distance_pct: float | None
     drop_pct: float
@@ -413,6 +346,22 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
 
     score_result = scoring.compute_score(score_input)
 
+    # ── Audit fix #2: filter kelayakan short selling (BEI) untuk SELL ──
+    # Sinyal SELL = entry short hanya legal utk saham dalam Daftar Efek Short
+    # Selling BEI (direview tiap bulan). Di luar daftar, SELL hanya sinyal
+    # EXIT dari posisi long yang sudah ada — bukan entry short baru.
+    short_gate_note = None
+    if (
+        score_result["valid"]
+        and score_result["recommendation"] == "SELL"
+        and config.SHORT_SELLING_ENFORCE
+        and not short_selling.is_short_selling_eligible(kode)
+    ):
+        st = short_selling.short_selling_status(kode)
+        score_result = dict(score_result)
+        score_result["recommendation"] = "HOLD"
+        short_gate_note = f"{kode}: {st['note']}"
+
     # Gorengan detection
     gor_result = gorengan.compute_gorengan(
         close=close, open_=open_, high=high, low=low, volume=volume,
@@ -502,6 +451,19 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         "pattern_candles": pattern_candles
     }
 
+    # ── Catatan validasi gabungan (audit fix #2 & #9) ──
+    notes = [
+        (
+            "BUY direkomendasikan hanya saat regime bull/sideways."
+            " Harga acuan trade plan adalah harga PADA SAAT sinyal dihasilkan"
+            " (close bar terakhir) — eksekusi realistis paling cepat di harga"
+            " pembukaan hari berikutnya, jadi harga eksekusi aktual bisa"
+            " berbeda dari entry_price yang ditampilkan."
+        ),
+    ]
+    if short_gate_note:
+        notes.append(short_gate_note)
+
     return {
         "kode": kode,
         "harga": float(close[-1]),
@@ -514,10 +476,7 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         "capital_used": capital,
         "gorengan": gor_result,
         "buy_signal_validated": config.SWING_BUY_VALIDATED,
-        "validation_note": (
-            "BUY direkomendasikan hanya saat regime bull/sideways."
-            " SELL bersifat advisory (long-only mode aktif)."
-        ),
+        "validation_note": " ".join(notes),
     }
 
 
@@ -555,7 +514,7 @@ def _market_is_open() -> bool:
 # App
 # ---------------------------------------------------------------------------
 
-app = FastAPI(title="Swing Bot IDX API", version="0.1.0")
+app = FastAPI(title="Swingbot IDX API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -722,13 +681,15 @@ def get_recovery(
     kode: str,
     drop_pct: float | None = Query(None, gt=0, le=50),
     date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    ref_days: int | None = Query(None, ge=1, le=252),
 ):
     """
-    Probabilitas harga kembali ke previous close (mean reversion).
+    Probabilitas harga kembali ke harga acuan (default previous close).
 
     Model GBM first-passage time (CDF Inverse Gaussian) + base rate empiris
     dari history saham. drop_pct None = otomatis dari volatilitas saham.
-    Hanya relevan saat harga di bawah previous close.
+    ref_days = target acuan dalam hari trading (1 = previous close).
+    Hanya relevan saat harga di bawah harga acuan.
     """
     kode = kode.strip().upper()
 
@@ -748,7 +709,7 @@ def get_recovery(
             detail=f"Gagal ambil data untuk {kode}: {e}",
         )
 
-    return recovery.build_recovery_analysis(kode, sec.name, bars, drop_pct=drop_pct)
+    return recovery.build_recovery_analysis(kode, sec.name, bars, drop_pct=drop_pct, ref_days=ref_days)
 
 
 @app.post("/scrape/gorengan")

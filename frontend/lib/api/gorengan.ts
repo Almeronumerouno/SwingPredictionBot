@@ -1,6 +1,10 @@
 import type { GorenganScannerResponse } from "@/types/api"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const RAW_API_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL
+  || process.env.API_BASE_URL
+  || "http://localhost:8000";
+const API_URL = RAW_API_URL.replace(/\/api\/?$/, "")
 
 export async function fetchGorengan(date?: string): Promise<GorenganScannerResponse> {
   const url = new URL(`${API_URL}/gorengan`)
@@ -23,7 +27,7 @@ export async function fetchGorengan(date?: string): Promise<GorenganScannerRespo
     try {
       const errData = await res.json()
       errorDetail = errData.detail || errorDetail
-    } catch (e) {
+    } catch {
       // Ignore JSON parse error if response is not JSON
     }
     throw new Error(errorDetail)
@@ -50,7 +54,9 @@ export async function triggerScrapeGorengan(date?: string) {
     try {
       const errData = await res.json()
       errorDetail = errData.detail || errorDetail
-    } catch (e) {}
+    } catch {
+      // Ignore JSON parse error if response is not JSON
+    }
     throw new Error(errorDetail)
   }
 

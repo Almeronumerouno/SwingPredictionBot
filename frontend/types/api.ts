@@ -43,6 +43,7 @@ export interface TradePlanResponse {
   shares: number
   lots: number
   risk_reward_ratio: number | null
+  risk_per_trade_pct?: number | null
   note: string | null
 }
 
@@ -177,6 +178,11 @@ export interface RecoveryAccumulation {
   max_rvol: number | null
   ara_date: string | null
   ara_ref_price: number | null
+  prev_ara_date?: string | null
+  prev_ara_ref_price?: number | null
+  days_since_prev_ara?: number | null
+  double_ara?: boolean
+  gates?: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean } | null
   sma20: number | null
   state_ma20: "above" | "breakout" | "below" | null
   distance_pct: number | null
@@ -191,6 +197,7 @@ export interface RecoveryResponse {
   valid: boolean
   harga: number | null
   ref_price: number | null
+  ref_days: number | null
   last_updated: string
   distance_pct: number | null
   drop_pct: number

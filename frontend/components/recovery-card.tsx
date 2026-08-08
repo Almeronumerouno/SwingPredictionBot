@@ -30,6 +30,7 @@ function pctBar(p: number): { bar: string; text: string; label: string } {
 export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
   const cfg = signalConfig[data.signal] || signalConfig.NO_SETUP;
   const belowRef = data.distance_pct != null && data.distance_pct < 0;
+  const refLabel = data.ref_days ? `${HORIZON_LABELS[data.ref_days] || `${data.ref_days} Hari`}` : "Previous Close";
 
   return (
     <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden mb-8">
@@ -43,7 +44,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
           </div>
           <div>
             <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Mean Reversion / Recovery</h2>
-            <p className="text-xs text-[var(--color-text-muted)]">Peluang kembali ke previous close (1D - 3M)</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Peluang kembali ke harga acuan terpilih</p>
           </div>
         </div>
         <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
@@ -63,7 +64,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
                 <p className="text-lg font-bold tabular-nums text-[var(--color-text-primary)]">{fmtIdr(data.harga ?? 0)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Previous Close</p>
+                <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Harga Acuan ({refLabel})</p>
                 <p className="text-lg font-bold tabular-nums text-[var(--color-text-primary)]">{fmtIdr(data.ref_price ?? 0)}</p>
               </div>
               <div>

@@ -63,7 +63,8 @@ def _events_for_code(code: str, length: int, ara_pct: float, min_heavy: int,
         sma[ma_days - 1:] = (cs[ma_days:] - cs[:-ma_days]) / ma_days
 
     rows: list[dict] = []
-    last_ara: int | None = None  # indeks ARA terbaru yang sudah terlihat (di <= t)
+    last_ara: int | None = None  # indeks ARA terbaru yang sudah terlihat (di <= i)
+    heavy_anchor: int | None = None  # anchor yang dipakai utk heavy terakhir
 
     for i in range(1, n):
         if close[i - 1] > 0 and close[i] >= close[i - 1] * (1.0 + ara_pct / 100.0):
@@ -79,6 +80,18 @@ def _events_for_code(code: str, length: int, ara_pct: float, min_heavy: int,
         if a >= i:
             continue
         window = i - a  # hari trading SETELAH ARA .. i (tanpa hari ARA itu sendiri)
+
+        # Baseline volume "normal" DI-ANCHOR ke 20 hari SEBELUM ARA (sama dengan
+        # recovery.detect_accumulation): volume hari ARA tidak boleh ikut menaikkan
+        # baseline, kalau tidak heavy post-ARA ~20 hari pertama tidak pernah ke-detect.
+        if a != heavy_anchor:
+            base_start = max(0, a - 20)
+            pre_ara_avg = float(volume[base_start:a].mean()) if a > base_start else float("nan")
+            if np.isfinite(pre_ara_avg) and pre_ara_avg > 0:
+                heavy = volume >= heavy_mult * pre_ara_avg
+            else:
+                heavy = rv >= heavy_mult
+            heavy_anchor = a
         heavy_cnt = int(heavy[a + 1: i + 1].sum())
         density = heavy_cnt / window
 

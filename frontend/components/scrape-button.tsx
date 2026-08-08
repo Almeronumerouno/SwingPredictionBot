@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { triggerScrape } from "@/lib/api/scrape";
 
 type Toast = { message: string; type: "success" | "error" } | null;
 
 function ToastNotification({ toast, onDone }: { toast: NonNullable<Toast>; onDone: () => void }) {
-  setTimeout(onDone, 4000);
+  useEffect(() => {
+    const timer = setTimeout(onDone, 4000);
+    return () => clearTimeout(timer);
+  }, [onDone]);
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in">
@@ -51,6 +54,14 @@ function MarketChoiceModal({
 
   const today = new Date().toISOString().slice(0, 10);
   const isPastDate = Boolean(globalDate && globalDate !== today);
+
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !loading) onCancel();
+    }
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [loading, onCancel]);
 
   function handleBack() {
     setStep("choose");

@@ -4,7 +4,7 @@ import Sidebar from "@/components/sidebar";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "Swingbot — Analisis Teknikal IDX",
+  title: "Swingbot IDX — Analisis Teknikal",
   description: "Swing trading signal generator untuk Bursa Efek Indonesia",
   icons: { icon: "/logo.png" },
 };

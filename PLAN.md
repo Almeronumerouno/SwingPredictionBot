@@ -1,4 +1,4 @@
-# Swing Bot IDX — Execution Plan v0.3.0
+# Swingbot IDX — Execution Plan v0.3.0
 
 ## Ringkasan
 

@@ -1,6 +1,6 @@
-# Swing Bot IDX — Frontend Dashboard
+# Swingbot IDX — Frontend Dashboard
 
-Next.js 16 dashboard untuk Swing Bot IDX API.
+Next.js 16 dashboard untuk Swingbot IDX API.
 
 ## Pages
 

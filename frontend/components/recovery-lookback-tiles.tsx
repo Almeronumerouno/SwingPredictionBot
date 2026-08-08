@@ -15,14 +15,13 @@ export default function RecoveryLookbackTiles({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentDropPct = searchParams.get("drop_pct");
-  const parsedCurrentDropPct = currentDropPct ? parseFloat(currentDropPct) : null;
+  const currentRefDays = searchParams.get("ref_days");
+  const parsedCurrentRefDays = currentRefDays ? parseInt(currentRefDays, 10) : null;
 
-  const handleClick = (distancePct: number) => {
-    const absDist = Math.abs(distancePct).toFixed(2);
+  const handleClick = (days: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("drop_pct", absDist);
-    router.replace(`${pathname}?${params.toString()}`);
+    params.set("ref_days", String(days));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -34,12 +33,12 @@ export default function RecoveryLookbackTiles({
         {lookbacks.map((v) => {
           const above = v.status === "above";
           const absDist = Math.abs(v.distance_pct);
-          const isActive = parsedCurrentDropPct !== null && Math.abs(parsedCurrentDropPct - absDist) < 0.05;
-          
+          const isActive = parsedCurrentRefDays !== null && parsedCurrentRefDays === v.days;
+
           return (
             <button
               key={v.days}
-              onClick={() => handleClick(v.distance_pct)}
+              onClick={() => handleClick(v.days)}
               aria-pressed={isActive}
               className={`text-left w-full rounded-lg border p-3 transition-all ${
                 above ? "border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/60" : "border-red-200 bg-red-50/60 hover:bg-red-100/60"

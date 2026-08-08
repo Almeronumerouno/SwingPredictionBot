@@ -23,6 +23,11 @@
   --color-up: var(--color-green);
   --color-down: #DC2626;
   --color-muted-bg: #F2F3F4;
+
+  /* Motion tokens — dropdown/panels use base + ease-out */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -94,4 +99,80 @@ input, select, button {
 }
 .animate-scale-in {
   animation: scale-in 0.25s ease-out;
+}
+
+/* Search history dropdown — pop-out: fade + scale with subtle one-bounce overshoot */
+@keyframes dropdown-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.92);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(1px) scale(1.02);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-dropdown-in {
+  animation: dropdown-in 260ms var(--ease-out);
+  transform-origin: top center;
+}
+
+/* Dropdown exit — faster than enter (~55%), ease-in per motion rules */
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+.animate-dropdown-exit {
+  animation: dropdown-out 140ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  transform-origin: top center;
+}
+
+/* Dropdown header fades in first, before the staggered items */
+@keyframes dropdown-header-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-dropdown-header {
+  animation: dropdown-header-in var(--duration-fast) var(--ease-out) both;
+}
+
+/* Search history item stagger (30ms per sibling) */
+@keyframes history-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-history-item {
+  animation: history-item-in 220ms var(--ease-out) both;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-dropdown-in,
+  .animate-dropdown-exit,
+  .animate-dropdown-header,
+  .animate-history-item {
+    animation: none !important;
+  }
 }

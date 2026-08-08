@@ -3,8 +3,8 @@
 | Item | Detail |
 |------|--------|
 | **Modul** | `backend/risk.py` |
-| **Versi** | v0.3.0-wip |
-| **Last Updated** | 27 Juli 2026 |
+| **Versi** | v0.4.0-wip |
+| **Last Updated** | 7 Agustus 2026 |
 
 ## 1. Ringkasan
 
@@ -14,9 +14,9 @@ Layer risk management menghitung Stop Loss, Take Profit, dan position sizing ber
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Position sizing | 100% dari capital input user | Capital-based (frontend CapitalControl handle input) |
-| Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
-| Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 |
+| Position sizing | **Risk-based** (bukan full deploy) | `risk_budget = capital × 1% × regime_mult` |
+| Risk per trade | Bull **1.0%**, Sideways **0.5%**, Bear **0.25%** | Risk budget per regime = `RISK_PER_TRADE_PCT × position_pct` |
+| Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 (× 0.8 jika risk tinggi) |
 | Take Profit | entry ± ATR × **3.0** | v0.3.0: dinaikkan dari 2.5 (R:R 1:1) |
 | Breakeven trigger | entry + ATR × **1.0** | Saat profit 1 ATR, SL pindah ke entry |
 | Lot size | 100 lembar | Konvensi IDX |
@@ -32,20 +32,26 @@ if risk_level == "tinggi":
 
 ## 3. Position Sizing Logic
 
-Kode menggunakan 100% dari capital yang di-input user. Ini sengaja — frontend CapitalControl sudah memberikan kendali penuh ke user, backend tidak perlu memotong lagi.
+**v0.4.0:** Risk-based sizing menggantikan full-deployment. Ukuran posisi ditentukan agar **max loss saat kena stop = risk budget**, bukan "deploy semua modal". Regime multiplier (`profile.position_pct`, single source of truth dari `regime.py`) dipakai sebagai risk multiplier:
+
+- **Bull**: risk budget = capital × 1% × **1.0** = 1.0% modal
+- **Sideways**: capital × 1% × **0.5** = 0.5% modal
+- **Bear**: capital × 1% × **0.25** = 0.25% modal
+
+Saat ATR lebar (stop jauh), risk budget otomatis memaksa posisi kecil — bukan full deploy. Safety net: posisi tidak boleh melebihi `capital × regime_mult` (no leverage).
 
 ```python
-cost_per_lot = entry_price * 100  # 1 lot = 100 lembar
-for deploy_pct in (1.0,):         # 100% modal
-    max_lots = int((capital * deploy_pct) // cost_per_lot)
-    if max_lots >= 1:
-        shares = max_lots * 100
-        risk_pct = (per_share_risk * shares) / capital
-        if risk_pct > 1%:
-            note = f"Risiko: Rp {risk_amt:,} ({risk_pct*100:.1f}%)"
-        return shares, note
-return 0, None  # Tidak cukup modal untuk 1 lot
+per_share_risk = abs(entry - stop_loss)
+deploy_capital = capital * regime_mult            # capital dialokasikan
+risk_budget = deploy_capital * risk_pct           # e.g. 10jt × 1% = 100rb
+lots = int(risk_budget / per_share_risk) // 100   # floor ke lot
+# cap: tidak boleh > capital × regime_mult / entry (no leverage)
+shares = lots * 100
 ```
+
+Contoh: modal 10jt, entry @1.000, SL @970 (risk/share 30) → Bull: 100.000/30 = 33 lot = 0.99% modal at risk. Dengan sizing lama (full deploy) saham ini masuk 100 lot = 300.000 risk (3%).
+
+Formulanya identik di `risk.py` (live) dan `backtest.py:_calc_shares_by_risk` (validation) sehingga live == backtest.
 
 ## 4. Trade Plan Output
 
@@ -55,10 +61,11 @@ return 0, None  # Tidak cukup modal untuk 1 lot
 | `entry` | float | Harga entry (close terakhir) |
 | `stop_loss` | float | entry ± ATR × 3.0 (× 0.8 jika risk tinggi) |
 | `take_profit` | float | entry ± ATR × 3.0 |
-| `shares` | int | Jumlah lembar (kelipatan 100) — 0 jika SELL + long-only |
+| `shares` | int | Jumlah lembar (kelipatan 100) — 0 jika tidak cukup untuk 1 lot |
 | `lots` | int | shares / 100 |
-| `risk_reward_ratio` | float | reward / risk (1.0) |
-| `note` | string | Peringatan jika risiko > 1% modal, atau mode long-only aktif |
+| `risk_reward_ratio` | float | reward / risk (1:1) |
+| `risk_per_trade_pct` | float \| None | **BARU v0.4.0** — actual risk % dari modal (di frontend tampil sebagai "Risiko per Trade") |
+| `note` | string | Ringkasan risiko aktual (dari `risk.py`) |
 
 ## 5. Long-Only Mode
 
@@ -95,13 +102,13 @@ Begitu harga menyentuh entry + 1.0 ATR, SL otomatis dipindah ke entry price.
 
 ## 7. Sprint 3 — Regime-Dependent Position Sizing
 
-Setelah base sizing direkonsiliasi (Sprint 2), sizing bervariasi per regime:
+Setelah base sizing direkonsiliasi (Sprint 2), sizing bervariasi per regime. **v0.4.0:** regime multiplier sekarang **risk multiplier** (bukan position multiplier):
 
-| Regime | Position Size |
-|--------|:------------:|
-| Bull | 100% |
-| Sideways | 50% |
-| Bear | 25% |
+| Regime | Risk per Trade | Posisi saat SL 3% |
+|--------|:------------:|:-----------------:|
+| Bull | 1.0% | ~1/3 modal |
+| Sideways | 0.5% | ~1/6 modal |
+| Bear | 0.25% | ~1/12 modal |
 
 ## 8. Roadmap Sprint (S1-S4)
 

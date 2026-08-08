@@ -113,27 +113,39 @@ def rsi(close: np.ndarray, period: int = 14) -> np.ndarray:
     RSI Wilder. RS = avg_gain/avg_loss (Wilder-smoothed), RSI = 100 - 100/(1+RS).
     Edge case: avg_loss == 0 dan avg_gain > 0 -> RSI = 100 (bukan div-by-zero).
     avg_loss == 0 dan avg_gain == 0 (harga flat total) -> RSI = 50 (netral).
+
+    AUDIT #9 (seeding bias): versi lama memakai `np.diff(close, prepend=close[0])`
+    yang menyisipkan delta[0]=0 PALSU, lalu seed wilder_rma menghitung
+    mean(values[0:period]) — berarti seed hanya dari (period-1) delta asli
+    + 1 nol. Sekarang delta dihitung TANPA padding (panjang n-1, semua asli),
+    seed wilder_rma berisi `period` delta asli (baris bar ke-i = delta[i-1]).
+    Bar RSI pertama yang benar secara konvensi Wilder = index `period`
+    (butuh 14 delta = 15 bar harga).
     """
     close = np.asarray(close, dtype=float)
-    delta = np.diff(close, prepend=close[0])
+    n = len(close)
+    out = np.full(n, np.nan)
+    if n < period + 1:
+        return out
+
+    delta = np.diff(close)  # n-1 delta ASLI, tanpa padding nol
     gain = np.where(delta > 0, delta, 0.0)
     loss = np.where(delta < 0, -delta, 0.0)
-    # bar pertama tidak ada delta valid, buang dari perhitungan seed
-    gain[0] = 0.0
-    loss[0] = 0.0
 
     avg_gain = wilder_rma(gain, period)
     avg_loss = wilder_rma(loss, period)
 
-    out = np.full(len(close), np.nan)
     with np.errstate(divide="ignore", invalid="ignore"):
         rs = avg_gain / avg_loss
         rsi_val = 100 - (100 / (1 + rs))
 
     valid = ~np.isnan(avg_gain)
-    out[valid] = rsi_val[valid]
-    out[valid & (avg_loss == 0) & (avg_gain > 0)] = 100.0
-    out[valid & (avg_loss == 0) & (avg_gain == 0)] = 50.0
+    rsi_val[valid & (avg_loss == 0) & (avg_gain > 0)] = 100.0
+    rsi_val[valid & (avg_loss == 0) & (avg_gain == 0)] = 50.0
+
+    # Bar harga ke-i memakai delta ke-(i-1) -> geser output 1 index.
+    # Bar pertama (i=0) tidak punya delta -> NaN. Bar valid pertama = index `period`.
+    out[1:] = rsi_val
     return out
 
 

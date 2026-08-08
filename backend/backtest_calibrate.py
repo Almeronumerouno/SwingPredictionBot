@@ -1,5 +1,5 @@
 """
-backtest_calibrate.py — Multi-parameter calibration untuk SwingPredictionBot.
+backtest_calibrate.py — Multi-parameter calibration untuk Swingbot IDX.
 
 Mencoba berbagai kombinasi parameter, menjalankan backtest pada beberapa
 saham IDX, dan menampilkan perbandingan metrik untuk menemukan parameter
@@ -25,11 +25,12 @@ import itertools
 import json
 import sys
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import Any, Optional
 
 import numpy as np
 
+import config as CFG
 from backtest import BacktestConfig, BacktestMetrics, run_backtest, print_report
 
 
@@ -37,13 +38,10 @@ from backtest import BacktestConfig, BacktestMetrics, run_backtest, print_report
 #  Default Parameter Grid
 # ──────────────────────────────────────────────
 
-DEFAULT_PARAM_GRID: dict[str, list[Any]] = {
-    "adx_gate_ceiling": [15, 20, 25, 30],
-    "swing_buy_threshold": [55, 60, 65, 70, 75],
-    "atr_sl_multiplier": [1.5, 2.0, 3.0, 4.0],
-    "rvol_window": [5, 10, 20, 30],
-    "rvol_breakout_confirm": [1.2, 1.5, 2.0, 3.0],
-}
+# audit fix #3: grid default dibuat SEKECIL mungkin (ikut CFG.WF_OPT_GRID =
+# 36 kombinasi, bukan 1.280 kombinasi lama yang 100% in-sample). Optimasi
+# jalan di data TRAIN; ranking akhir divalidasi ulang di data TEST (OOS).
+DEFAULT_PARAM_GRID: dict[str, list[Any]] = dict(CFG.WF_OPT_GRID)
 
 DEFAULT_CODES = ["BBCA", "BMRI", "ASII", "TLKM", "ADRO"]
 
@@ -57,8 +55,10 @@ DEFAULT_METRIC = "sharpe"
 @dataclass
 class CalibrationResult:
     params: dict[str, Any]
-    aggregate: dict[str, float]
+    aggregate: dict[str, float]                 # metrik di data TRAIN
     per_stock: dict[str, BacktestMetrics]
+    oos_aggregate: dict[str, float] = field(default_factory=dict)  # metrik di data TEST
+    oos_per_stock: dict[str, BacktestMetrics] = field(default_factory=dict)
 
 
 def run_calibration(
@@ -68,10 +68,14 @@ def run_calibration(
     length: int = 365,
     target_date: str | None = None,
     fixed_params: Optional[dict] = None,
+    test_days: int = 63,
+    train_top_n: int = 10,
 ) -> list[CalibrationResult]:
     """
-    Iterate all parameter combinations, run backtest for each stock,
-    aggregate metrics, return ranked results.
+    Iterate all parameter combinations, run backtest on TRAIN window for each
+    stock, aggregate, then re-validate the top-N combos on the TEST (OOS)
+    window — audit fix #3 (sebelumnya: optimasi 100% in-sample, 1.280
+    kombinasi, tanpa validasi out-of-sample sama sekali).
 
     Args:
         codes: List kode saham IDX
@@ -80,9 +84,12 @@ def run_calibration(
         length: Hari kalender historis
         target_date: Optional YYYY-MM-DD
         fixed_params: Parameter yang tetap (not in grid)
+        test_days: Jumlah trading day terakhir yang dijadikan TEST (OOS)
+        train_top_n: Top-N kombinasi (urut by aggregate[metric]) yang
+                     di-validasi ulang di data TEST
 
     Returns:
-        List CalibrationResult sorted by aggregate[metric] descending
+        List CalibrationResult sorted by aggregate[metric].oos_aggregate
     """
     param_names = list(param_grid.keys())
     param_values = list(param_grid.values())
@@ -99,6 +106,14 @@ def run_calibration(
         "total_trades", "avg_return_per_trade", "avg_holding_days",
     ]
 
+    # ── Tentukan titik potong TRAIN/TEST per saham ──
+    from data_source.yahoo_client import fetch_trading_info
+    test_start_idx_by_code: dict[str, int] = {}
+    for code in codes:
+        bars = fetch_trading_info(code, length=length, target_date=target_date)
+        n_bars = len(bars)
+        test_start_idx_by_code[code] = max(0, n_bars - test_days)
+
     for idx, combo in enumerate(combinations, 1):
         params = dict(zip(param_names, combo))
         merged = {**fixed_params, **params}
@@ -109,7 +124,7 @@ def run_calibration(
             if hasattr(cfg, k):
                 setattr(cfg, k, v)
 
-        sys.stdout.write(f"\r  Calibrating [{idx}/{total}] {params}... ")
+        sys.stdout.write(f"\r  Calibrating (TRAIN) [{idx}/{total}] {params}... ")
         sys.stdout.flush()
 
         per_stock: dict[str, BacktestMetrics] = {}
@@ -121,6 +136,7 @@ def run_calibration(
                 metrics = run_backtest(
                     code, capital=capital, bt_config=cfg,
                     length=length, target_date=target_date,
+                    sim_end_idx=test_start_idx_by_code.get(code),
                 )
                 per_stock[code] = metrics
                 if metrics.total_trades > 0:
@@ -141,9 +157,53 @@ def run_calibration(
         ))
 
         # Small delay to avoid rate limiting
-        time.sleep(0.1)
+        time.sleep(0.05)
 
     print()
+
+    # ── Audit fix #3: validasi OOS untuk top-N ──
+    candidates_ranked = sorted(
+        results,
+        key=lambda r: r.aggregate.get(DEFAULT_METRIC, 0.0),
+        reverse=True,
+    )[:train_top_n]
+
+    print(f"  Validasi OOS top-{len(candidates_ranked)} kombinasi (TEST window, {test_days} hari)...")
+    for r in candidates_ranked:
+        cfg = BacktestConfig()
+        for k, v in r.params.items():
+            if hasattr(cfg, k):
+                setattr(cfg, k, v)
+
+        oos_agg: dict[str, float] = {m: 0.0 for m in metric_names}
+        oos_valid = 0
+        r.oos_per_stock = {}
+        for code in codes:
+            try:
+                metrics = run_backtest(
+                    code, capital=capital, bt_config=cfg,
+                    length=length, target_date=target_date,
+                    sim_start_idx=test_start_idx_by_code.get(code, 0),
+                )
+                r.oos_per_stock[code] = metrics
+                if metrics.total_trades > 0:
+                    for m in metric_names:
+                        oos_agg[m] += getattr(metrics, m, 0.0)
+                    oos_valid += 1
+            except (ValueError, Exception) as e:
+                sys.stdout.write(f"[OOS {code}:{e}] ")
+        if oos_valid > 0:
+            for m in metric_names:
+                oos_agg[m] /= oos_valid
+        r.oos_aggregate = oos_agg
+
+    # Rank utama: urut COMBINED (OOS bila ada, fallback train)
+    def _rank_key(r: CalibrationResult) -> tuple[float, float]:
+        oos = r.oos_aggregate.get(DEFAULT_METRIC, 0.0)
+        train = r.aggregate.get(DEFAULT_METRIC, 0.0)
+        return (oos, train)
+
+    results.sort(key=_rank_key, reverse=True)
     return results
 
 
@@ -156,52 +216,54 @@ def print_leaderboard(
     metric: str = "sharpe",
     top_n: int = 10,
 ) -> None:
-    """Print top-N parameter combinations ranked by metric."""
+    """Print top-N parameter combinations ranked by (OOS, train) metric."""
     sorted_results = sorted(
         results,
-        key=lambda r: r.aggregate.get(metric, 0.0),
+        key=lambda r: (r.oos_aggregate.get(metric, 0.0),
+                       r.aggregate.get(metric, 0.0)),
         reverse=True,
     )
 
-    sep = "=" * 80
+    sep = "=" * 88
     header = (
-        f"  {'Rank':>4}  {'WinRate':>7}  {'TotRet':>8}  {'Alpha':>8}  "
-        f"{'Sharpe':>7}  {'MaxDD':>7}  {'AvgR:R':>7}  {'Trades':>6}  "
-        f"{'Params'}"
+        f"  {'Rank':>4}  {'WinRate':>7}  {'TotRet':>8}  {'OOS.Sharpe':>10}  "
+        f"{'Trn.Sharpe':>10}  {'MaxDD':>7}  {'OOS.Trades':>10}  {'Params'}"
     )
 
     print()
     print(sep)
-    print(f"  CALIBRATION LEADERBOARD — ranked by {metric}")
+    print(f"  CALIBRATION LEADERBOARD — ranked by {metric} (OOS primary, train tiebreak)")
     print(sep)
     print(header)
-    print("-" * 80)
+    print("-" * 88)
 
     for rank, r in enumerate(sorted_results[:top_n], 1):
         a = r.aggregate
+        oos_a = r.oos_aggregate
+        oos_trades = oos_a.get("total_trades", 0)
         param_str = " ".join(f"{k}={v}" for k, v in r.params.items())
         print(
             f"  {rank:>4}  "
             f"{a.get('win_rate', 0):>6.1f}%  "
             f"{a.get('total_return_pct', 0):>+7.2f}%  "
-            f"{a.get('alpha_pct', 0):>+7.2f}%  "
-            f"{a.get('sharpe', 0):>7.3f}  "
+            f"{oos_a.get(metric, 0):>10.3f}  "
+            f"{a.get(metric, 0):>10.3f}  "
             f"{a.get('max_drawdown_pct', 0):>6.2f}%  "
-            f"{a.get('avg_rr', 0):>7.2f}  "
-            f"{int(a.get('total_trades', 0)):>6}  "
+            f"{int(oos_trades):>10}  "
             f"{param_str}"
         )
 
     print("-" * 80)
 
-    # Best params
+    # Best params per OOS (bukan train in-sample)
     best = sorted_results[0]
     print()
-    print("  RECOMMENDED PARAMETERS:")
+    print("  RECOMMENDED PARAMETERS (terbaik di data TEST/OOS):")
     print(f"    {best.params}")
-    print(f"    Expected Sharpe: {best.aggregate.get('sharpe', 0):.3f}")
-    print(f"    Expected Win Rate: {best.aggregate.get('win_rate', 0):.1f}%")
-    print(f"    Expected Alpha: {best.aggregate.get('alpha_pct', 0):+.2f}%")
+    print(f"    OOS Sharpe:    {best.oos_aggregate.get(metric, 0):.3f}  (data TEST)")
+    print(f"    Train Sharpe:  {best.aggregate.get(metric, 0):.3f}  (data TRAIN — hanya referensi)")
+    print(f"    OOS Win Rate:  {best.oos_aggregate.get('win_rate', 0):.1f}%")
+    print(f"    OOS Trades:    {int(best.oos_aggregate.get('total_trades', 0))}")
     print()
 
 
@@ -213,7 +275,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Calibrate SwingPredictionBot parameters — Fase 6",
+        description="Calibrate Swingbot IDX parameters — Fase 6",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Contoh:
@@ -230,6 +292,10 @@ Contoh:
     parser.add_argument("--metric", default=DEFAULT_METRIC,
                         help=f"Metrik ranking (default: {DEFAULT_METRIC})")
     parser.add_argument("--top", type=int, default=10, help="Top N ditampilkan")
+    parser.add_argument("--test-days", type=int, default=63,
+                        help="Trading day terakhir yang jadi data TEST (OOS)")
+    parser.add_argument("--train-top", type=int, default=10,
+                        help="Top-N kombinasi (by train metric) yang divalidasi di TEST")
     parser.add_argument("--output", "-o", type=str, default=None,
                         help="Output JSON file untuk hasil lengkap")
     parser.add_argument("--param", action="append", nargs="+", default=None,
@@ -276,6 +342,8 @@ Contoh:
         param_grid=param_grid,
         capital=args.capital,
         length=args.length,
+        test_days=args.test_days,
+        train_top_n=args.train_top,
     )
     elapsed = time.time() - start
 
@@ -289,6 +357,7 @@ Contoh:
             {
                 "params": r.params,
                 "aggregate": r.aggregate,
+                "oos_aggregate": r.oos_aggregate,
                 "per_stock": {
                     code: {
                         k: v for k, v in asdict(metrics).items()
@@ -297,7 +366,7 @@ Contoh:
                     for code, metrics in r.per_stock.items()
                 },
             }
-            for r in sorted(results, key=lambda x: x.aggregate.get(args.metric, 0), reverse=True)
+            for r in results
         ]
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2, default=str)

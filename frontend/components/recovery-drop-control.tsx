@@ -1,22 +1,27 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function RecoveryDropControl({ kode, dropPct }: { kode: string; dropPct?: number }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<"auto" | "manual">(dropPct ? "manual" : "auto");
   const [drop, setDrop] = useState(dropPct ? String(dropPct) : "5");
+  const [isTyping, setIsTyping] = useState(false);
 
-  useEffect(() => {
+  const [prevDropPct, setPrevDropPct] = useState(dropPct);
+  if (dropPct !== prevDropPct) {
+    setPrevDropPct(dropPct);
     if (dropPct !== undefined) {
       setMode("manual");
-      setDrop(String(dropPct));
+      if (!isTyping) {
+        setDrop(String(dropPct));
+      }
     } else {
       setMode("auto");
     }
-  }, [dropPct]);
+  }
 
   const apply = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -68,7 +73,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
             Threshold dihitung otomatis dari volatilitas saham ini (2.5× σ harian).
           </p>
           <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 mb-2.5">
-            Dibatasi 2%–30% sesuai tier harga IDX (blue chip max 13%, small cap max 30%).
+            Dibatasi 2%–13% (ARB flat 15% untuk semua tier harga IDX sejak April 2025).
           </p>
           <button
             onClick={apply}
@@ -91,6 +96,8 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
             inputMode="decimal"
             value={drop}
             onChange={(e) => setDrop(e.target.value)}
+            onFocus={() => setIsTyping(true)}
+            onBlur={() => setIsTyping(false)}
             className="w-full h-8 px-2.5 text-xs border border-[var(--color-border)] rounded-md bg-[var(--color-bg)] text-[var(--color-text-primary)] tabular-nums focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]/40 transition-all duration-150"
           />
           <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 mb-2.5">

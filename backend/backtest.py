@@ -1,5 +1,5 @@
 """
-backtest.py — Fase 6: Backtest Engine untuk SwingPredictionBot.
+backtest.py — Fase 6: Backtest Engine untuk Swingbot IDX.
 
 Mensimulasikan strategi Swing Score (BUY/SELL/HOLD) + SL/TP ATR-based
 pada data historis. Zero modification ke kode existing (Fase 1-5).
@@ -43,8 +43,10 @@ class BacktestConfig:
     atr_tp_multiplier: float = CFG.ATR_TP_MULTIPLIER
     rvol_breakout_confirm: float = CFG.RVOL_BREAKOUT_CONFIRM
     rvol_window: int = CFG.RVOL_WINDOW
-    position_pct: float = CFG.DEFAULT_POSITION_PCT
-    fee_pct: float = 0.25
+    risk_per_trade_pct: float = CFG.RISK_PER_TRADE_PCT
+    # Model fee ASIMETRIS (audit fix #14): beli < jual (PPh final 0.1% hanya sisi jual)
+    fee_buy_pct: float = CFG.FEE_BUY_PCT
+    fee_sell_pct: float = CFG.FEE_SELL_PCT
     long_only: bool = CFG.LONG_ONLY_MODE
     breakeven_trigger: float = CFG.BREAKEVEN_TRIGGER
     trailing_stop_multiplier: float = 0.0  # 0=disabled, >0 trail by N×ATR below peak
@@ -144,13 +146,24 @@ def _calc_tp(entry: float, atr: float, direction: str, cfg: BacktestConfig) -> f
     return entry - mult * atr
 
 
-def _calc_shares(allocated: float, entry_price: float) -> int:
-    lot_cost = entry_price * _LOT_SIZE
-    if lot_cost <= 0:
+def _calc_shares_by_risk(
+    capital: float,
+    entry_price: float,
+    stop_loss: float,
+    regime: str,
+    risk_per_trade_pct: float = CFG.RISK_PER_TRADE_PCT,
+) -> int:
+    """Sizing konsisten dgn live risk._position_shares().
+
+    POSITION_SIZING_MODE="all_in" (keputusan produk): seluruh modal utk
+    SATU saham, kelipatan LOT_SIZE. risk_per_trade_pct & regime dipertahankan
+    di signature utk kompatibilitas pemanggil; tidak dipakai utk sizing.
+    """
+    per_share_risk = abs(entry_price - stop_loss)
+    if per_share_risk <= 0 or entry_price <= 0:
         return 0
-    lots = int(allocated // lot_cost)
-    if lots < 1:
-        return 0
+
+    lots = int(capital / entry_price) // _LOT_SIZE
     return lots * _LOT_SIZE
 
 
@@ -241,9 +254,11 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
         else:
             base = 0.5
         rv = rvol_arr[i] if not np.isnan(rvol_arr[i]) else 0.0
-        if not np.isnan(donch_upper[i]) and close[i] > donch_upper[i] and rv >= cfg.rvol_breakout_confirm:
+        prev_upper = donch_upper[i - 1] if i > 0 else np.nan
+        prev_lower = donch_lower[i - 1] if i > 0 else np.nan
+        if not np.isnan(prev_upper) and close[i] > prev_upper and rv >= cfg.rvol_breakout_confirm:
             pa_scores[i] = 1.0
-        elif not np.isnan(donch_lower[i]) and close[i] < donch_lower[i] and rv >= cfg.rvol_breakout_confirm:
+        elif not np.isnan(prev_lower) and close[i] < prev_lower and rv >= cfg.rvol_breakout_confirm:
             pa_scores[i] = 0.0
         else:
             pa_scores[i] = base
@@ -266,7 +281,8 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
         effective = raw * profile.multiplier
         swing_scores[i] = round(effective, 1)
 
-        if swing_scores[i] >= 70:
+        buy_thr = profile.buy_threshold if profile.buy_threshold is not None else cfg.swing_buy_threshold
+        if swing_scores[i] >= buy_thr:
             recs[i] = "BUY"
         elif swing_scores[i] <= profile.sell_threshold:
             recs[i] = "SELL"
@@ -410,7 +426,7 @@ def run_backtest(
             ret_mtm = (close[i] / pos["entry_price"] - 1)
             if pos["direction"] == "SELL":
                 ret_mtm = -ret_mtm
-            current_equity = pos["entry_equity"] * (1 + ret_mtm * bt_config.position_pct)
+            current_equity = pos["entry_equity"] * (1 + ret_mtm * pos["deploy_fraction"])
         else:
             current_equity = equity
 
@@ -435,17 +451,22 @@ def run_backtest(
 
             entry_price = close[i]
 
-            allocated = current_equity * bt_config.position_pct
-            shares = _calc_shares(allocated, entry_price)
+            risk_lvl = _risk_level(atr_val, i)
+            regime_i = signals["regimes"][i - 1]
+            sl = _calc_sl(entry_price, atr_i, direction, risk_lvl, bt_config, regime=regime_i)
+            tp = _calc_tp(entry_price, atr_i, direction, bt_config)
+
+            shares = _calc_shares_by_risk(
+                current_equity,
+                entry_price,
+                sl,
+                regime=regime_i,
+                risk_per_trade_pct=bt_config.risk_per_trade_pct,
+            )
             if shares < _LOT_SIZE:
                 continue
 
-            risk_lvl = _risk_level(atr_val, i)
-
-            sl = _calc_sl(entry_price, atr_i, direction, risk_lvl, bt_config)
-            tp = _calc_tp(entry_price, atr_i, direction, bt_config)
-
-            fee_entry = entry_price * shares * bt_config.fee_pct / 100
+            fee_entry = entry_price * shares * bt_config.fee_buy_pct / 100
             total_fees += fee_entry
 
             gate_i = float(signals["gate"][i])
@@ -475,6 +496,7 @@ def run_backtest(
                 "entry_date": dates[i],
                 "entry_score": float(swing_scores[i]),
                 "entry_equity": current_equity,
+                "deploy_fraction": (shares * entry_price) / current_equity if current_equity > 0 else 0.0,
                 "confidence": conf,
                 "risk_level": risk_lvl,
                 "breakeven_bar": -1,
@@ -524,7 +546,11 @@ def run_backtest(
                 elif high[i] >= pos["take_profit"]:
                     exit_reason = ExitReason.TP_HIT
                     exit_price_candidate = max(pos["take_profit"], open_[i])
-                elif recs[i] == "SELL" and i > pos["entry_idx"]:
+                # audit fix #7: exit REVERSAL pakai sinyal bar SEBELUMNYA (recs[i-1]),
+                # konsisten dengan konvensi entry (recs[i-1] → eksekusi bar i).
+                # Dulu recs[i] — sinyal yang baru TERSEDIA di close bar i dipakai
+                # exit di harga close bar i juga (same-bar = lookahead bias)
+                elif recs[i-1] == "SELL" and i > pos["entry_idx"]:
                     exit_reason = ExitReason.REVERSAL
                     exit_price_candidate = close[i]
             else:
@@ -534,7 +560,7 @@ def run_backtest(
                 elif low[i] <= pos["take_profit"]:
                     exit_reason = ExitReason.TP_HIT
                     exit_price_candidate = min(pos["take_profit"], open_[i])
-                elif recs[i] == "BUY" and i > pos["entry_idx"]:
+                elif recs[i-1] == "BUY" and i > pos["entry_idx"]:
                     exit_reason = ExitReason.REVERSAL
                     exit_price_candidate = close[i]
 
@@ -544,11 +570,12 @@ def run_backtest(
                 if direction == "SELL":
                     ret = -ret
 
-                fee_exit = exit_price_candidate * pos["shares"] * bt_config.fee_pct / 100
+                fee_exit = exit_price_candidate * pos["shares"] * bt_config.fee_sell_pct / 100
                 total_fees += fee_exit
 
-                fee_rate = bt_config.fee_pct / 100
-                net_ret = ret - fee_rate * (1 + exit_price_candidate / pos["entry_price"])
+                fee_buy_rate = bt_config.fee_buy_pct / 100
+                fee_sell_rate = bt_config.fee_sell_pct / 100
+                net_ret = ret - fee_buy_rate - fee_sell_rate * (exit_price_candidate / pos["entry_price"])
 
                 trade = BacktestTrade(
                     entry_date=pos["entry_date"],
@@ -567,7 +594,7 @@ def run_backtest(
                 )
                 trades.append(trade)
 
-                pnl = pos["entry_equity"] * bt_config.position_pct * ret
+                pnl = pos["entry_equity"] * pos["deploy_fraction"] * ret
                 pnl -= (fee_entry + fee_exit)
                 equity = pos["entry_equity"] + pnl
                 in_position = False
@@ -580,10 +607,11 @@ def run_backtest(
         if pos["direction"] == "SELL":
             ret = -ret
 
-        fee_exit = close[last_idx] * pos["shares"] * bt_config.fee_pct / 100
+        fee_exit = close[last_idx] * pos["shares"] * bt_config.fee_sell_pct / 100
         total_fees += fee_exit
-        fee_rate = bt_config.fee_pct / 100
-        net_ret = ret - fee_rate * (1 + close[last_idx] / pos["entry_price"])
+        fee_buy_rate = bt_config.fee_buy_pct / 100
+        fee_sell_rate = bt_config.fee_sell_pct / 100
+        net_ret = ret - fee_buy_rate - fee_sell_rate * (close[last_idx] / pos["entry_price"])
 
         trade = BacktestTrade(
             entry_date=pos["entry_date"],
@@ -601,7 +629,7 @@ def run_backtest(
             risk_level=pos["risk_level"],
         )
         trades.append(trade)
-        pnl = pos["entry_equity"] * bt_config.position_pct * ret
+        pnl = pos["entry_equity"] * pos["deploy_fraction"] * ret
         pnl -= (fee_entry + fee_exit)
         equity = pos["entry_equity"] + pnl
 
@@ -630,12 +658,10 @@ def run_backtest(
         ])
     ) if trades else 0.0
 
-    rets_arr = np.array([t.return_pct / 100 for t in trades])
-    if len(rets_arr) > 1 and rets_arr.std() > 0:
-        annualization_factor = math.sqrt(252 / avg_hold) if avg_hold > 0 else 1.0
-        sharpe = float(rets_arr.mean() / rets_arr.std() * annualization_factor)
-    else:
-        sharpe = 0.0
+    # audit fix #5 & #8: blok "trade-based Sharpe" lama (annualisasi √(252/avg_hold)
+    # atas return per-trade) dihapus — hasilnya langsung di-overwrite blok
+    # berikutnya (dead code / variable shadowing) dan annualisasinya salah secara
+    # metodologis. Yang valid: Daily Sharpe dari equity curve di bawah.
 
     # Daily Sharpe from equity curve
     eq_arr = np.array(equity_curve)
@@ -752,7 +778,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Backtest SwingPredictionBot — Fase 6",
+        description="Backtest Swingbot IDX — Fase 6",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Contoh:
@@ -776,7 +802,7 @@ Contoh:
     parser.add_argument("--tp-multiplier", type=float, default=None)
     parser.add_argument("--rvol-breakout", type=float, default=None)
     parser.add_argument("--rvol-window", type=int, default=None)
-    parser.add_argument("--position-pct", type=float, default=None)
+    parser.add_argument("--risk-per-trade-pct", type=float, default=None)
     parser.add_argument("--fee-pct", type=float, default=None)
     parser.add_argument("--long-only", action="store_true",
                         help="Nonaktifkan short entry (SELL cuma jadi exit signal)")
@@ -799,10 +825,12 @@ Contoh:
         bt_config.rvol_breakout_confirm = args.rvol_breakout
     if args.rvol_window is not None:
         bt_config.rvol_window = args.rvol_window
-    if args.position_pct is not None:
-        bt_config.position_pct = args.position_pct
+    if args.risk_per_trade_pct is not None:
+        bt_config.risk_per_trade_pct = args.risk_per_trade_pct
     if args.fee_pct is not None:
-        bt_config.fee_pct = args.fee_pct
+        # CLI compat: satu angka → set buy & sell sama (menimpa model asimetris)
+        bt_config.fee_buy_pct = args.fee_pct
+        bt_config.fee_sell_pct = args.fee_pct
     if args.long_only:
         bt_config.long_only = True
     if args.breakeven_trigger is not None:

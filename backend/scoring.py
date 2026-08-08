@@ -59,16 +59,76 @@ def _price_action_score(close, support, resistance, donchian_upper, donchian_low
             base = 0.5
 
         rvol_i = rvol[i] if not np.isnan(rvol[i]) else 0.0
-        if not np.isnan(donchian_upper[i]) and close[i] > donchian_upper[i] and rvol_i >= config.RVOL_BREAKOUT_CONFIRM:
+        prev_upper = donchian_upper[i - 1] if i > 0 else np.nan
+        prev_lower = donchian_lower[i - 1] if i > 0 else np.nan
+        if not np.isnan(prev_upper) and close[i] > prev_upper and rvol_i >= config.RVOL_BREAKOUT_CONFIRM:
             pa[i] = 1.0
-        elif not np.isnan(donchian_lower[i]) and close[i] < donchian_lower[i] and rvol_i >= config.RVOL_BREAKOUT_CONFIRM:
+        elif not np.isnan(prev_lower) and close[i] < prev_lower and rvol_i >= config.RVOL_BREAKOUT_CONFIRM:
             pa[i] = 0.0
         else:
             pa[i] = base
     return pa
 
 
-BUY_THRESHOLD = 70
+# Fallback buy threshold — selalu sama dengan config (audit #15: konstanta
+# duplikat `BUY_THRESHOLD=70` lama yang beda nilai sudah dihapus).
+BUY_THRESHOLD = config.SWING_BUY_THRESHOLD
+
+
+def risk_level_from_atr(atr: np.ndarray, i: int = -1) -> str:
+    """
+    Risk level berdasar rasio ATR bar ke-i vs baseline ATR `RISK_ATR_LOOKBACK`
+    hari SEBELUMNYA (single source of truth — dipakai live & backtest).
+
+    ratio > RISK_HIGH_CUTOFF (1.5x) -> "tinggi"   (SL diketatkan 0.8x)
+    ratio < RISK_LOW_CUTOFF  (0.8x) -> "rendah"
+    selain itu                       -> "sedang"
+    """
+    if i < 0:
+        i = len(atr) + i
+    if i < config.RISK_ATR_LOOKBACK:
+        return "sedang"
+    latest = atr[i]
+    baseline = float(np.nanmean(atr[i - config.RISK_ATR_LOOKBACK:i]))
+    if np.isnan(latest) or np.isnan(baseline) or baseline == 0:
+        return "sedang"
+    ratio = float(latest) / baseline
+    if ratio > config.RISK_HIGH_CUTOFF:
+        return "tinggi"
+    elif ratio < config.RISK_LOW_CUTOFF:
+        return "rendah"
+    return "sedang"
+
+
+def confidence_from_score(
+    components: dict,
+    swing_score: float,
+    gate: float,
+    rvol: float,
+    recommendation: str | None = None,
+    rvol_breakout_confirm: float = config.RVOL_BREAKOUT_CONFIRM,
+) -> str:
+    """
+    Confidence berdasar agreement antar komponen skor + ADX gate + RVOL.
+    Identik dengan logika `_confidence()` lama di backtest.py (audit: pindah
+    ke sini agar live API & backtest memakai logika yang sama).
+    """
+    values = list(components.values())
+    majority = 1.0 if swing_score > 50.0 else -1.0
+    aligned = sum(1 for v in values if (v > 0.5) == (majority > 0))
+    agreement_score = aligned / len(values) if values else 0.0
+    rvol_strength = min(rvol / rvol_breakout_confirm, 1.0) if rvol > 0 else 0.0
+    strength_factor = (gate + rvol_strength) / 2.0
+    raw = agreement_score * strength_factor
+    if raw >= config.CONFIDENCE_HIGH_CUTOFF:
+        tier = "tinggi"
+    elif raw >= config.CONFIDENCE_LOW_CUTOFF:
+        tier = "sedang"
+    else:
+        tier = "rendah"
+    if recommendation == "BUY":
+        tier = {"tinggi": "sedang", "sedang": "rendah", "rendah": "rendah"}[tier]
+    return tier
 
 
 def _price_stagnation_gate(high: np.ndarray, low: np.ndarray, close: np.ndarray) -> bool:
@@ -129,7 +189,8 @@ def compute_score(data: dict) -> dict:
     effective_score = raw_score * profile.multiplier
     swing_score = round(effective_score, 1)
 
-    if swing_score >= BUY_THRESHOLD:
+    buy_thr = profile.buy_threshold if profile.buy_threshold is not None else BUY_THRESHOLD
+    if swing_score >= buy_thr:
         rec = "BUY"
     elif swing_score <= profile.sell_threshold:
         rec = "SELL"
@@ -141,13 +202,23 @@ def compute_score(data: dict) -> dict:
         rec = "HOLD"
         swing_score = min(swing_score, 50.0)
 
+    # risk_level & confidence DINAMIS (audit #6): dulu hardcoded "sedang" sehingga
+    # cabang tighten-SL di risk.py tidak pernah aktif di jalur live. Sekarang
+    # memakai fungsi yang sama dengan backtest (single source of truth).
+    risk_level = risk_level_from_atr(atr_arr, -1)
+    gate_i = float(_gate_adx(adx_arr)[-1]) if not np.isnan(adx_arr[-1]) else 0.0
+    rvol_i = float(rvol_arr[-1]) if not np.isnan(rvol_arr[-1]) else 0.0
+    confidence = confidence_from_score(
+        components, swing_score, gate_i, rvol_i, recommendation=rec
+    )
+
     return {
         "valid": True,
         "swing_score": swing_score,
         "components": components,
         "recommendation": rec,
-        "confidence": "sedang",
-        "risk_level": "sedang",
+        "confidence": confidence,
+        "risk_level": risk_level,
         "prob_continuation": None,
         "prob_reversal": None,
         "regime": regime,

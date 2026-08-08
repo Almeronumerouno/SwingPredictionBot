@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { triggerScrapeGorengan } from "@/lib/api/gorengan";
 
 type Toast = { message: string; type: "success" | "error" } | null;
 
 function ToastNotification({ toast, onDone }: { toast: NonNullable<Toast>; onDone: () => void }) {
-  setTimeout(onDone, 4000);
+  useEffect(() => {
+    const timer = setTimeout(onDone, 4000);
+    return () => clearTimeout(timer);
+  }, [onDone]);
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in">
@@ -45,6 +48,14 @@ function GorenganConfirmModal({
   onCancel: () => void;
 }) {
   const [selectedDate, setSelectedDate] = useState(globalDate || "");
+
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !loading) onCancel();
+    }
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [loading, onCancel]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">

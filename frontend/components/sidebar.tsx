@@ -119,7 +119,7 @@ function SidebarInner() {
           <div className="w-7 h-7 relative flex-shrink-0">
             <Image src="/logo.png" alt="Swingbot Logo" fill sizes="28px" className="object-contain" priority />
           </div>
-          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-base">Swingbot</span>
+          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-base">Swingbot IDX</span>
         </div>
         {/* Spacer to balance the hamburger button */}
         <div className="w-10" />
@@ -144,7 +144,7 @@ function SidebarInner() {
             <div className="w-8 h-8 relative flex-shrink-0">
               <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
             </div>
-            <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
+            <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot IDX</span>
           </div>
           <button
             onClick={close}
@@ -167,7 +167,7 @@ function SidebarInner() {
           <div className="w-8 h-8 relative flex-shrink-0">
             <Image src="/logo.png" alt="Swingbot Logo" fill sizes="32px" className="object-contain" priority />
           </div>
-          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot</span>
+          <span className="font-bold tracking-tight text-[var(--color-text-primary)] text-lg">Swingbot IDX</span>
         </div>
         <Suspense fallback={<div className="flex-1 p-4"></div>}>
           <SidebarContent />

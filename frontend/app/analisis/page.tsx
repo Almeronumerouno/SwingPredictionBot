@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 
 const POPULAR_STOCKS = ["BBCA", "BMRI", "BBNI", "BBRI", "TLKM", "ASII"];
+
+const HISTORY_KEY = "swingbot-search-history";
+const HISTORY_LIMIT = 8;
 
 function AnalisisContent() {
   const router = useRouter();
@@ -15,6 +18,58 @@ function AnalisisContent() {
   const [code, setCode] = useState("");
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const [isFocused, setIsFocused] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyClosing, setHistoryClosing] = useState(false);
+  const closeTimerRef = useRef<number | null>(null);
+
+  // Buka dropdown (batal fase penutupan kalau lagi jalan)
+  function openHistory() {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setHistoryClosing(false);
+    setHistoryOpen(true);
+  }
+
+  // Tutup dropdown dengan animasi exit dulu, baru buang dari DOM
+  function closeHistory() {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+    if (!historyOpen) return;
+    setHistoryClosing(true);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      setHistoryClosing(false);
+      setHistoryOpen(false);
+    }, 150);
+  }
+
+  // Bersihkan timer saat unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Muat riwayat pencarian dari localStorage (client-only)
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(HISTORY_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setSearchHistory(parsed.filter((k) => typeof k === "string").slice(0, HISTORY_LIMIT));
+        }
+      }
+    } catch {
+      // localStorage tidak tersedia / corrupt: abaikan
+    }
+  }, []);
 
   // Sync date changes to URL so that back button restores it
   function handleDateChange(newDate: string) {
@@ -29,12 +84,48 @@ function AnalisisContent() {
     router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
   }
 
+  function saveSearchHistory(kodeRaw: string) {
+    const kode = kodeRaw.trim().toUpperCase();
+    if (!kode) return;
+    const next = [kode, ...searchHistory.filter((k) => k !== kode)].slice(0, HISTORY_LIMIT);
+    setSearchHistory(next);
+    try {
+      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    } catch {
+      // storage penuh / mode privat: riwayat tetap hidup di state sesi ini
+    }
+  }
+
+  function removeFromHistory(kode: string) {
+    const next = searchHistory.filter((k) => k !== kode);
+    setSearchHistory(next);
+    try {
+      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    } catch {
+      // abaikan
+    }
+  }
+
+  function clearAllHistory() {
+    setSearchHistory([]);
+    try {
+      window.localStorage.removeItem(HISTORY_KEY);
+    } catch {
+      // abaikan
+    }
+  }
+
+  function goToStock(kode: string) {
+    saveSearchHistory(kode);
+    const dateParam = selectedDate ? `?date=${selectedDate}` : "";
+    router.push(`/saham/${kode}${dateParam}`);
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const kode = code.trim().toUpperCase();
     if (kode) {
-      const dateParam = selectedDate ? `?date=${selectedDate}` : "";
-      router.push(`/saham/${kode}${dateParam}`);
+      goToStock(kode);
     }
   }
 
@@ -42,6 +133,9 @@ function AnalisisContent() {
     const dateParam = selectedDate ? `?date=${selectedDate}` : "";
     return `/saham/${stock}${dateParam}`;
   }
+
+  const query = code.trim().toUpperCase();
+  const visibleHistory = (query ? searchHistory.filter((k) => k.includes(query)) : searchHistory).slice(0, 5);
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -97,8 +191,14 @@ function AnalisisContent() {
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 4))}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={() => {
+                setIsFocused(true);
+                openHistory();
+              }}
+              onBlur={() => {
+                setIsFocused(false);
+                closeHistory();
+              }}
               placeholder="Masukkan kode saham (cth: BBCA)"
               maxLength={4}
               className="w-full py-4 px-2 text-lg font-bold tracking-wider uppercase text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] placeholder:font-medium placeholder:normal-case placeholder:tracking-normal bg-transparent border-none focus:outline-none focus:ring-0"
@@ -114,6 +214,61 @@ function AnalisisContent() {
           </div>
         </form>
 
+        {/* Search history dropdown */}
+        {(historyOpen || historyClosing) && visibleHistory.length > 0 && (
+          <div
+            className={`mt-4 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden text-left ${
+              historyClosing ? "animate-dropdown-exit" : "animate-dropdown-in"
+            }`}
+          >
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)] animate-dropdown-header">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Pencarian Terakhir
+              </p>
+              <button
+                type="button"
+                onClick={clearAllHistory}
+                className="text-[11px] font-semibold text-red-500 hover:text-red-700 transition-colors"
+              >
+                Hapus Semua
+              </button>
+            </div>
+            <ul>
+              {visibleHistory.map((kode, i) => (
+                <li
+                  key={kode}
+                  className="animate-history-item group flex items-center border-b last:border-b-0 border-[var(--color-border)]/50"
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => goToStock(kode)}
+                    className="flex-1 flex items-center gap-2.5 px-4 py-2.5 text-left hover:bg-[var(--color-muted-bg)] transition-all duration-150 hover:translate-x-0.5"
+                  >
+                    <svg className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-primary)]">{kode}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeFromHistory(kode)}
+                    aria-label={`Hapus ${kode} dari pencarian terakhir`}
+                    className="mr-1.5 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="mt-8 text-center">
           <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">
             Pencarian Populer
@@ -124,6 +279,7 @@ function AnalisisContent() {
                 prefetch={false}
                 key={stock}
                 href={navigateStock(stock)}
+                onClick={() => saveSearchHistory(stock)}
                 className="px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 hover:shadow-sm transition-all"
               >
                 {stock}

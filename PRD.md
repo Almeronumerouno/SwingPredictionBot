@@ -1,8 +1,8 @@
-# Product Requirements Document — Swing Bot IDX
+# Product Requirements Document — Swingbot IDX
 
 | Item | Detail |
 |------|--------|
-| **Product Name** | Swing Bot IDX |
+| **Product Name** | Swingbot IDX |
 | **Version** | 0.3.0-wip |
 | **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
 | **Last Updated** | 27 Juli 2026 |
@@ -420,7 +420,7 @@ Analisis mean-reversion: probabilitas saham yang turun ≥ X% di bawah previous 
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `drop_pct` | float | No | Otomatis (2.5× σ_daily) | Threshold drop (%). Setup aktif jika `(close/prev_close - 1) ≤ -drop_pct/100`. Auto di-clamp 2%–30% sesuai tier harga IDX (<200→30%, 200-5000→18%, ≥5000→13%) |
+| `drop_pct` | float | No | Otomatis (2.5× σ_daily) | Threshold drop (%). Setup aktif jika `(close/prev_close - 1) ≤ -drop_pct/100`. Auto di-clamp 2%–13% — flat untuk semua tier harga (ARB flat 15% sejak April 2025; cap 13% = margin di bawah ARB) |
 | `date` | string | No | Data terbaru | Format `YYYY-MM-DD` |
 
 **Response 200:** `RecoveryResponse`

@@ -1,8 +1,8 @@
-# Product Overview — Swing Bot IDX
+# Product Overview — Swingbot IDX
 
 | Item | Detail |
 |------|--------|
-| **Product Name** | Swing Bot IDX |
+| **Product Name** | Swingbot IDX |
 | **Version** | 0.3.0-wip |
 | **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
 | **Last Updated** | 27 Juli 2026 |

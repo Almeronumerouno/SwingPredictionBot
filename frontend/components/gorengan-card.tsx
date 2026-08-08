@@ -10,10 +10,11 @@ const levelConfig: Record<string, { color: string; bg: string; border: string; l
 const factorLabels: { key: keyof GorenganAnalysis["factors"]; label: string; icon: string }[] = [
   { key: "historical_pump_dump_risk", label: "Historical P&D Profile", icon: "🏔️" },
   { key: "liquidity_risk", label: "Liquidity Risk", icon: "💧" },
-  { key: "volume_anomaly", label: "Volume Anomaly", icon: "📊" },
+  { key: "market_cap_risk", label: "Market Cap Risk", icon: "⚖️" },
+  { key: "active_pump", label: "Active Pump", icon: "🚀" },
+  { key: "mid_momentum", label: "Mid Momentum", icon: "📈" },
   { key: "distribution_risk", label: "Distribution Risk", icon: "📉" },
-  { key: "parabolic_move_risk", label: "Parabolic Move", icon: "🚀" },
-  { key: "volatility_anomaly", label: "Volatility Explosion", icon: "💥" },
+  { key: "turnover_gaps", label: "Turnover & Gaps", icon: "💥" },
 ];
 
 function getScoreColor(score: number): string {
@@ -28,13 +29,6 @@ function getBarColor(score: number): string {
   if (score <= 60) return "bg-amber-400";
   if (score <= 80) return "bg-orange-500";
   return "bg-red-500";
-}
-
-function getGaugeBg(score: number): string {
-  if (score <= 30) return "from-emerald-500 to-emerald-600";
-  if (score <= 60) return "from-amber-400 to-amber-500";
-  if (score <= 80) return "from-orange-400 to-orange-600";
-  return "from-red-500 to-red-700";
 }
 
 export default function GorenganCard({ data }: { data: GorenganAnalysis }) {

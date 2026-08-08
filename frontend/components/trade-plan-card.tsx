@@ -36,6 +36,14 @@ export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
           <span className="text-sm font-medium text-[var(--color-text-secondary)]">R/R Ratio</span>
           <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.risk_reward_ratio ? `1 : ${plan.risk_reward_ratio.toFixed(2)}` : "-"}</span>
         </div>
+        {plan.risk_per_trade_pct != null && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-[var(--color-text-secondary)]">Risiko per Trade</span>
+            <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">
+              {plan.risk_per_trade_pct.toFixed(2)}%
+            </span>
+          </div>
+        )}
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-[var(--color-text-secondary)]">Size</span>
           <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.lots} lot <span className="text-[var(--color-text-muted)] font-normal">({plan.shares} lbr)</span></span>

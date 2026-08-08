@@ -99,7 +99,12 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
     start = end_d - timedelta(days=length)
 
     try:
-        df = yf.Ticker(ticker).history(start=start.isoformat(), end=end.isoformat(), interval="1d")
+        df = yf.Ticker(ticker).history(
+            start=start.isoformat(),
+            end=end.isoformat(),
+            interval="1d",
+            auto_adjust=config.YAHOO_AUTO_ADJUST,  # eksplisit (audit fix #15)
+        )
     except Exception as e:  # noqa: BLE001
         raise YahooClientError(f"Gagal fetch {ticker} dari Yahoo Finance: {e}") from e
 
