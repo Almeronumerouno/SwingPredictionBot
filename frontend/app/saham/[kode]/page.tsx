@@ -98,7 +98,7 @@ export default async function SahamPage({
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
-                <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${rekomendasi === "BUY" ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : rekomendasi === "SELL" ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" : "bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)] border-[var(--color-border)]"}`}>
+                <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${rekomendasi === "BUY" ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : rekomendasi === "SELL" ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
                   {rekomendasi}
                 </span>
               </div>
