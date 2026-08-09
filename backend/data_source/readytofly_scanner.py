@@ -1,0 +1,209 @@
+"""
+Scanner "Ready To Fly" — scan seluruh saham IDX untuk deteksi pola
+akumulasi post-ARA (siap terbang atau hampir siap).
+"""
+import json
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass, field
+from datetime import date, datetime, timedelta
+from typing import Optional
+from zoneinfo import ZoneInfo
+
+import numpy as np
+
+import config
+from recovery import detect_accumulation
+from data_source.idx_client import fetch_all_securities
+from data_source.idx_trading import IdxTradingError, fetch_daily_stock_summary
+from data_source.yahoo_client import YahooClientError, fetch_trading_info
+
+WIB = ZoneInfo("Asia/Jakarta")
+
+
+@dataclass
+class ReadyToFlyEntry:
+    code: str
+    name: str
+    close: float
+    pct_change: float
+    status: str  # "ready" | "almost"
+    density_pct: float | None
+    k_heavy: int
+    window_days: int
+    ara_date: str | None
+    ara_ref_price: float | None
+    distance_pct: float | None
+    sma20: float | None
+    state_ma20: str | None
+    max_rvol: float | None
+    gates: dict | None
+    note: str | None
+    reason: str | None
+
+
+def _ensure_cache_dir() -> None:
+    os.makedirs(config.CACHE_DIR, exist_ok=True)
+
+
+def _get_cache_path(date_str: str) -> str:
+    return os.path.join(config.CACHE_DIR, f"readytofly_{date_str}.json")
+
+
+def _count_gates_passed(gates: dict | None) -> int:
+    """Count how many of the 4 gates (below, density, min_heavy, above_ma) are True."""
+    if not gates:
+        return 0
+    return sum(1 for k in ("below", "density", "min_heavy", "above_ma") if gates.get(k))
+
+
+def _fetch_and_check_one(
+    code: str,
+    name: str,
+    daily_data: dict,
+    target_date: Optional[str] = None,
+    bars=None,
+) -> Optional[ReadyToFlyEntry]:
+    """Fetch history for one stock and run accumulation detection.
+    bars bolehdiberikan dari luar (dipakai scan_all agar 1 fetch dipakai 3 analisis)."""
+    try:
+        if bars is None:
+            bars = fetch_trading_info(
+                code,
+                length=config.RECOVERY_HISTORY_LOOKBACK_DAYS,
+                target_date=target_date,
+            )
+        if len(bars) < config.RECOVERY_MIN_BARS:
+            return None
+
+        accum = detect_accumulation(bars)
+
+        # Determine status
+        is_ready = accum.get("ready_to_fly", False)
+        gates = accum.get("gates")
+        gates_passed = _count_gates_passed(gates)
+
+        # Keep if ready OR almost ready (>= 3 of 4 gates passed)
+        if not is_ready and gates_passed < 3:
+            return None
+
+        status = "ready" if is_ready else "almost"
+
+        close_arr = [b.close for b in bars]
+        close_now = float(close_arr[-1]) if close_arr else 0.0
+
+        prev = float(daily_data.get("Previous", 0) or 0)
+        c = float(daily_data.get("Close", close_now) or close_now)
+        pct = ((c - prev) / prev * 100.0) if prev else 0.0
+
+        return ReadyToFlyEntry(
+            code=code,
+            name=name,
+            close=c,
+            pct_change=pct,
+            status=status,
+            density_pct=accum.get("density_pct"),
+            k_heavy=accum.get("k_heavy", 0),
+            window_days=accum.get("window_days", 0),
+            ara_date=accum.get("ara_date"),
+            ara_ref_price=accum.get("ara_ref_price"),
+            distance_pct=accum.get("distance_pct"),
+            sma20=accum.get("sma20"),
+            state_ma20=accum.get("state_ma20"),
+            max_rvol=accum.get("max_rvol"),
+            gates=gates,
+            note=accum.get("note"),
+            reason=accum.get("reason"),
+        )
+    except Exception:
+        return None
+
+
+def scan_ready_to_fly(target_date: Optional[str] = None) -> list[ReadyToFlyEntry]:
+    """
+    Scan seluruh saham IDX untuk deteksi pola akumulasi post-ARA.
+    Returns list of ReadyToFlyEntry (ready + almost ready).
+    """
+    scraped_at = datetime.now(WIB)
+
+    # 1. Ambil daftar security
+    securities = fetch_all_securities()
+    sec_map = {s.code: s for s in securities}
+
+    # 2. Ambil snapshot IDX harian
+    if target_date:
+        start = date.fromisoformat(target_date)
+    else:
+        start = date.today()
+
+    raw = []
+    for offset in range(config.IDX_FALLBACK_MAX_DAYS):
+        d = start - timedelta(days=offset)
+        date_str = d.strftime("%Y%m%d")
+        try:
+            raw = fetch_daily_stock_summary(date_str)
+            if raw:
+                break
+        except Exception:
+            pass
+
+    if not raw:
+        print("[WARN] Gagal mendapatkan snapshot harian, akan mencoba full scan.")
+        raw = [{"StockCode": s.code, "StockName": s.name} for s in securities]
+
+    # Filter stocks with active volume
+    active_stocks = []
+    for item in raw:
+        code = str(item.get("StockCode", "")).strip()
+        vol = float(item.get("Volume", 0) or 0)
+        if code and (vol > 0 or "Volume" not in item):
+            active_stocks.append(item)
+
+    results: list[ReadyToFlyEntry] = []
+
+    # 3. Scan paralel
+    with ThreadPoolExecutor(max_workers=config.SCAN_MAX_WORKERS) as executor:
+        futures = {}
+        for item in active_stocks:
+            code = str(item.get("StockCode", "")).strip()
+            name = str(item.get("StockName", "") or "")
+            futures[
+                executor.submit(_fetch_and_check_one, code, name, item, target_date)
+            ] = code
+
+        for future in as_completed(futures):
+            entry = future.result()
+            if entry is not None:
+                results.append(entry)
+
+    # Sort: ready first, then by density descending
+    results.sort(key=lambda x: (0 if x.status == "ready" else 1, -(x.density_pct or 0)))
+
+    # 4. Cache
+    _ensure_cache_dir()
+    file_date = target_date or scraped_at.date().isoformat()
+    path = _get_cache_path(file_date)
+    payload = {
+        "scraped_at": scraped_at.isoformat(),
+        "data": [asdict(e) for e in results],
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    return results
+
+
+def get_cached_ready_to_fly(for_date: Optional[str] = None) -> Optional[dict]:
+    for_date = for_date or datetime.now(WIB).date().isoformat()
+    path = _get_cache_path(for_date)
+
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    return {
+        "scraped_at": raw["scraped_at"],
+        "data": [ReadyToFlyEntry(**row) for row in raw["data"]],
+    }

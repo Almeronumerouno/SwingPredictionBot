@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { GainersResponse } from "@/types/api";
 import { fetchGainers } from "@/lib/api/gainers";
 import GainersTable from "@/components/gainers-table";
-import ScrapeButton from "@/components/scrape-button";
 import DatePicker from "./date-picker";
 
 export default async function TopGainersPage({
@@ -28,9 +27,6 @@ export default async function TopGainersPage({
           <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]">Saham dengan kenaikan tertinggi hari ini &middot; Bursa Efek Indonesia</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <Suspense fallback={<div className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
-            <ScrapeButton />
-          </Suspense>
           <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DatePicker selected={date || ""} />
           </Suspense>
@@ -38,8 +34,10 @@ export default async function TopGainersPage({
       </header>
 
       {error ? (
-        <div className="border border-[var(--color-down)]/30 bg-red-50 rounded-lg px-4 py-3 text-sm text-[var(--color-down)]">
-          {error}
+        <div className="border border-[var(--color-down)]/30 bg-red-50 rounded-xl px-5 py-4 text-sm text-[var(--color-down)] shadow-sm">
+          <p className="font-bold mb-1">Data Belum Tersedia</p>
+          <p>{error}</p>
+          <p className="mt-2 text-xs opacity-80">Lakukan scan dari halaman <a href="/" className="underline font-bold">Dashboard</a> terlebih dahulu.</p>
         </div>
       ) : gainers ? (
         <section>

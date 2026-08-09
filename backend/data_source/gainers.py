@@ -76,29 +76,35 @@ def get_or_fetch_securities_list(force_refresh: bool = False) -> list[Security]:
     return securities
 
 
+def gainer_from_bars(code: str, bars: list[DailyBar]) -> Optional[GainerEntry]:
+    """Buat GainerEntry dari bars yang SUDAH di-fetch (dipakai juga oleh scan_all
+    supaya 1 fetch dipakai banyak analisis). Nama diisi belakangan dari daftar efek."""
+    if len(bars) < 2:
+        return None
+
+    latest: DailyBar = bars[-1]
+
+    if not math.isfinite(latest.volume) or latest.volume <= 0:
+        return None
+    if not math.isfinite(latest.pct_change):
+        return None
+
+    return GainerEntry(
+        code=code,
+        name="",  # diisi belakangan dari securities list
+        close=latest.close,
+        pct_change=latest.pct_change,
+        volume=latest.volume,
+    )
+
+
 def _fetch_one_for_scan_yahoo(code: str) -> Optional[GainerEntry]:
     """Fallback: ambil data 1 saham via Yahoo Finance (thread pool).
     Dipakai kalau IDX gagal.
     """
     try:
         bars = fetch_trading_info(code, length=config.FALLBACK_SCAN_LENGTH)
-        if len(bars) < 2:
-            return None
-
-        latest: DailyBar = bars[-1]
-
-        if not math.isfinite(latest.volume) or latest.volume <= 0:
-            return None
-        if not math.isfinite(latest.pct_change):
-            return None
-
-        return GainerEntry(
-            code=code,
-            name="",  # diisi belakangan dari securities list
-            close=latest.close,
-            pct_change=latest.pct_change,
-            volume=latest.volume,
-        )
+        return gainer_from_bars(code, bars)
     except YahooClientError as e:
         print(f"[WARN] Gagal fetch {code} (Yahoo fallback): {e}")
         return None
@@ -107,23 +113,9 @@ def _fetch_one_for_scan_yahoo(code: str) -> Optional[GainerEntry]:
         return None
 
 
-def _scan_via_idx(target_date: Optional[str] = None) -> list[GainerEntry]:
-    """Strategi utama: 1x call GetStockSummary -> sort by %change.
-    Coba hari ini dulu, kalau kosong (libur / EOD blm ready) mundur max 3 hari ke belakang cari data terakhir yang ada.
-    Jika target_date diberikan (format YYYY-MM-DD), gunakan tanggal tersebut sebagai titik awal.
-    """
-    if target_date:
-        start = date.fromisoformat(target_date)
-    else:
-        start = date.today()
-    raw = []
-    for offset in range(config.IDX_FALLBACK_MAX_DAYS):
-        d = start - timedelta(days=offset)
-        date_str = d.strftime("%Y%m%d")
-        raw = fetch_daily_stock_summary(date_str)
-        if raw:
-            break
-
+def build_gainers_from_raw(raw: list[dict]) -> list[GainerEntry]:
+    """Mapping snapshot IDX GetStockSummary -> Top N gainers (dipakai juga oleh
+    scan_all untuk memakai snapshot yang sama)."""
     results: list[GainerEntry] = []
     for item in raw:
         code = str(item.get("StockCode", "")).strip()
@@ -149,6 +141,26 @@ def _scan_via_idx(target_date: Optional[str] = None) -> list[GainerEntry]:
 
     results.sort(key=lambda e: e.pct_change, reverse=True)
     return results[: config.TOP_GAINERS_COUNT]
+
+
+def _scan_via_idx(target_date: Optional[str] = None) -> list[GainerEntry]:
+    """Strategi utama: 1x call GetStockSummary -> sort by %change.
+    Coba hari ini dulu, kalau kosong (libur / EOD blm ready) mundur max 3 hari ke belakang cari data terakhir yang ada.
+    Jika target_date diberikan (format YYYY-MM-DD), gunakan tanggal tersebut sebagai titik awal.
+    """
+    if target_date:
+        start = date.fromisoformat(target_date)
+    else:
+        start = date.today()
+    raw = []
+    for offset in range(config.IDX_FALLBACK_MAX_DAYS):
+        d = start - timedelta(days=offset)
+        date_str = d.strftime("%Y%m%d")
+        raw = fetch_daily_stock_summary(date_str)
+        if raw:
+            break
+
+    return build_gainers_from_raw(raw)
 
 
 def _scan_via_yahoo(securities: list[Security]) -> list[GainerEntry]:

@@ -22,6 +22,8 @@ import recovery
 import short_selling
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
+from data_source.readytofly_scanner import get_cached_ready_to_fly, scan_ready_to_fly
+from data_source.scan_all import run_scan_all
 from data_source.idx_trading import IdxTradingError
 from data_source.yahoo_client import YahooClientError, fetch_trading_info
 
@@ -251,12 +253,41 @@ class MarketStatusResponse(BaseModel):
     suggested_source: str
 
 
+class ReadyToFlyEntryResponse(BaseModel):
+    code: str
+    name: str
+    close: float
+    pct_change: float
+    status: str  # "ready" | "almost"
+    density_pct: float | None = None
+    k_heavy: int = 0
+    window_days: int = 0
+    ara_date: str | None = None
+    ara_ref_price: float | None = None
+    distance_pct: float | None = None
+    sma20: float | None = None
+    state_ma20: str | None = None
+    max_rvol: float | None = None
+    gates: dict | None = None
+    note: str | None = None
+    reason: str | None = None
+
+
+class ReadyToFlyScannerResponse(BaseModel):
+    scraped_at: str
+    date: str
+    count_ready: int
+    count_almost: int
+    data: list[ReadyToFlyEntryResponse]
+
+
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
                AnalisisResponse, HistoryResponse, MarketStatusResponse,
                RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
                RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
-               GorenganScannerEntryResponse, GorenganScannerResponse):
+               GorenganScannerEntryResponse, GorenganScannerResponse,
+               ReadyToFlyEntryResponse, ReadyToFlyScannerResponse):
     _model.model_rebuild()
 
 
@@ -551,6 +582,24 @@ def get_market_status():
     }
 
 
+@app.post("/scrape/all")
+def trigger_scrape_all(
+    source: str | None = Query(None, pattern=r"^(yahoo|idx)$"),
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+):
+    """
+    Scan SATU putaran data utk SEMUA kategori sekaligus:
+    1x snapshot IDX + 1x fetch bars per saham => Top Gainers + Gorengan + Ready To Fly.
+    Jadi tidak lagi 3x fetch hampir ~900-an saham (2.700 request -> ~900 request).
+    """
+    try:
+        result = run_scan_all(target_date=date, force_source=source)
+        return result
+    except Exception as e:
+        logging.exception("Scan semua kategori gagal")
+        raise HTTPException(status_code=500, detail=f"Scan semua kategori gagal: {e}")
+
+
 @app.post("/scrape")
 def trigger_scrape(
     source: str | None = Query(None, pattern=r"^(yahoo|idx)$"),
@@ -757,5 +806,72 @@ def get_gorengan(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"))
                 "warnings": e.warnings,
             }
             for e in cached["data"]
+        ],
+    }
+
+
+@app.post("/scrape/readytofly")
+def trigger_scrape_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    """
+    Trigger scan seluruh bursa untuk mendeteksi saham siap terbang (akumulasi post-ARA).
+    Proses ini memakan waktu beberapa menit.
+    """
+    try:
+        results = scan_ready_to_fly(target_date=date)
+        count_ready = sum(1 for r in results if r.status == "ready")
+        count_almost = sum(1 for r in results if r.status == "almost")
+        return {
+            "status": "success",
+            "count_ready": count_ready,
+            "count_almost": count_almost,
+            "message": f"Scan selesai: {count_ready} ready, {count_almost} hampir siap.",
+        }
+    except Exception as e:
+        logging.exception("Scrape ready-to-fly gagal")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/readytofly", response_model=ReadyToFlyScannerResponse)
+def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    """
+    Mengambil data saham ready-to-fly yang sudah di-scan.
+    """
+    cached = get_cached_ready_to_fly(for_date=date)
+    if not cached:
+        raise HTTPException(
+            status_code=404,
+            detail="Data belum discan. Silakan klik tombol 'Scan Ready To Fly' terlebih dahulu.",
+        )
+
+    entries = cached["data"]
+    count_ready = sum(1 for e in entries if e.status == "ready")
+    count_almost = sum(1 for e in entries if e.status == "almost")
+
+    return {
+        "scraped_at": cached["scraped_at"],
+        "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
+        "count_ready": count_ready,
+        "count_almost": count_almost,
+        "data": [
+            {
+                "code": e.code,
+                "name": e.name,
+                "close": e.close,
+                "pct_change": e.pct_change,
+                "status": e.status,
+                "density_pct": e.density_pct,
+                "k_heavy": e.k_heavy,
+                "window_days": e.window_days,
+                "ara_date": e.ara_date,
+                "ara_ref_price": e.ara_ref_price,
+                "distance_pct": e.distance_pct,
+                "sma20": e.sma20,
+                "state_ma20": e.state_ma20,
+                "max_rvol": e.max_rvol,
+                "gates": e.gates,
+                "note": e.note,
+                "reason": e.reason,
+            }
+            for e in entries
         ],
     }

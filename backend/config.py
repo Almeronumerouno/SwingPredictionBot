@@ -157,19 +157,26 @@ RECOVERY_SL_DISTANCE_MULT = 2.0    # SL = entry - 2x jarak ke previous close
 RECOVERY_VS_LOOKBACKS_DAYS = [1, 5, 21, 63]  # 1D, 1W, 1M, 3M
 RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
 
-# Accumulation ("siap terbang" versi bandar: ARA = distribusi, lalu akumulasi + konfirmasi SMA20)
-# Divalidasi walk-forward (963 saham IDX, 2026, _validate_accum3.py) — sub-arm yang MASIH
-# DI BAWAH level ARA (yang sudah recovery/distribusi tidak dihitung sinyal):
-#   pola (density>=40% && min 2 hari heavy sejak ARA && close >= SMA20):
-#     rec5=48.7% b5=26.8% b10=16.8% up1=34.0%  (n=2958)
-#   kontrol (density < 40%): rec5=18.4% b5=9.6% b10=5.9% up1=26.5% (n=228459)
-#   => ARA (+10% harian) = puncak distribusi/dump; setelah ARA harga red + volume
-#      terkonsentrasi = akumulasi; konfirmasi = harga BERADA DI ATAS SMA20 (fresh
-#      cross <=2d justru LEBIH LEMAH: b10 36.4% vs 51.9%).
+# Accumulation ("siap terbang": ARA = puncak distribusi/dump, lalu volume besar
+# sambil harga masih stagnant + konfirmasi SMA20).
+# PERUBAHAN: baseline volume = mean SELURUH hari post-ARA sebelum hari berjalan
+# (jendela akumulasi itu sendiri, tanpa hari ARA & tanpa hari ini — anti-self-
+# referencing), bukan 20 hari pre-ARA. Sinyal = minimal
+# ACCUM_MIN_HEAVY_DAYS hari heavy; ACCUM_DENSITY_PCT hanya info (bukan gate).
+# ACCUM_HEAVY_RVOL = knob sensitivitas (2.0x; turunkan ~1.5-1.8x bila lonjakan
+# banyak yang kelewat).
+# Validasi HISTORIS (baseline pre-ARA + density>=40%, _validate_accum3.py,
+# 963 saham IDX, 2026, sub-arm yang masih di bawah ARA):
+#   pola: rec5=48.7% b5=26.8% b10=16.8% up1=34.0% (n=2958)
+#   kontrol: rec5=18.4% b5=9.6% b10=5.9% up1=26.5% (n=228459)
+#   => edge ~3x pada boom +10%/5d. Angka ini untuk logika LAMA; baseline
+#   post-ARA perlu re-validasi (menunggu logika final).
 ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
-ACCUM_HEAVY_RVOL = 2.0          # RVOL yang dianggap heavy (vol / avg 20 hari sebelumnya)
-ACCUM_RVOL_PERIOD = 20          # periode baseline RVOL
-ACCUM_DENSITY_PCT = 40.0        # min kepadatan hari heavy di jendela sejak ARA (%)
+ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
+ACCUM_HEAVY_RVOL = 2.0          # multiplikator vs baseline volume POST-ARA (fallback: 20 hari pre-ARA / RVOL)
+ACCUM_RVOL_PERIOD = 20          # jendela fallback pre-ARA & ambang double-ARA; periode display RVOL
+ACCUM_DENSITY_PCT = 30.0        # GATE kepadatan hari heavy dlm jendela post-ARA (%) — WAJIB (validasi: 30-50%
+                                #   punya edge sama ~+13pp b10; 30% = sinyal paling banyak utk edge yg sama)
 ACCUM_MIN_HEAVY_DAYS = 2        # minimal jumlah hari heavy di jendela
 ACCUM_MA20_DAYS = 20            # konfirmasi: close harus >= SMA(N) (di atas, bukan fresh cross)
 

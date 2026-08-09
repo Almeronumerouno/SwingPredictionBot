@@ -35,6 +35,15 @@ const navItems = [
     ),
   },
   {
+    label: "Ready To Fly",
+    href: "/ready-to-fly",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l7 7m0 0l7-7m-7 7v11" />
+      </svg>
+    ),
+  },
+  {
     label: "Analisis",
     href: "/analisis",
     icon: (

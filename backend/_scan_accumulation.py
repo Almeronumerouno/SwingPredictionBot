@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from types import SimpleNamespace
 
 import config as CFG
 import recovery
@@ -67,10 +68,12 @@ def _diag(code: str, name: str) -> dict | None:
         # valid == False tapi gates ada => "Belum pola akumulasi post-ARA"
         if not gates.get("below"):
             return {"code": code, "stage": "recovered_above", "acc": acc}
-        if gates.get("density") and gates.get("min_heavy") and not gates.get("above_ma"):
+        if gates.get("min_heavy") and gates.get("density") and not gates.get("above_ma"):
             return {"code": code, "stage": "pantau_no_ma", "acc": acc}
-        if not gates.get("density") or not gates.get("min_heavy"):
+        if not gates.get("density"):
             return {"code": code, "stage": "weak_density", "acc": acc}
+        if not gates.get("min_heavy"):
+            return {"code": code, "stage": "weak_heavy", "acc": acc}
         return {"code": code, "stage": "above_ma_fail", "acc": acc}
 
     reason = acc.get("reason", "")
@@ -85,6 +88,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Scan saham dengan sinyal akumulasi siap terbang")
     parser.add_argument("--limit", type=int, default=0, help="0 = semua")
     parser.add_argument("--min-value", type=float, default=0.0, help="min nilai transaksi harian (IDX)")
+    parser.add_argument("--codes", nargs="+", help="hanya kode saham tertentu (mis. SOLA ENZO BBCA)")
     parser.add_argument("--workers", type=int, default=CFG.SCAN_MAX_WORKERS)
     parser.add_argument("--diag", action="store_true",
                         help="mode diagnosis: hitung saham per gate funnel (bukan daftar sinyal)")
@@ -94,6 +98,12 @@ def main() -> None:
     if not securities:
         print("Daftar sekuritas kosong.", file=sys.stderr)
         return
+
+    if args.codes:
+        wanted = {c.upper() for c in args.codes}
+        securities = [s for s in securities if s.code.upper() in wanted]
+        for c in sorted(wanted - {s.code.upper() for s in securities}):
+            securities.append(SimpleNamespace(code=c, name=c, value=0.0))
 
     if args.min_value > 0:
         securities = [s for s in securities if getattr(s, "value", 0.0) >= args.min_value]
@@ -166,7 +176,7 @@ def _run_diag(securities, workers: int) -> None:
     print("=" * 72)
     print("  FUNNEL DETEKSI AKUMULASI (berapa saham gugur di gerbang mana)")
     print("=" * 72)
-    order = ["READY", "pantau_no_ma", "weak_density", "recovered_above",
+    order = ["READY", "pantau_no_ma", "weak_density", "weak_heavy", "recovered_above",
              "today_ara", "no_ara", "data", "error"]
     total = sum(counter.values())
     for st in order:
@@ -177,8 +187,8 @@ def _run_diag(securities, workers: int) -> None:
         bar = "#" * int(pct / 2)
         print(f"  {st:<18}{n:>6} ({pct:5.1f}%) {bar}")
         if st == "pantau_no_ma":
-            # gerbang density/min-heavy sudah LULUS, tinggal konfirmasi SMA20
-            print(f"      -> {n} saham SUDAH memenuhi pola volume, hanya belum lolos SMA20 "
+            # syarat volume & kepadatan sudah LULUS, tinggal konfirmasi SMA20
+            print(f"      -> {n} saham SUDAH memenuhi pola volume & kepadatan, hanya belum lolos SMA20 "
                   f"(contoh: {', '.join(err.get(st, [])[:6])})")
     print(f"  {'total':<18}{total:>6}")
     print("=" * 72)

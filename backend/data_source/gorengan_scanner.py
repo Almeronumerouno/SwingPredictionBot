@@ -41,9 +41,10 @@ def _ensure_cache_dir() -> None:
 def _get_gorengan_cache_path(date_str: str) -> str:
     return os.path.join(config.CACHE_DIR, f"gorengan_{date_str}.json")
 
-def _fetch_and_compute_one(code: str, name: str, daily_data: dict, shares: float, listing_board: str, target_date: Optional[str]) -> Optional[GorenganEntry]:
+def _fetch_and_compute_one(code: str, name: str, daily_data: dict, shares: float, listing_board: str, target_date: Optional[str] = None, bars=None) -> Optional[GorenganEntry]:
     try:
-        bars = fetch_trading_info(code, length=config.HISTORY_LOOKBACK_DAYS, target_date=target_date)
+        if bars is None:
+            bars = fetch_trading_info(code, length=config.HISTORY_LOOKBACK_DAYS, target_date=target_date)
         if len(bars) < config.MIN_TRADING_DAYS:
             return None
             

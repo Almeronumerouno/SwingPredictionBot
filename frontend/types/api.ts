@@ -219,3 +219,31 @@ export interface Candle {
   low: number
   close: number
 }
+
+export interface ReadyToFlyEntry {
+  code: string
+  name: string
+  close: number
+  pct_change: number
+  status: "ready" | "almost"
+  density_pct: number | null
+  k_heavy: number
+  window_days: number
+  ara_date: string | null
+  ara_ref_price: number | null
+  distance_pct: number | null
+  sma20: number | null
+  state_ma20: string | null
+  max_rvol: number | null
+  gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean } | null
+  note: string | null
+  reason: string | null
+}
+
+export interface ReadyToFlyScannerResponse {
+  scraped_at: string
+  date: string
+  count_ready: number
+  count_almost: number
+  data: ReadyToFlyEntry[]
+}
