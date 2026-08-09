@@ -10,7 +10,7 @@ export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
     <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Trading Plan</h3>
-        <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${isBuy ? "bg-[var(--color-up)]/10 text-[var(--color-up)] border-[var(--color-up)]/20" : "bg-[var(--color-down)]/10 text-[var(--color-down)] border-[var(--color-down)]/20"}`}>
+        <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${isBuy ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20"}`}>
           {plan.direction}
         </span>
       </div>

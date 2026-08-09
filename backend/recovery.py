@@ -1,24 +1,23 @@
 """
-recovery.py — Mean Reversion / Recovery ke Previous Price.
+recovery.py - Mean reversion: probabilitas harga balik ke level sebelumnya.
 
-Menghitung probabilitas harga kembali ke previous close (close bar
-sebelumnya) dalam horizon 1D-3M untuk saham yang sedang di bawah level
-tersebut ("gap-down" / drop X%).
+Modul ini menghitung peluang harga saham kembali ke previous close dalam
+horizon 1 hari sampai 3 bulan, untuk saham yang baru gap-down / turun
+tajam X%.
 
-Dua pendekatan digabung:
-  1. GBM analitik First-Passage Time (CDF Inverse Gaussian / Wald):
-     a = ln(S_target / S_0), drift mu & volatilitas sigma diestimasi dari
-     log-return historis. F(T) = P(hit target pada atau sebelum T hari).
-     Implementasi numpy murni — normal CDF via math.erf (stdlib), TANPA
-     scipy / sklearn / lifelines.
-  2. Base rate empiris historis: berapa % event "close turun X% di bawah
-     previous close" yang sebelumnya pernah recovery (high menyentuh ref)
-     dalam horizon yang sama — cross-check data-driven yang jujur.
+Dua pendekatan dipakai berbarengan:
+  1. First-passage time GBM (CDF Inverse Gaussian / Wald): a = ln(S_target/S_0),
+     drift mu dan volatilitas sigma diestimasi dari log-return historis,
+     lalu F(T) = peluang menyentuh target pada atau sebelum T hari. Semua
+     dihitung pakai numpy + math.erf saja, tanpa scipy/sklearn/lifelines.
+  2. Base rate empiris: dari histori harga saham itu sendiri, berapa persen
+     kejadian "turun X% dari previous close" yang akhirnya recovery (high
+     menyentuh level referensi) dalam horizon yang sama.
 
-Ini BUKAN rekomendasi beli. Ini estimasi probabilitas (ekspektasi), bukan
-jaminan. Exit plan (target/time-stop/SL) bersifat informasional.
+Ini bukan rekomendasi beli - murni estimasi probabilitas, bukan jaminan.
+Exit plan (target/time-stop/stop-loss) sifatnya informasional saja.
 
-Dependensi: numpy + math saja.
+Dependensi: numpy dan math (stdlib).
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ import indicators as ind
 
 
 # ---------------------------------------------------------------------------
-# Distribusi normal (via erf, stdlib — tanpa scipy)
+# Distribusi normal (via erf, stdlib - tanpa scipy)
 # ---------------------------------------------------------------------------
 
 def _normal_cdf(x: float) -> float:
@@ -60,18 +59,20 @@ def estimate_gbm_params(
     sigma_lookback: int = config.RECOVERY_SIGMA_LOOKBACK_DAYS,
 ) -> tuple[float, float]:
     """
-    Estimasi drift harian mu_log & vol harian sigma dari log-return.
+    Estimasi drift harian (mu_log) dan volatilitas harian (sigma) dari log-return.
 
-    mu_log = mean(log-return mu_lookback terakhir)   <- drift PROSES LOG-HARGA,
-        TANPA koreksi (audit #1): untuk GBM dS = mu_harga*S*dt + sigma*S*dW,
-        lemma Itô memberi d(ln S) = (mu_harga - 0.5*sigma^2)*dt + sigma*dW,
-        jadi mean(log_ret) ALREADY est. drift proses log-harga. Menambah
-        +0.5*sigma^2 (seperti versi lama) mengubahnya jadi drift harga
-        aritmetik — salah & over-optimis saat dipakai di first_passage_cdf.
-    sigma = std(log-return sigma_lookback terakhir, ddof=1)
+    mu_log = rata-rata log-return sepanjang mu_lookback hari terakhir. Ini
+        sudah merupakan drift proses log-harga apa adanya: untuk GBM
+        dS = mu_harga*S*dt + sigma*S*dW, lemma Ito memberi
+        d(ln S) = (mu_harga - 0.5*sigma^2)*dt + sigma*dW, sehingga
+        mean(log_ret) memang estimasi drift log-harga, bukan drift harga
+        aritmetik. Jangan tambahkan +0.5*sigma^2 di sini - itu akan
+        mengubahnya jadi drift harga aritmetik dan membuat estimasi di
+        first_passage_cdf over-optimis.
+    sigma = std log-return sepanjang sigma_lookback hari terakhir (ddof=1).
 
-    Returns (mu_daily_log, sigma_daily); (0.0, 0.0) jika data tidak cukup.
-    Gunakan `mu_arithmetic_daily()` untuk drift harga aritmetik (pelaporan).
+    Returns (mu_daily_log, sigma_daily); (0.0, 0.0) kalau data tidak cukup.
+    Untuk drift harga aritmetik (dipakai di pelaporan), pakai mu_arithmetic_daily().
     """
     close = np.asarray(close, dtype=float)
     valid = close[~np.isnan(close)]
@@ -97,32 +98,34 @@ def estimate_gbm_params(
 
 def mu_arithmetic_daily(mu_log: float, sigma: float) -> float:
     """
-    Drift harga aritmetik (ekspektasi return harga per hari) dari drift
-    log-harga: mu_harga = mu_log + 0.5*sigma^2 (kebalikan koreksi Itô).
-    Dipakai HANYA untuk pelaporan (mu_daily/mu_annual ke user) — BUKAN
-    sebagai argumen drift di first_passage_cdf / p_hit_ever.
+    Konversi drift log-harga ke drift harga aritmetik (ekspektasi return
+    harga per hari): mu_harga = mu_log + 0.5*sigma^2, kebalikan dari
+    koreksi Ito. Dipakai hanya untuk pelaporan (mu_daily/mu_annual ke
+    pengguna), bukan sebagai input drift di first_passage_cdf / p_hit_ever.
     """
     return mu_log + 0.5 * sigma * sigma
 
 
 # ---------------------------------------------------------------------------
-# First-Passage Time (Inverse Gaussian CDF) — GBM
+# First-Passage Time (Inverse Gaussian CDF) - GBM
 # ---------------------------------------------------------------------------
 
 def first_passage_cdf(a: float, mu: float, sigma: float, t: float) -> float:
     """
-    P(hit level log-distance +a pada atau sebelum waktu t), a > 0.
+    Peluang menyentuh level dengan jarak log +a, pada atau sebelum waktu t (a > 0).
 
-    CDF Inverse Gaussian (Wald) untuk hitting time BM berdrift:
+    Pakai CDF Inverse Gaussian (Wald) untuk hitting time Brownian motion
+    berdrift:
         F(t) = Phi((mu*t - a)/(sigma*sqrt(t)))
              + exp(2*a*mu/sigma^2) * Phi(-(a + mu*t)/(sigma*sqrt(t)))
 
-    CATATAN: versi pertama di beberapa sumber menulis Phi((a-mu*t)/...) pada
-    term pertama — itu salah (memberi F(t)=1 saat mu=0). Bentuk di atas
-    adalah bentuk standar (Wikipedia: Inverse Gaussian distribution) dan
-    tervalidasi: mu=0 -> F(t) = 2*Phi(-a/(sigma*sqrt(t))) via refleksi.
+    Catatan: beberapa referensi menulis Phi((a-mu*t)/...) pada term pertama,
+    yang keliru karena memberi F(t)=1 saat mu=0. Bentuk di atas mengikuti
+    definisi standar distribusi Inverse Gaussian, dan bisa dicek: saat mu=0,
+    hasilnya F(t) = 2*Phi(-a/(sigma*sqrt(t))) lewat argumen refleksi.
 
-    Term kedua dihitung di log-space (stabil numerik). Output di-clip ke [0,1].
+    Term kedua dihitung di log-space biar stabil secara numerik. Hasil
+    akhir di-clip ke rentang [0, 1].
     """
     if a <= 0 or sigma <= 0 or t <= 0:
         return 0.0
@@ -162,10 +165,12 @@ def empirical_base_rates(
     horizons: list[int] = config.RECOVERY_HORIZONS_DAYS,
 ) -> list[dict]:
     """
-    Untuk tiap bar i: event = close[i] <= close[i-1] * (1 - X/100).
-    Recovery = max(high[i+1 .. i+h]) >= close[i-1] (touch, konsisten dgn FPT).
+    Untuk tiap bar i, event terjadi kalau close[i] <= close[i-1] * (1 - X/100).
+    Event dianggap recovery kalau max(high[i+1 .. i+h]) >= close[i-1] - cukup
+    disentuh, konsisten dengan definisi first-passage time di atas.
 
-    Event tanpa horizon penuh di-censor (tidak dihitung) — anti look-ahead.
+    Event yang horizonnya belum lengkap (kurang data ke depan) tidak
+    dihitung, supaya tidak ada look-ahead bias.
     """
     close = np.asarray(close, dtype=float)
     high = np.asarray(high, dtype=float)
@@ -205,7 +210,7 @@ def empirical_base_rates(
 def _build_signal(in_setup: bool, distance_pct: float, drop_pct: float,
                   p_signal: Optional[float], basis: str = "model GBM") -> tuple[str, str]:
     if distance_pct >= 0:
-        return "NO_SETUP", "Harga di atas atau sama dengan previous close — tidak ada setup gap-down."
+        return "NO_SETUP", "Harga di atas atau sama dengan previous close - tidak ada setup gap-down."
     if not in_setup:
         return "NO_SETUP", (
             f"Belum turun cukup jauh (baru {distance_pct:.2f}% vs threshold {drop_pct:.1f}%)."
@@ -239,11 +244,12 @@ def _build_exit_plan(price: float, ref_price: float) -> dict:
 
 def auto_drop_pct(sigma_daily: float, price: float) -> float:
     """
-    Threshold otomatis: 2.5 x sigma_daily, di-clamp floor 2% dan cap
-    mengikuti batas Auto Rejection BEI TERBARU (SK Kep-00003/BEI/04-2025):
-    ARB (batas turun) FLAT 15% untuk semua tier harga sejak April 2025.
-    Setup recovery berkaitan dengan PENURUNAN harga -> acuan = ARB, jadi
-    cap flat ~13% (margin di bawah 15%) untuk seluruh tier harga.
+    Threshold drop otomatis = 2.5 x sigma_daily, di-clamp dengan floor 2%
+    dan cap yang mengikuti batas Auto Rejection Bawah (ARB) BEI saat ini
+    (SK Kep-00003/BEI/04-2025): ARB flat 15% untuk semua tier harga sejak
+    April 2025. Karena setup recovery berkaitan dengan penurunan harga,
+    acuannya adalah ARB - jadi cap dipasang ~13% (sedikit di bawah 15%)
+    untuk semua tier harga.
     """
     if price < 200:
         cap = config.RECOVERY_AUTO_CAP_UNDER_200
@@ -260,48 +266,57 @@ def auto_drop_pct(sigma_daily: float, price: float) -> float:
 
 def detect_accumulation(bars: list) -> dict:
     """
-    Deteksi pola "akumulasi post-ARA" (versi bandar) — siap terbang.
+    Deteksi pola "akumulasi post-ARA": saham yang baru saja distribusi besar
+    (ARA), lalu terkumpul lagi diam-diam sebelum berpotensi naik.
 
-    Konsep:
-      - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) = hari melesat = puncak
-        distribusi/dump. Hari ARA TIDAK dihitung sebagai hari akumulasi.
-      - Setelah ARA, jendela akumulasi = SEMUA hari trading sejak ARA (dinamis,
-        bukan jendela tetap). Bila dalam <= ACCUM_RVOL_PERIOD hari muncul ARA kedua,
-        keduanya dianggap satu gelombang akumulasi (window di-anchor ke ARA pertama,
-        referensi harga = ARA terbaru/puncak). Catatan double-ARA: hari ARA #2
-        TETAP masuk window, baseline, dan hitungan k — yang dikecualikan hanya ARA
-        #1 (anchor). "Hari ARA tidak dihitung" berlaku untuk anchor saja.
-      - Heavy (PER-HARI, point-in-time): utk tiap bar i di jendela, baseline = mean
-        volume post-ARA SEBELUM i (anti-self-referencing & anti-lookahead, konsisten
-        dgn konvensi RVOL di indicators.py; fallback: 20 hari pre-ARA, lalu RVOL).
-        heavy(i) = volume[i] >= ACCUM_HEAVY_RVOL x baseline(i); hari ARA itu sendiri
-        TIDAK masuk window. Catatan statistik: hari bervolume besar menaikkan
-        baseline historisnya (lagging), jadi ACCUM_HEAVY_RVOL adalah knob sensitivitas
-        utama (default 2.0x; turunkan ke 1.5-1.8x bila banyak lonjakan kelewat);
-        flag heavy hari i stabil terhadap pergeseran t.
-      - Sinyal terang = minimal ACCUM_MIN_HEAVY_DAYS hari heavy di jendela sejak ARA
-        (default 2). Kepadatan (density_pct) WAJIB >= ACCUM_DENSITY_PCT (30%) — ini
-        GATE: tanpa density, pola kehilangan edge total (b10 8.7% == kontrol).
-      - Konfirmasi (versi bandar) = harga BERADA DI ATAS SMA(ACCUM_MA20_DAYS).
-        Validasi 963 saham: fresh cross (<=2d) lebih lemah (b10 36.4%) daripada
-        posisi sudah di atas (b10 51.9%) — konfirmasi = posisi, bukan momen cross.
-      - Syarat wajib: harga MASIH DI BAWAH level ARA (belum recovery). Saham yang
-        sudah di atas level ARA = fase recovery/distribusi — sinyal akumulasi
-        tidak bermakna (rec5/b5/b10 tinggi karena harga sudah di atas, pola tidak
-        membedakan dari kontrol).
+    Logika:
+      - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) dianggap hari
+        distribusi/dump, bukan hari akumulasi - jadi hari ARA itu sendiri
+        tidak ikut dihitung sebagai bagian window.
+      - Window akumulasi = semua hari trading sejak ARA, panjangnya dinamis
+        (bukan jendela tetap). Kalau ARA kedua muncul dalam <= ACCUM_RVOL_PERIOD
+        hari setelah ARA pertama, keduanya dianggap satu gelombang: window
+        di-anchor ke ARA pertama (supaya hari di antara dua ARA tidak
+        terbuang), tapi harga acuannya tetap ARA terbaru/puncak. Hari ARA
+        kedua sendiri tetap ikut dihitung di window, baseline, dan k - yang
+        dikecualikan hanya ARA pertama (si anchor).
+      - "Heavy" dihitung per hari (point-in-time): untuk bar i di window,
+        baseline-nya adalah rata-rata volume post-ARA sebelum hari i (anti
+        self-reference, anti look-ahead, konsisten dengan konvensi RVOL di
+        indicators.py; fallback ke rata-rata 20 hari pre-ARA, lalu ke RVOL
+        biasa kalau masih kosong). Hari i dianggap heavy kalau volumenya
+        >= ACCUM_HEAVY_RVOL x baseline itu. Baseline ini sifatnya lagging
+        (hari bervolume besar ikut menaikkan baseline berikutnya), jadi
+        ACCUM_HEAVY_RVOL adalah parameter sensitivitas utama - default 2.0x,
+        bisa diturunkan ke 1.5-1.8x kalau banyak lonjakan volume terlewat.
+      - Sinyal dianggap kuat kalau minimal ACCUM_MIN_HEAVY_DAYS hari heavy
+        muncul di window (default 2), dan kepadatannya (density_pct) >=
+        ACCUM_DENSITY_PCT (30%). Density ini gate wajib: tanpa filter ini,
+        pola kehilangan edge-nya sepenuhnya (lihat hasil validasi di bawah).
+      - Konfirmasi tambahan: harga harus berada di atas SMA(ACCUM_MA20_DAYS).
+        Validasi atas 963 saham menunjukkan posisi harga yang sudah stabil
+        di atas MA (b10 51.9%) lebih kuat daripada baru saja cross ke atas
+        MA dalam <=2 hari (b10 36.4%) - jadi yang dipakai adalah posisi
+        harga saat ini, bukan momen crossing-nya.
+      - Syarat wajib lain: harga masih di bawah level ARA (belum recovery).
+        Kalau harga sudah di atas ARA, itu masuk fase recovery/distribusi,
+        bukan akumulasi lagi, jadi sinyalnya tidak bermakna di situasi itu.
 
-Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
-    baseline POST-ARA + gate density, anti-lookahead):
-      - density >=30%: arm b10 = 18.4% (n=8092) vs kontrol-below 5.4% (n=217521)
-        -> edge ~3.4x, p < 1e-16
-      - density >=40%: arm b10 = 18.6% (n=5546) vs kontrol-below 5.6% (n=222932)
-      - TANPA gate density: arm b10 8.7% == kontrol 8.7% (p~1) -> EDGE MATI,
-        density wajib diaktifkan sebagai filter.
-    Angka v3 lama (baseline PRE-ARA + density>=40%): arm b10=16.8% vs kontrol
-    5.9% (n=2958) — baseline post-ARA + density>=30% memberi edge SAMA/lebih
-    (b10 18.4%) dengan sinyal ~2.7x lebih banyak.
+    Hasil validasi walk-forward terbaru (_validate_accum4.py, 915 saham IDX,
+    panjang data 800 hari, baseline post-ARA + gate density, anti look-ahead):
+      - density >= 30%: win-rate 10 hari (b10) = 18.4% (n=8092) vs kontrol
+        (harga di bawah ARA tanpa sinyal) 5.4% (n=217521) -> edge ~3.4x,
+        p < 1e-16.
+      - density >= 40%: b10 = 18.6% (n=5546) vs kontrol 5.6% (n=222932).
+      - Tanpa gate density: b10 = 8.7%, sama persis dengan kontrol (p~1) -
+        artinya tanpa filter density, edge-nya hilang total. Ini alasan
+        density dijadikan gate wajib, bukan opsional.
+    Sebagai perbandingan, versi lama (baseline pre-ARA + density>=40%)
+    memberi b10=16.8% vs kontrol 5.9% (n=2958). Baseline post-ARA dengan
+    density>=30% memberi edge yang setara atau lebih baik (b10 18.4%),
+    dengan jumlah sinyal ~2.7x lebih banyak.
 
-    Returns dict params jika tak ada sinyal akumulasi (valid=False).
+    Return: dict parameter dengan valid=False kalau tidak ada sinyal akumulasi.
     """
     close = np.array([b.close for b in bars], dtype=float)
     volume = np.array([b.volume for b in bars], dtype=float)
@@ -312,7 +327,7 @@ Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
 
     rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)  # rolling RVOL (utk display / max_rvol)
 
-    # SMA (posisi harga vs MA) — tanpa look-ahead
+    # SMA (posisi harga vs MA) - tanpa look-ahead
     sma = np.full(n, np.nan)
     if n >= config.ACCUM_MA20_DAYS:
         cs = np.cumsum(np.concatenate(([0.0], close)))
@@ -336,24 +351,24 @@ Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
         return {
             "valid": False,
             "ready_to_fly": False,
-            "reason": "Belum pernah ada ARA (+{}%) dalam history — tidak ada acuan distribusi.".format(
+            "reason": "Belum pernah ada ARA (+{}%) dalam history - tidak ada acuan distribusi.".format(
                 config.ACCUM_ARA_RISE_PCT),
         }
 
-    # Baseline volume "normal" = rata-rata hari SETELAH ARA (post-ARA), bukan
-    # sebelum. Multiple ARA: kalau ARA #2 terjadi dalam <= ACCUM_RVOL_PERIOD hari setelah ARA #1,
-    # dua-duanya milik pola akumulasi yang SAMA (bukan reset). Window di-anchor ke ARA #1
-    # supaya hari akumulasi di antara ARA #1 dan ARA #2 TIDAK dibuang; anti-look-ahead tetap
-    # terjaga karena anchor = ARA paling awal di "gelombang" terakhir. Referensi harga = tertinggi.
+    # Baseline volume "normal" dihitung dari hari-hari setelah ARA, bukan sebelum.
+    # Kalau ada ARA kedua dalam <= ACCUM_RVOL_PERIOD hari setelah ARA pertama, keduanya
+    # dianggap satu gelombang akumulasi (bukan reset): window di-anchor ke ARA pertama
+    # supaya hari di antara ARA #1 dan #2 tidak terbuang, dan anti-look-ahead tetap
+    # terjaga karena anchor-nya tetap ARA paling awal. Harga acuan pakai ARA terbaru (puncak).
     double_ara = prev_ara_idx is not None and (ara_idx - prev_ara_idx) <= config.ACCUM_RVOL_PERIOD
     anchor_idx = prev_ara_idx if double_ara else ara_idx
     ref_ara_idx = ara_idx  # harga acuan = ARA terbaru (puncak gelombang)
 
-    # Baseline volume PER-HARI (point-in-time, identik dgn _validate_accum4.py):
-    # utk tiap hari i di window, baseline = mean volume post-ARA SEBELUM hari i
-    # (anti-self-referencing: hari i tidak ikut menghitung baseline-nya sendiri;
-    # anti-lookahead: tidak memakai data > i). Jendela <2 bar -> fallback mean
-    # ACCUM_RVOL_PERIOD hari SEBELUM ARA; masih NaN -> RVOL abs.
+    # Baseline volume dihitung per hari (point-in-time, sama seperti di
+    # _validate_accum4.py): untuk hari i di window, baseline = rata-rata volume
+    # post-ARA sebelum hari i (hari i sendiri tidak ikut menghitung baseline-nya,
+    # dan tidak memakai data setelah i). Kalau windownya masih < 2 bar, fallback
+    # ke rata-rata ACCUM_RVOL_PERIOD hari sebelum ARA; kalau masih NaN, pakai RVOL biasa.
     base_start = max(0, anchor_idx - config.ACCUM_RVOL_PERIOD)
     pre_ara_avg = float(volume[base_start:anchor_idx].mean()) if anchor_idx > base_start else float("nan")
 
@@ -393,7 +408,7 @@ Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
             "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
             "days_since_prev_ara": ara_meta["days_since_prev_ara"],
             "double_ara": ara_meta["double_ara"],
-            "reason": "Hari ini hari ARA — belum ada jendela akumulasi.",
+            "reason": "Hari ini hari ARA belum ada jendela akumulasi.",
         }
 
     k = int(heavy[anchor_idx + 1: t + 1].sum())
@@ -449,7 +464,7 @@ Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
             "distance_pct": round(dist_ara, 2),
             "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
                       "above_ma": above_ma},
-            "reason": "Belum pola akumulasi post-ARA — " + "; ".join(parts) + ".",
+            "reason": "Belum pola akumulasi post-ARA " + "; ".join(parts) + ".",
         }
 
     state_ma = "above"
@@ -487,7 +502,7 @@ Validasi walk-forward TERBARU (_validate_accum4.py, 915 saham IDX, length 800,
             f"(validasi walk-forward 915 saham: b10 {18.4:.1f}% vs kontrol {5.4:.1f}%, edge ~3.3x)."
         ),
         "warning": "Akumulasi post-ARA (harga belum recovery ke level ARA) + konfirmasi SMA20 "
-                   "— probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
+                   "probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
     }
 
 
@@ -560,7 +575,7 @@ def build_recovery_analysis(
             )
             return base
 
-    # Auto-drop: threshold = 2.5 x sigma_daily, clamp 2%..cap 13% (flat — ARB flat 15%)
+    # Auto-drop: threshold = 2.5 x sigma_daily, clamp 2%..cap 13% (flat - ARB flat 15%)
     params = None
     if drop_pct is None:
         params = estimate_gbm_params(close)
@@ -591,9 +606,9 @@ def build_recovery_analysis(
 
     if price < ref_price:
         a = math.log(ref_price / price)
-        # audit #1: estimate_gbm_params kini mengembalikan drift PROSES LOG-HARGA
-        # (mu_log). first_passage_cdf/p_hit_ever butuh drift proses LOG-harga,
-        # jadi pakai mu_log apa adanya — jangan tambah +0.5*sigma^2 (koreksi Itô).
+        # estimate_gbm_params mengembalikan drift proses log-harga (mu_log),
+        # dan itu memang yang dibutuhkan first_passage_cdf/p_hit_ever - pakai
+        # apa adanya, jangan tambah +0.5*sigma^2 (itu koreksi Ito untuk drift harga).
         mu_log, sigma = params if params else estimate_gbm_params(close)
         mu_arith = mu_arithmetic_daily(mu_log, sigma)
         probs = [
@@ -616,9 +631,9 @@ def build_recovery_analysis(
             (e for e in base["empirical"] if e["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
             None,
         )
-        # Base rate empiris saham tsb lebih representatif saat sampel cukup;
-        # fallback GBM (drift log diestimasi benar — audit #1) terkalibrasi,
-        # jadi tidak ada lagi bias sistematis over-optimis dari +0.5*sigma^2.
+        # Base rate empiris lebih representatif kalau sampelnya cukup; kalau
+        # tidak, fallback ke model GBM (drift log-nya sudah diestimasi dengan
+        # benar, jadi tidak ada bias over-optimis dari +0.5*sigma^2).
         if emp_signal and emp_signal["n_events"] >= 5 and emp_signal["rate"] is not None:
             p_signal = emp_signal["rate"]
             basis = f"empiris {emp_signal['n_events']} event historis"

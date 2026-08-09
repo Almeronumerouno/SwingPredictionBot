@@ -30,7 +30,9 @@ export async function fetchGorengan(date?: string): Promise<GorenganScannerRespo
     } catch {
       // Ignore JSON parse error if response is not JSON
     }
-    throw new Error(errorDetail)
+    const err = new Error(errorDetail) as Error & { status?: number }
+    err.status = res.status
+    throw err
   }
 
   return res.json()

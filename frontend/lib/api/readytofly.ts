@@ -26,7 +26,9 @@ export async function fetchReadyToFly(date?: string): Promise<ReadyToFlyScannerR
     } catch {
       // Ignore JSON parse error
     }
-    throw new Error(errorDetail)
+    const err = new Error(errorDetail) as Error & { status?: number }
+    err.status = res.status
+    throw err
   }
 
   return res.json()

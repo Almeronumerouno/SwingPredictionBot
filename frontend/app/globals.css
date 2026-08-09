@@ -2,29 +2,45 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #F7F7F7;
-  
-  /* Logo Palette */
-  --color-green-light: #8CD4B8;
-  --color-green: #19A56F;
-  --color-green-dark: #0E6D51;
-  --color-navy-light: #47545B;
-  --color-navy: #0F202F;
-  --color-navy-dark: #05121F;
-
-  /* Semantic Mappings */
+  /* Surface & Background */
+  --color-bg: #F8F9FA;
   --color-surface: #FFFFFF;
-  --color-border: #E6E8EA;
-  --color-text-primary: var(--color-navy-dark);
-  --color-text-secondary: var(--color-navy-light);
-  --color-text-muted: #94A3B8;
-  --color-primary: var(--color-navy);
-  --color-accent: var(--color-green);
-  --color-up: var(--color-green);
-  --color-down: #DC2626;
-  --color-muted-bg: #F2F3F4;
+  --color-surface-hover: #F1F5F9;
+  --color-muted-bg: #F8FAFC;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
 
-  /* Motion tokens — dropdown/panels use base + ease-out */
+  /* Typography Colors */
+  --color-text-primary: #0F172A;   /* Slate 900 */
+  --color-text-secondary: #475569; /* Slate 600 */
+  --color-text-muted: #64748B;     /* Slate 500 */
+
+  /* Market Semantics */
+  --color-up: #16A34A;             /* Emerald 600 */
+  --color-up-bg: #F0FDF4;         /* Emerald 50 */
+  --color-down: #DC2626;           /* Red 600 */
+  --color-down-bg: #FEF2F2;       /* Red 50 */
+  --color-warning: #D97706;        /* Amber 600 */
+  --color-warning-bg: #FFFBEB;    /* Amber 50 */
+
+  /* Primary Brand / Neutral Action */
+  --color-primary: #0F172A;        /* Deep Slate */
+  --color-primary-hover: #1E293B;
+
+  /* Radius Scale */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Shadows (Subtle, Crisp) */
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-panel: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+
+  /* Legacy compat aliases */
+  --shadow-card: var(--shadow-panel);
+  --shadow-card-hover: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+
+  /* Motion tokens */
   --duration-fast: 120ms;
   --duration-base: 200ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -53,7 +69,7 @@ input, select, button {
   font-family: inherit;
 }
 
-/* Monospaced numbers for financial data */
+/* Tabular numerals for financial data alignment */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -101,7 +117,7 @@ input, select, button {
   animation: scale-in 0.25s ease-out;
 }
 
-/* Search history dropdown — pop-out: fade + scale with subtle one-bounce overshoot */
+/* Search history dropdown */
 @keyframes dropdown-in {
   0% {
     opacity: 0;
@@ -123,7 +139,6 @@ input, select, button {
   transform-origin: top center;
 }
 
-/* Dropdown exit — faster than enter (~55%), ease-in per motion rules */
 @keyframes dropdown-out {
   from {
     opacity: 1;
@@ -139,20 +154,14 @@ input, select, button {
   transform-origin: top center;
 }
 
-/* Dropdown header fades in first, before the staggered items */
 @keyframes dropdown-header-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .animate-dropdown-header {
   animation: dropdown-header-in var(--duration-fast) var(--ease-out) both;
 }
 
-/* Search history item stagger (30ms per sibling) */
 @keyframes history-item-in {
   from {
     opacity: 0;
@@ -167,12 +176,52 @@ input, select, button {
   animation: history-item-in 220ms var(--ease-out) both;
 }
 
+/* Entrance animation for sections/cards */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-rise {
+  animation: rise-in 300ms var(--ease-out) both;
+}
+.animate-rise-stagger-2 {
+  animation: rise-in 300ms var(--ease-out) 40ms both;
+}
+.animate-rise-stagger-3 {
+  animation: rise-in 300ms var(--ease-out) 80ms both;
+}
+
+/* Factor bar grow animation */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.animate-bar-grow {
+  transform-origin: left center;
+  animation: bar-grow 700ms var(--ease-out) both;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-dropdown-in,
   .animate-dropdown-exit,
   .animate-dropdown-header,
-  .animate-history-item {
+  .animate-history-item,
+  .animate-rise,
+  .animate-rise-stagger-2,
+  .animate-rise-stagger-3,
+  .animate-bar-grow {
     animation: none !important;
+    opacity: 1 !important;
   }
 }

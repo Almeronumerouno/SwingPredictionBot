@@ -98,7 +98,7 @@ export default async function SahamPage({
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
-                <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border ${rekomendasi === "BUY" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : rekomendasi === "SELL" ? "bg-red-50 text-red-700 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${rekomendasi === "BUY" ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : rekomendasi === "SELL" ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" : "bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)] border-[var(--color-border)]"}`}>
                   {rekomendasi}
                 </span>
               </div>
@@ -110,8 +110,15 @@ export default async function SahamPage({
               </p>
               <div className="flex items-baseline gap-3 md:justify-end mb-2">
                 <p className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[var(--color-text-primary)]">{fmt(analisis.harga)}</p>
-                <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                  {priceChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
+                <span className={`text-sm font-bold tabular-nums ${priceChange >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
+                  <svg className="w-3.5 h-3.5 inline mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {priceChange >= 0 ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    )}
+                  </svg>
+                  {Math.abs(pctChange).toFixed(2)}%
                 </span>
               </div>
               {analisis.data_delayed !== false && (
@@ -122,7 +129,7 @@ export default async function SahamPage({
                   Data dari Yahoo Finance
                   {analisis.fetched_at
                     ? ` diambil ${fmtTime(analisis.fetched_at)} (delay ±15 mnt → data ~${fmtTime(analisis.fetched_at, true)}), bukan live.`
-                    : " — delay ±15 menit dari harga real-time, bukan live."}
+                    : `, delay ±15 menit dari harga real-time, bukan data live.`}
                 </p>
               )}
             </div>

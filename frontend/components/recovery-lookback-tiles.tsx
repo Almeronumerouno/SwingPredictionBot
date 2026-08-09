@@ -27,7 +27,7 @@ export default function RecoveryLookbackTiles({
   return (
     <div>
       <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
-        Posisi vs Harga Acuan — udah balik atau masih di bawah?
+        Posisi vs Harga Acuan: sudah balik atau masih di bawah?
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {lookbacks.map((v) => {
@@ -41,12 +41,12 @@ export default function RecoveryLookbackTiles({
               onClick={() => handleClick(v.days)}
               aria-pressed={isActive}
               className={`text-left w-full rounded-lg border p-3 transition-all ${
-                above ? "border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/60" : "border-red-200 bg-red-50/60 hover:bg-red-100/60"
+                above ? "border-[var(--color-up)]/20 bg-[var(--color-up-bg)]/60 hover:bg-[var(--color-up-bg)]" : "border-[var(--color-down)]/20 bg-[var(--color-down-bg)]/60 hover:bg-[var(--color-down-bg)]"
               } ${isActive ? "ring-2 ring-offset-1 ring-blue-500" : ""}`}
             >
               <div className="flex items-center justify-between mb-1.5 gap-2">
                 <span className="text-xs font-bold text-[var(--color-text-primary)]">{v.label}</span>
-                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${above ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
+                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded border ${above ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20"}`}>
                   <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {above ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
@@ -59,8 +59,15 @@ export default function RecoveryLookbackTiles({
               </div>
               <p className="text-[10px] text-[var(--color-text-muted)] tabular-nums mb-1">Acuan {fmtIdr(v.ref_price)}</p>
               <div className="flex items-center justify-between mt-1">
-                <p className={`text-sm font-bold tabular-nums ${above ? "text-emerald-600" : "text-red-500"}`}>
-                  {above ? "▲" : "▼"} {absDist.toFixed(2)}%
+                <p className={`text-sm font-bold tabular-nums ${above ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
+                  <svg className="w-3 h-3 inline mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {above ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    )}
+                  </svg>
+                  {absDist.toFixed(2)}%
                 </p>
                 {v.threshold_pct != null && (
                   <span className="text-[9px] text-[var(--color-text-muted)]">

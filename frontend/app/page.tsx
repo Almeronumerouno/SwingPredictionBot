@@ -1,24 +1,112 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import type { GainersResponse, GorenganScannerResponse, ReadyToFlyScannerResponse } from "@/types/api";
 import { fetchGainers } from "@/lib/api/gainers";
 import { fetchGorengan } from "@/lib/api/gorengan";
 import { fetchReadyToFly } from "@/lib/api/readytofly";
 import ScrapeAllButton from "@/components/scrape-all-button";
 import DateSelector from "@/components/date-selector";
 import SignalScreener from "@/components/signal-screener";
+import AnimatedNumber from "@/components/animated-number";
 
 const fmtIdr = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const pct = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(2)}%`;
 
-async function safeFetch<T>(fn: () => Promise<T>): Promise<T | null> {
+const fmtStamp = (iso?: string | null) =>
+  iso ? new Date(iso).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
+
+type FetchResult<T> = { ok: true; value: T } | { ok: false; status: number | null };
+
+async function safeFetch<T>(fn: () => Promise<T>): Promise<FetchResult<T>> {
   try {
-    return await fn();
-  } catch {
-    return null;
+    return { ok: true, value: await fn() };
+  } catch (e) {
+    const status = (e as { status?: number }).status;
+    return { ok: false, status: status ?? null };
   }
+}
+
+type SignalState = "unscanned" | "error" | "scanned-empty" | "has-data";
+
+function SignalCard({
+  href,
+  title,
+  subtitle,
+  state,
+  stats,
+  stamp,
+  noun,
+  dateLabel,
+  animationDelay,
+}: {
+  href: string;
+  title: string;
+  subtitle: string;
+  state: SignalState;
+  stats: { label: string; value: number; valueClass: string }[];
+  stamp: string | null;
+  noun: string;
+  dateLabel: string;
+  animationDelay: string;
+}) {
+  return (
+    <Link
+      prefetch={false}
+      href={href}
+      style={{ animationDelay }}
+      className="animate-rise group border border-[var(--color-border)] rounded-lg p-5 bg-[var(--color-surface)] shadow-[var(--shadow-panel)] hover:shadow-[var(--shadow-card-hover)] hover:border-[var(--color-border-strong)] transition-all duration-200 flex flex-col justify-between"
+    >
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">{title}</h3>
+            <p className="text-[11px] font-medium text-[var(--color-text-secondary)] mt-0.5">{subtitle}</p>
+          </div>
+          <svg className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        {state === "has-data" ? (
+          <div className="grid grid-cols-2 gap-3 my-3">
+            {stats.map((s) => (
+              <div key={s.label} className="rounded-md bg-[var(--color-muted-bg)] px-3 py-2.5 border border-[var(--color-border)]/50">
+                <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">{s.label}</p>
+                <p className={`text-xl font-extrabold tabular-nums mt-0.5 tracking-tight ${s.valueClass}`}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md bg-[var(--color-muted-bg)] px-3 py-3 text-center my-3 border border-[var(--color-border)]/50">
+            <p className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              {state === "unscanned" && "Belum discan untuk tanggal ini"}
+              {state === "error" && "Gagal memuat data"}
+              {state === "scanned-empty" && `Tidak ada ${noun} terdeteksi`}
+            </p>
+            <p className="text-[11px] text-[var(--color-text-secondary)] mt-1 leading-relaxed">
+              {state === "unscanned" && `Klik "Scan Market" untuk memindai seluruh pasar.`}
+              {state === "error" && "Periksa koneksi server, lalu muat ulang."}
+              {state === "scanned-empty" && `Scanner berjalan normal untuk ${dateLabel}.`}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)] mt-1">
+        {stamp ? (
+          <span className="text-[11px] font-medium text-[var(--color-text-muted)]">
+            Diperbarui {stamp}
+          </span>
+        ) : (
+          <span />
+        )}
+        <svg className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </div>
+    </Link>
+  );
 }
 
 export default async function DashboardPage({
@@ -27,291 +115,278 @@ export default async function DashboardPage({
   searchParams: Promise<{ date?: string }>;
 }) {
   const { date } = await searchParams;
+  const dateLabel = date || "hari ini";
 
-  // Fetch all data sources in parallel
-  const [gainers, gorenganRes, rtfRes] = await Promise.all([
+  const [gainersRes, gorenganRes, rtfRes] = await Promise.all([
     safeFetch(() => fetchGainers(date)),
     safeFetch(() => fetchGorengan(date)),
     safeFetch(() => fetchReadyToFly(date)),
   ]);
 
-  const gainerData = gainers?.data ?? [];
-  const gorenganData = gorenganRes?.data ?? [];
-  const rtfData = rtfRes?.data ?? [];
+  const gainers = gainersRes.ok ? gainersRes.value : null;
+  const gorengan = gorenganRes.ok ? gorenganRes.value : null;
+  const rtf = rtfRes.ok ? rtfRes.value : null;
 
-  // Gainer stats
+  const gainerData = gainers?.data ?? [];
+  const gorenganData = gorengan?.data ?? [];
+  const rtfData = rtf?.data ?? [];
+
   const topBuy = gainerData.filter((g) => g.recommendation === "BUY").sort((a, b) => (b.swing_score ?? 0) - (a.swing_score ?? 0));
   const avgChange = gainerData.length > 0 ? gainerData.reduce((acc, g) => acc + g.pct_change, 0) / gainerData.length : 0;
   const totalVolume = gainerData.reduce((acc, g) => acc + g.volume, 0);
   const totalValue = gainerData.reduce((acc, g) => acc + g.value, 0);
   const maxGainer = gainerData.length > 0 ? gainerData.reduce((a, b) => (a.pct_change > b.pct_change ? a : b)) : null;
 
-  // Gorengan stats
   const countExtreme = gorenganData.filter((g) => g.gorengan_level === "EXTREME").length;
   const countHigh = gorenganData.filter((g) => g.gorengan_level === "HIGH").length;
 
-  // Ready To Fly stats
   const countReady = rtfData.filter((e) => e.status === "ready").length;
   const countAlmost = rtfData.filter((e) => e.status === "almost").length;
+
+  const gorenganState: SignalState = gorenganRes.ok
+    ? (gorenganData.length > 0 ? "has-data" : "scanned-empty")
+    : (gorenganRes.status === 404 ? "unscanned" : "error");
+  const rtfState: SignalState = rtfRes.ok
+    ? (rtfData.length > 0 ? "has-data" : "scanned-empty")
+    : (rtfRes.status === 404 ? "unscanned" : "error");
+
+  const hasGainerData = gainerData.length > 0;
+
+  type KpiDef = {
+    label: string;
+    caption: string;
+    value: number | null;
+    valueClass: string;
+    format: "id" | "idr" | "pct";
+    decimals?: number;
+  };
+
+  const kpis: KpiDef[] = [
+    {
+      label: "Total Gainer",
+      caption: "saham naik terdeteksi",
+      value: hasGainerData ? gainerData.length : null,
+      valueClass: "text-[var(--color-text-primary)]",
+      format: "id",
+    },
+    {
+      label: "Sinyal Buy",
+      caption: "rekomendasi beli aktif",
+      value: hasGainerData ? topBuy.length : null,
+      valueClass: "text-[var(--color-up)]",
+      format: "id",
+    },
+    {
+      label: "Nilai Transaksi",
+      caption: hasGainerData ? `volume ${fmt(totalVolume)}` : "belum ada data",
+      value: hasGainerData ? totalValue : null,
+      valueClass: "text-[var(--color-text-primary)]",
+      format: "idr",
+    },
+    {
+      label: "Rata-rata Naik",
+      caption: hasGainerData ? "seluruh gainer" : "belum ada data",
+      value: hasGainerData ? avgChange : null,
+      valueClass: avgChange >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]",
+      format: "pct",
+      decimals: 2,
+    },
+  ];
 
   return (
     <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-8 lg:mb-10 gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 lg:mb-8 gap-4 animate-rise">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
-          </div>
-          <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]">
-            Pusat kendali — scan market, pantau sinyal, dan ringkasan seluruh analisis.
+          <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] mb-0.5">Dashboard</h1>
+          <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+            Data Bursa IDX | {dateLabel}
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <Suspense fallback={<div className="h-9 w-40 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+          <Suspense fallback={<div className="h-9 w-40 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/" />
           </Suspense>
         </div>
       </header>
 
-      {/* ─── Scan Control Panel ─── */}
-      <section className="border border-[var(--color-border)] rounded-xl p-5 bg-[var(--color-surface)] shadow-sm mb-8 lg:mb-10">
+      {/* Scan Market Control */}
+      <section
+        style={{ animationDelay: "40ms" }}
+        className="animate-rise border border-[var(--color-border)] rounded-lg p-4 sm:p-5 bg-[var(--color-surface)] mb-6 lg:mb-8"
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
-              <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-md bg-[var(--color-primary)]/[0.08] flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Scan Market Keseluruhan</h2>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">Jalankan seluruh scanner sekaligus (Top Gainers, Gorengan, Ready To Fly) untuk hari ini.</p>
+              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Scan Market</h2>
+              <p className="text-[11px] font-medium text-[var(--color-text-secondary)] mt-0.5">
+                Pembaruan data bursa serentak.
+              </p>
             </div>
           </div>
-          <div className="flex-shrink-0">
-            <Suspense fallback={<div className="h-9 w-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+          <div className="flex-shrink-0 w-full sm:w-auto">
+            <Suspense fallback={<div className="h-10 w-36 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
               <ScrapeAllButton />
             </Suspense>
           </div>
         </div>
       </section>
 
-      {/* ─── Market Overview (Gainers) ─── */}
-      {gainerData.length > 0 && (
-        <section className="mb-8 lg:mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-[var(--color-text-primary)]">Market Overview</h2>
-            <Link href={`/top-gainers${date ? `?date=${date}` : ""}`} className="text-xs font-semibold text-[var(--color-primary)] hover:underline flex items-center gap-1">
-              Lihat Semua
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
-            <div className="group border border-[var(--color-border)] rounded-xl px-5 py-5 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total Saham</p>
-              </div>
-              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{gainerData.length}</p>
-              <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">saham gainer terdeteksi</p>
-            </div>
-
-            <div className="group border border-[var(--color-border)] rounded-xl px-5 py-5 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-[var(--color-up)]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[var(--color-up)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Sinyal Buy</p>
-              </div>
-              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-[var(--color-up)] tracking-tight">{topBuy.length}</p>
-              <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">rekomendasi beli aktif</p>
-            </div>
-
-            <div className="group border border-[var(--color-border)] rounded-xl px-5 py-5 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total Value</p>
-              </div>
-              <p className="text-lg sm:text-2xl font-extrabold tabular-nums text-[var(--color-text-primary)] tracking-tight">{fmtIdr(totalValue)}</p>
-              <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">volume transaksi: {fmt(totalVolume)}</p>
-            </div>
-
-            <div className="group border border-[var(--color-border)] rounded-xl px-5 py-5 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Rata-rata Change</p>
-              </div>
-              <p className={`text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight ${avgChange >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>{pct(avgChange)}</p>
-              <p className="text-xs font-medium text-[var(--color-text-muted)] mt-1">dari seluruh gainer</p>
-            </div>
-          </div>
-
-          {/* Top Gainer + Signal Screener */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {maxGainer && (
-              <div className="lg:col-span-1 border border-[var(--color-up)]/20 rounded-xl p-6 bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-up)]/[0.03] shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">🔥 Top Gainer</h2>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[var(--color-up)]/10 text-[var(--color-up)] border border-[var(--color-up)]/20">
-                    {pct(maxGainer.pct_change)}
-                  </span>
-                </div>
-                <Link prefetch={false} href={`/saham/${maxGainer.code}${date ? `?date=${date}` : ""}`} className="group block">
-                  <p className="text-3xl font-extrabold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors tracking-tight">{maxGainer.code}</p>
-                  <p className="text-sm font-medium text-[var(--color-text-secondary)] mt-1 truncate">{maxGainer.name}</p>
-                </Link>
-                <div className="mt-5 pt-4 border-t border-[var(--color-border)]/50 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Harga</p>
-                    <p className="text-lg font-bold tabular-nums text-[var(--color-text-primary)]">{fmtIdr(maxGainer.close)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Volume</p>
-                    <p className="text-lg font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(maxGainer.volume)}</p>
-                  </div>
-                </div>
-                <Link
-                  href={`/saham/${maxGainer.code}${date ? `?date=${date}` : ""}`}
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-colors"
-                >
-                  Lihat Analisis
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                </Link>
-              </div>
-            )}
-            <SignalScreener data={gainerData} date={date} />
-          </div>
-        </section>
-      )}
-
-      {/* ─── Market Alerts: Gorengan + Ready To Fly ─── */}
-      <section className="mb-8 lg:mb-10">
-        <h2 className="text-base font-bold text-[var(--color-text-primary)] mb-4">Market Alerts</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-
-          {/* Gorengan Card */}
-          <Link href={`/gorengan${date ? `?date=${date}` : ""}`} className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-                <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">Scanner Gorengan</p>
-                <p className="text-xs font-medium text-[var(--color-text-muted)] truncate">Deteksi pump-and-dump &amp; aktivitas bandar</p>
-              </div>
-              <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            {gorenganData.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-red-50 rounded-lg px-3 py-2.5">
-                  <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-0.5">Extreme</p>
-                  <p className="text-xl font-extrabold tabular-nums text-red-600">{countExtreme}</p>
-                </div>
-                <div className="bg-orange-50 rounded-lg px-3 py-2.5">
-                  <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider mb-0.5">High</p>
-                  <p className="text-xl font-extrabold tabular-nums text-orange-600">{countHigh}</p>
-                </div>
-              </div>
+      {/* KPI Grid */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 lg:mb-8">
+        {kpis.map((kpi, i) => (
+          <div
+            key={kpi.label}
+            style={{ animationDelay: `${80 + i * 50}ms` }}
+            className="animate-rise border border-[var(--color-border)] rounded-lg p-4 bg-[var(--color-surface)]"
+          >
+            <p className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">{kpi.label}</p>
+            {kpi.value !== null ? (
+              <AnimatedNumber
+                value={kpi.value}
+                format={kpi.format}
+                decimals={kpi.decimals ?? 0}
+                className={`block text-xl sm:text-2xl font-extrabold tabular-nums tracking-tight ${kpi.valueClass}`}
+              />
             ) : (
-              <div className="bg-[var(--color-muted-bg)] rounded-lg px-3 py-3 text-center">
-                <p className="text-xs text-[var(--color-text-muted)]">Belum di-scan — klik &quot;Scrape Gorengan&quot; di atas</p>
-              </div>
+              <p className="text-xl sm:text-2xl font-extrabold tabular-nums tracking-tight text-[var(--color-text-muted)]">--</p>
             )}
-          </Link>
+            <p className="text-[11px] font-medium text-[var(--color-text-secondary)] mt-1">{kpi.caption}</p>
+          </div>
+        ))}
+      </section>
 
-          {/* Ready To Fly Card */}
-          <Link href={`/ready-to-fly${date ? `?date=${date}` : ""}`} className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors">
-                <svg className="w-6 h-6 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l7 7m0 0l7-7m-7 7v11" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">Ready To Fly</p>
-                <p className="text-xs font-medium text-[var(--color-text-muted)] truncate">Akumulasi post-ARA — siap terbang</p>
-              </div>
-              <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            {rtfData.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-violet-50 rounded-lg px-3 py-2.5">
-                  <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider mb-0.5">Siap Terbang</p>
-                  <p className="text-xl font-extrabold tabular-nums text-violet-600">{countReady}</p>
-                </div>
-                <div className="bg-amber-50 rounded-lg px-3 py-2.5">
-                  <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider mb-0.5">Hampir Siap</p>
-                  <p className="text-xl font-extrabold tabular-nums text-amber-600">{countAlmost}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[var(--color-muted-bg)] rounded-lg px-3 py-3 text-center">
-                <p className="text-xs text-[var(--color-text-muted)]">Belum di-scan — klik &quot;Scan Ready To Fly&quot; di atas</p>
-              </div>
-            )}
-          </Link>
+      {/* Signal Radar: Gorengan & Ready To Fly */}
+      <section className="mb-6 lg:mb-8">
+        <div className="mb-3">
+          <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Radar Sinyal</h2>
+          <p className="text-[11px] font-medium text-[var(--color-text-secondary)] mt-0.5">
+            Deteksi aktivitas bandar dan pola akumulasi.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <SignalCard
+            href={`/gorengan${date ? `?date=${date}` : ""}`}
+            title="Scanner Gorengan"
+            subtitle="Deteksi pump-and-dump & bandar"
+            state={gorenganState}
+            stamp={fmtStamp(gorengan?.scraped_at)}
+            noun="gorengan"
+            dateLabel={dateLabel}
+            animationDelay="110ms"
+            stats={[
+              { label: "Extreme", value: countExtreme, valueClass: "text-[var(--color-down)]" },
+              { label: "High Risk", value: countHigh, valueClass: "text-[var(--color-warning)]" },
+            ]}
+          />
+          <SignalCard
+            href={`/ready-to-fly${date ? `?date=${date}` : ""}`}
+            title="Ready To Fly"
+            subtitle="Akumulasi post-ARA, kandidat breakout"
+            state={rtfState}
+            stamp={fmtStamp(rtf?.scraped_at)}
+            noun="ready to fly"
+            dateLabel={dateLabel}
+            animationDelay="170ms"
+            stats={[
+              { label: "Siap Terbang", value: countReady, valueClass: "text-[var(--color-up)]" },
+              { label: "Hampir Siap", value: countAlmost, valueClass: "text-[var(--color-warning)]" },
+            ]}
+          />
         </div>
       </section>
 
-      {/* ─── Quick Access ─── */}
-      <section>
-        <h2 className="text-base font-bold text-[var(--color-text-primary)] mb-4">Akses Cepat</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
-          <Link href={`/top-gainers${date ? `?date=${date}` : ""}`} className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[var(--color-up)]/10 flex items-center justify-center group-hover:bg-[var(--color-up)]/20 transition-colors">
-                <svg className="w-6 h-6 text-[var(--color-up)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-base font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">Top Gainers</p>
-                <p className="text-sm font-medium text-[var(--color-text-muted)]">Lihat semua saham naik hari ini dengan detail lengkap</p>
-              </div>
-              <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+      {/* Market Overview & Top Gainers */}
+      <section className="mb-8 lg:mb-10">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Market Overview</h2>
+              {gainers && fmtStamp(gainers.scraped_at) && (
+                <span className="font-mono text-[11px] font-medium text-[var(--color-text-muted)]">
+                  {fmtStamp(gainers.scraped_at)}
+                </span>
+              )}
             </div>
-          </Link>
-
-          <Link href="/analisis" className="group border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-base font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">Analisis Saham</p>
-                <p className="text-sm font-medium text-[var(--color-text-muted)]">Cari dan analisis saham apapun di Bursa Efek Indonesia</p>
-              </div>
-              <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
+          </div>
+          <Link
+            href={`/top-gainers${date ? `?date=${date}` : ""}`}
+            className="flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] hover:underline"
+          >
+            Lihat Semua Gainers
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
+ 
+        {!gainersRes.ok ? (
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-8 text-center">
+            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+              {gainersRes.status === 404 ? "Data gainers belum discan untuk tanggal ini" : "Gagal memuat data gainers"}
+            </p>
+            <p className="mx-auto mt-1 max-w-md text-xs text-[var(--color-text-secondary)]">
+              {gainersRes.status === 404
+                ? `Gunakan tombol "Scan Market" di atas untuk memulai scanning data ${dateLabel}.`
+                : "Periksa koneksi ke server API backend, lalu muat ulang halaman ini."}
+            </p>
+          </div>
+        ) : gainerData.length === 0 ? (
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-8 text-center">
+            <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+              Belum ada data gainer untuk {dateLabel}. Jalankan &quot;Scan Market&quot; di atas.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
+            {maxGainer && (
+              <Link
+                prefetch={false}
+                href={`/saham/${maxGainer.code}${date ? `?date=${date}` : ""}`}
+                className="group flex flex-col justify-between rounded-lg border border-l-4 border-[var(--color-border)] border-l-[var(--color-up)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-border-strong)] hover:border-l-[var(--color-up)] lg:col-span-1"
+              >
+                <div>
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Top Gainer</h3>
+                    <span className="rounded-md border border-[var(--color-up)]/20 bg-[var(--color-up-bg)] px-2 py-0.5 font-mono text-[11px] font-bold tabular-nums text-[var(--color-up)]">
+                      {pct(maxGainer.pct_change)}
+                    </span>
+                  </div>
+                  <p className="font-mono text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-primary)]">
+                    {maxGainer.code}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs font-medium text-[var(--color-text-secondary)]">{maxGainer.name}</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[var(--color-border)] pt-3">
+                    <div>
+                      <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Harga</p>
+                      <p className="font-mono text-sm font-bold tabular-nums text-[var(--color-text-primary)]">{fmtIdr(maxGainer.close)}</p>
+                    </div>
+                    <div>
+                      <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Volume</p>
+                      <p className="font-mono text-sm font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(maxGainer.volume)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3">
+                  <span className="text-xs font-semibold text-[var(--color-primary)]">Lihat detail analisis</span>
+                  <svg className="h-3.5 w-3.5 text-[var(--color-primary)] transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </Link>
+            )}
+            <div className="lg:col-span-2">
+              <SignalScreener data={gainerData} date={date} />
+            </div>
+          </div>
+        )}
       </section>
     </>
   );
 }
+ 

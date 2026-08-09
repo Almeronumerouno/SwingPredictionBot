@@ -73,7 +73,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
             Threshold dihitung otomatis dari volatilitas saham ini (2.5× σ harian).
           </p>
           <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 mb-2.5">
-            Dibatasi 2%–13% (ARB flat 15% untuk semua tier harga IDX sejak April 2025).
+            Dibatasi 2% hingga 13% (ARB flat 15% untuk semua tier harga IDX sejak April 2025).
           </p>
           <button
             onClick={apply}

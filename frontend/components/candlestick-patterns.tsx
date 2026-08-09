@@ -229,7 +229,7 @@ const PATTERN_DB: Record<string, PatternMeta> = {
   },
   "Abandoned Baby Bullish": {
     signal: "bullish", strength: 3, candles: 3,
-    description: "Morning Star dengan gap penuh — shadow star tidak overlap sama sekali dengan candle 1 & 3.",
+    description: "Morning Star dengan gap penuh: shadow star tidak overlap sama sekali dengan candle 1 & 3.",
     prediction: "Sinyal reversal bullish sangat langka dan sangat kuat. Hampir selalu diikuti rally signifikan.",
     svgCandles: [
       { type: "bear", bt: 12, bb: 48, wt: 8, wb: 52 },
@@ -239,7 +239,7 @@ const PATTERN_DB: Record<string, PatternMeta> = {
   },
   "Abandoned Baby Bearish": {
     signal: "bearish", strength: 3, candles: 3,
-    description: "Evening Star dengan gap penuh — shadow star tidak overlap sama sekali dengan candle 1 & 3.",
+    description: "Evening Star dengan gap penuh: shadow star tidak overlap sama sekali dengan candle 1 & 3.",
     prediction: "Sinyal reversal bearish sangat langka dan sangat kuat. Hampir selalu diikuti penurunan tajam.",
     svgCandles: [
       { type: "bull", bt: 40, bb: 78, wt: 35, wb: 82 },
@@ -455,10 +455,10 @@ export default function CandlestickPatterns({
 
           const signalCls =
             meta.signal === "bullish"
-              ? { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "bg-emerald-100 text-emerald-700", label: "Bullish", arrow: "▲" }
+              ? { bg: "bg-[var(--color-up-bg)]", border: "border-[var(--color-up)]/20", text: "text-[var(--color-up)]", badge: "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20", label: "Bullish", dir: "up" as const }
               : meta.signal === "bearish"
-                ? { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", badge: "bg-red-100 text-red-700", label: "Bearish", arrow: "▼" }
-                : { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge: "bg-amber-100 text-amber-700", label: "Netral", arrow: "◆" };
+                ? { bg: "bg-[var(--color-down-bg)]", border: "border-[var(--color-down)]/20", text: "text-[var(--color-down)]", badge: "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20", label: "Bearish", dir: "down" as const }
+                : { bg: "bg-[var(--color-warning-bg)]", border: "border-[var(--color-warning)]/20", text: "text-[var(--color-warning)]", badge: "bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning)]/20", label: "Netral", dir: "neutral" as const };
 
           // Price projection based on ATR
           const atrVal = atr && atr > 0 ? atr : null;
@@ -484,8 +484,17 @@ export default function CandlestickPatterns({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h5 className="text-sm font-bold text-[var(--color-text-primary)]">{patternName}</h5>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full ${signalCls.badge}`}>
-                      {signalCls.arrow} {signalCls.label}
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-bold rounded border tabular-nums tracking-wide ${signalCls.badge}`}>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {signalCls.dir === "up" ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                        ) : signalCls.dir === "down" ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                        )}
+                      </svg>
+                      {signalCls.label}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mb-1.5">

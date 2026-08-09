@@ -3,20 +3,31 @@
 import type { RawIndicators } from "@/types/api";
 import CandlestickPatterns from "./candlestick-patterns";
 
-function SignalBadge({ label, signal }: { label: string; signal: "bullish" | "bearish" | "neutral" | "strong_bullish" | "strong_bearish" }) {
+function SignalBadge({ signal }: { signal: "bullish" | "bearish" | "neutral" | "strong_bullish" | "strong_bearish" }) {
   const styles = {
-    strong_bullish: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    bullish: "bg-emerald-50/60 text-emerald-600 border-emerald-100",
-    bearish: "bg-red-50/60 text-red-600 border-red-100",
-    strong_bearish: "bg-red-50 text-red-700 border-red-200",
-    neutral: "bg-slate-50 text-slate-500 border-slate-200",
+    strong_bullish: "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20",
+    bullish: "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20",
+    bearish: "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20",
+    strong_bearish: "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20",
+    neutral: "bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
   };
-  const icons = {
-    strong_bullish: "▲▲",
-    bullish: "▲",
-    bearish: "▼",
-    strong_bearish: "▼▼",
-    neutral: "●",
+  const icon = (d: "up" | "down" | "neutral") => (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {d === "up" ? (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+      ) : d === "down" ? (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+      )}
+    </svg>
+  );
+  const icons: Record<string, React.ReactNode> = {
+    strong_bullish: <span className="inline-flex"><span className="-mr-0.5">{icon("up")}</span>{icon("up")}</span>,
+    bullish: icon("up"),
+    bearish: icon("down"),
+    strong_bearish: <span className="inline-flex"><span className="-mr-0.5">{icon("down")}</span>{icon("down")}</span>,
+    neutral: icon("neutral"),
   };
   const labels = {
     strong_bullish: "Strong Bullish",
@@ -27,8 +38,8 @@ function SignalBadge({ label, signal }: { label: string; signal: "bullish" | "be
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border ${styles[signal]}`}>
-      <span>{icons[signal]}</span>
+    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-bold rounded border tabular-nums ${styles[signal]}`}>
+      {icons[signal]}
       {labels[signal]}
     </span>
   );
@@ -158,7 +169,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
             <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">RSI (14)</span>
-                <SignalBadge label="RSI" signal={rsiSig} />
+                <SignalBadge signal={rsiSig} />
               </div>
               <div className="text-2xl font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(data.rsi)}</div>
               {data.rsi !== null && <GaugeBar value={data.rsi} min={0} max={100} zones={rsiZones} />}
@@ -171,7 +182,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
             <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">MFI (14)</span>
-                <SignalBadge label="MFI" signal={mfiSig} />
+                <SignalBadge signal={mfiSig} />
               </div>
               <div className="text-2xl font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(data.mfi)}</div>
               {data.mfi !== null && <GaugeBar value={data.mfi} min={0} max={100} zones={mfiZones} />}
@@ -184,7 +195,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
             <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">ADX (14)</span>
-                <SignalBadge label="ADX" signal={adxSig} />
+                <SignalBadge signal={adxSig} />
               </div>
               <div className="text-2xl font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(data.adx)}</div>
               {data.adx !== null && <GaugeBar value={data.adx} min={0} max={100} zones={adxZones} />}
@@ -204,7 +215,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
             <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">EMA Cross</span>
-                <SignalBadge label="EMA" signal={emaSig} />
+                <SignalBadge signal={emaSig} />
               </div>
               <div className="mt-2 space-y-2">
                 <div className="flex justify-between items-center">
@@ -230,7 +241,7 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
             <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">RVOL (20)</span>
-                <SignalBadge label="RVOL" signal={rvolSig} />
+                <SignalBadge signal={rvolSig} />
               </div>
               <div className="text-2xl font-bold tabular-nums text-[var(--color-text-primary)]">{fmt(data.rvol)}x</div>
               <div className="mt-4 mb-2 h-2.5 rounded-full bg-[var(--color-muted-bg)] overflow-hidden">
@@ -274,9 +285,9 @@ export default function TechnicalIndicators({ data }: { data: RawIndicators | nu
                 </div>
                 <span className="text-sm font-bold tabular-nums text-red-600">{data.resistance ? fmtIDR(data.resistance) : "-"}</span>
               </div>
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-50/40 border border-emerald-100">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--color-up-bg)]/40 border border-[var(--color-up)]/20">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-md bg-[var(--color-up-bg)] flex items-center justify-center">
                     <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                   <span className="text-sm font-medium text-[var(--color-text-secondary)]">Support</span>

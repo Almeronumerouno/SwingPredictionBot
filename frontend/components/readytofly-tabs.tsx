@@ -12,7 +12,7 @@ type Tab = "ready" | "almost";
 function GateIndicator({ label, passed }: { label: string; passed: boolean }) {
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-      passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-500"
+      passed ? "bg-[var(--color-up-bg)] text-[var(--color-up)]" : "bg-[var(--color-down-bg)] text-[var(--color-down)]"
     }`}>
       {passed ? (
         <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +28,7 @@ function GateIndicator({ label, passed }: { label: string; passed: boolean }) {
   );
 }
 
-function ReadyToFlyTable({ data }: { data: ReadyToFlyEntry[] }) {
+function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = data.filter((e) => {
@@ -45,12 +45,14 @@ function ReadyToFlyTable({ data }: { data: ReadyToFlyEntry[] }) {
     );
   }
 
+  const qs = date ? `?date=${date}` : "";
+
   return (
     <div>
       <div className="mb-4">
         <div className="relative w-full sm:w-64">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -59,50 +61,50 @@ function ReadyToFlyTable({ data }: { data: ReadyToFlyEntry[] }) {
             placeholder="Cari kode saham..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl text-sm font-medium focus:outline-none focus:border-[var(--color-text-primary)] focus:ring-1 focus:ring-[var(--color-text-primary)] transition-all placeholder:text-[var(--color-text-muted)]"
+            className="w-full pl-10 pr-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md text-sm font-medium focus:outline-none focus:border-[var(--color-text-primary)] focus:ring-1 focus:ring-[var(--color-text-primary)] transition-all placeholder:text-[var(--color-text-muted)]"
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto border border-[var(--color-border)] rounded-xl">
+      <div className="overflow-x-auto border border-[var(--color-border)] rounded-lg">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] bg-[var(--color-muted-bg)]">
-              <th className="px-4 py-3">Kode</th>
-              <th className="px-4 py-3">Nama</th>
-              <th className="px-4 py-3 text-right">Harga</th>
-              <th className="px-4 py-3 text-right">% Change</th>
-              <th className="px-4 py-3 text-right">Jarak ARA</th>
-              <th className="px-4 py-3 text-right">Density</th>
-              <th className="px-4 py-3 text-center">Gates</th>
+            <tr className="text-left text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] bg-[var(--color-muted-bg)]">
+              <th className="px-4 py-2.5">Kode</th>
+              <th className="px-4 py-2.5">Nama</th>
+              <th className="px-4 py-2.5 text-right">Harga</th>
+              <th className="px-4 py-2.5 text-right">% Change</th>
+              <th className="px-4 py-2.5 text-right">Jarak ARA</th>
+              <th className="px-4 py-2.5 text-right">Density</th>
+              <th className="px-4 py-2.5 text-center">Gates</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((e) => {
-              const pctColor = e.pct_change >= 0 ? "text-emerald-600" : "text-red-500";
-              const distColor = (e.distance_pct ?? 0) >= 0 ? "text-emerald-600" : "text-red-500";
+              const pctColor = e.pct_change >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]";
+              const distColor = (e.distance_pct ?? 0) >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]";
               return (
                 <tr key={e.code} className="border-b border-[var(--color-border)]/60 last:border-0 hover:bg-[var(--color-muted-bg)]/40 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5">
                     <Link
-                      href={`/saham/${e.code}`}
+                      href={`/saham/${e.code}${qs}`}
                       className="font-bold text-[var(--color-primary)] hover:underline"
                     >
                       {e.code}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)] max-w-[180px] truncate">{e.name}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-semibold text-[var(--color-text-primary)]">{fmtIdr(e.close)}</td>
-                  <td className={`px-4 py-3 text-right tabular-nums font-bold ${pctColor}`}>
+                  <td className="px-4 py-2.5 text-[var(--color-text-secondary)] max-w-[180px] truncate">{e.name}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-[var(--color-text-primary)]">{fmtIdr(e.close)}</td>
+                  <td className={`px-4 py-2.5 text-right tabular-nums font-bold ${pctColor}`}>
                     {e.pct_change >= 0 ? "+" : ""}{e.pct_change.toFixed(2)}%
                   </td>
-                  <td className={`px-4 py-3 text-right tabular-nums font-bold ${distColor}`}>
-                    {e.distance_pct != null ? `${e.distance_pct.toFixed(1)}%` : "—"}
+                  <td className={`px-4 py-2.5 text-right tabular-nums font-bold ${distColor}`}>
+                    {e.distance_pct != null ? `${e.distance_pct.toFixed(1)}%` : "-"}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums font-bold text-[var(--color-text-primary)]">
-                    {e.density_pct != null ? `${e.density_pct.toFixed(0)}%` : "—"}
+                  <td className="px-4 py-2.5 text-right tabular-nums font-bold text-[var(--color-text-primary)]">
+                    {e.density_pct != null ? `${e.density_pct.toFixed(0)}%` : "-"}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5">
                     <div className="flex flex-wrap items-center justify-center gap-1">
                       <GateIndicator label="Below" passed={e.gates?.below ?? false} />
                       <GateIndicator label="Density" passed={e.gates?.density ?? false} />
@@ -120,7 +122,7 @@ function ReadyToFlyTable({ data }: { data: ReadyToFlyEntry[] }) {
   );
 }
 
-export default function ReadyToFlyTabs({ data }: { data: ReadyToFlyEntry[] }) {
+export default function ReadyToFlyTabs({ data, date }: { data: ReadyToFlyEntry[]; date?: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("ready");
 
   const readyData = data.filter((e) => e.status === "ready");
@@ -130,43 +132,42 @@ export default function ReadyToFlyTabs({ data }: { data: ReadyToFlyEntry[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Segmented Control */}
+      <div className="inline-flex bg-slate-100 p-1 rounded-md self-start">
         <button
           onClick={() => setActiveTab("ready")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+          className={`px-3.5 py-1.5 text-xs font-bold rounded transition-all ${
             activeTab === "ready"
-              ? "bg-violet-100 text-violet-800 border-2 border-violet-200"
-              : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-2 border-transparent hover:bg-[var(--color-muted-bg)]"
+              ? "bg-white text-[var(--color-up)] shadow-sm ring-1 ring-black/5"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l7 7m0 0l7-7m-7 7v11" />
-          </svg>
           Ready To Fly
-          <span className={`ml-1 px-2 py-0.5 rounded-md text-xs ${activeTab === "ready" ? "bg-violet-200 text-violet-900" : "bg-[var(--color-muted-bg)]"}`}>
+          <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] tabular-nums ${
+            activeTab === "ready" ? "bg-[var(--color-up-bg)] text-[var(--color-up)]" : "bg-slate-200/70 text-slate-500"
+          }`}>
             {readyData.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("almost")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+          className={`px-3.5 py-1.5 text-xs font-bold rounded transition-all ${
             activeTab === "almost"
-              ? "bg-amber-100 text-amber-800 border-2 border-amber-200"
-              : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-2 border-transparent hover:bg-[var(--color-muted-bg)]"
+              ? "bg-white text-[var(--color-warning)] shadow-sm ring-1 ring-black/5"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
           Hampir Siap
-          <span className={`ml-1 px-2 py-0.5 rounded-md text-xs ${activeTab === "almost" ? "bg-amber-200 text-amber-900" : "bg-[var(--color-muted-bg)]"}`}>
+          <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] tabular-nums ${
+            activeTab === "almost" ? "bg-amber-100 text-amber-700" : "bg-slate-200/70 text-slate-500"
+          }`}>
             {almostData.length}
           </span>
         </button>
       </div>
 
-      <ReadyToFlyTable data={activeData} />
+      <ReadyToFlyTable data={activeData} date={date} />
     </div>
   );
 }

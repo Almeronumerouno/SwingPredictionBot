@@ -125,12 +125,17 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
                     <p className={`text-xs font-semibold tabular-nums ${g.pct_change >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>{pct(g.pct_change)}</p>
                   </div>
                   <div className="flex items-center gap-1.5 pl-2 flex-shrink-0 w-[60px] justify-end">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold tabular-nums border ${
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-xs font-bold tabular-nums tracking-wide ${
                       activeTab === "buy" 
-                        ? "bg-[var(--color-up)]/10 text-[var(--color-up)] border-[var(--color-up)]/20" 
-                        : "bg-[var(--color-down)]/10 text-[var(--color-down)] border-[var(--color-down)]/20"
+                        ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" 
+                        : "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20"
                     }`}>
-                      {activeTab === "buy" ? "▲" : "▼"} {g.swing_score?.toFixed(0) ?? "-"}
+                      {activeTab === "buy" ? (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" /></svg>
+                      ) : (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                      )}
+                      {g.swing_score?.toFixed(0) ?? "-"}
                     </span>
                   </div>
                 </Link>
