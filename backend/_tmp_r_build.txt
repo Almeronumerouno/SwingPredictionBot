@@ -1,0 +1,189 @@
+def build_recovery_analysis(
+    code: str,
+    nama: str,
+    bars: list,
+    drop_pct: float = config.RECOVERY_DROP_DEFAULT,
+    last_updated: Optional[str] = None,
+    ref_days: Optional[int] = None,
+) -> dict:
+    """
+    Analisis recovery ke previous close untuk satu saham.
+
+    Args:
+        code: kode saham
+        nama: nama emiten
+        bars: list DailyBar (dari data_source.yahoo_client), urut lama->baru
+        drop_pct: threshold drop X%; None = otomatis dari volatilitas saham
+        last_updated: tanggal data terakhir (fallback ke bar terakhir)
+        ref_days: target acuan recovery dalam hari trading (1 = previous
+            close); None = previous close (close[-2], status quo)
+
+    Returns:
+        dict sesuai struktur RecoveryResponse di api.py
+    """
+    close = np.array([b.close for b in bars], dtype=float)
+    high = np.array([b.high for b in bars], dtype=float)
+
+    base = {
+        "kode": code,
+        "nama": nama,
+        "valid": False,
+        "last_updated": last_updated or (bars[-1].date if bars else ""),
+        "harga": float(close[-1]) if len(close) else 0.0,
+        "ref_price": float(close[-2]) if len(close) > 1 else 0.0,
+        "ref_days": ref_days,
+        "distance_pct": None,
+        "drop_pct": drop_pct,
+        "drop_source": "manual",
+        "in_setup": False,
+        "gbm": None,
+        "empirical": [],
+        "signal": "NO_SETUP",
+        "signal_reason": "",
+        "exit_plan": None,
+        "vs_lookbacks": [],
+        "accumulation": None,
+    }
+
+    if len(close) < config.RECOVERY_MIN_BARS:
+        base["signal_reason"] = (
+            f"Data historis cuma {len(close)} bar, minimal {config.RECOVERY_MIN_BARS} "
+            "untuk estimasi GBM yang stabil."
+        )
+        return base
+
+    if ref_days is not None:
+        if ref_days < 1:
+            base["signal_reason"] = "ref_days harus >= 1."
+            return base
+        if len(close) <= ref_days:
+            base["signal_reason"] = (
+                f"Data historis cuma {len(close)} bar, tidak cukup untuk acuan "
+                f"{ref_days} hari."
+            )
+            return base
+
+    # Auto-drop: threshold = 2.5 x sigma_daily, clamp 2%..cap 13% (flat - ARB flat 15%)
+    params = None
+    if drop_pct is None:
+        params = estimate_gbm_params(close)
+        sigma = params[1]
+        price_now = float(close[-1])
+        drop_pct = auto_drop_pct(sigma, price_now)
+        base["drop_source"] = "auto"
+    base["drop_pct"] = drop_pct
+
+    price = float(close[-1])
+    if ref_days is not None:
+        ref_price = float(close[-1 - ref_days])
+    else:
+        ref_price = float(close[-2])
+    base["ref_price"] = ref_price
+    if ref_price <= 0:
+        base["signal_reason"] = "Harga acuan tidak valid."
+        return base
+
+    distance_pct = (price - ref_price) / ref_price * 100.0
+    base["distance_pct"] = round(distance_pct, 2)
+    base["last_updated"] = last_updated or bars[-1].date
+
+    in_setup = distance_pct <= -drop_pct
+    base["in_setup"] = in_setup
+
+    base["empirical"] = empirical_base_rates(close, high, drop_pct)
+
+    if price < ref_price:
+        a = math.log(ref_price / price)
+        # estimate_gbm_params mengembalikan drift proses log-harga (mu_log),
+        # dan itu memang yang dibutuhkan first_passage_cdf/p_hit_ever - pakai
+        # apa adanya, jangan tambah +0.5*sigma^2 (itu koreksi Ito untuk drift harga).
+        mu_log, sigma = params if params else estimate_gbm_params(close)
+        mu_arith = mu_arithmetic_daily(mu_log, sigma)
+        probs = [
+            {"horizon_days": h, "p_hit": round(first_passage_cdf(a, mu_log, sigma, h), 3)}
+            for h in config.RECOVERY_HORIZONS_DAYS
+        ]
+        ever = p_hit_ever(mu_log, sigma, a)
+        base["gbm"] = {
+            "mu_daily": round(mu_arith, 6),
+            "sigma_daily": round(sigma, 6),
+            "mu_annual": round(mu_arith * 252, 4),
+            "sigma_annual": round(sigma * math.sqrt(252), 4),
+            "p_hit_ever": round(ever, 3),
+            "probabilities": probs,
+        }
+
+        p_signal = None
+        basis = "model GBM"
+        emp_signal = next(
+            (e for e in base["empirical"] if e["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
+            None,
+        )
+        # Base rate empiris lebih representatif kalau sampelnya cukup; kalau
+        # tidak, fallback ke model GBM (drift log-nya sudah diestimasi dengan
+        # benar, jadi tidak ada bias over-optimis dari +0.5*sigma^2).
+        if emp_signal and emp_signal["n_events"] >= 5 and emp_signal["rate"] is not None:
+            p_signal = emp_signal["rate"]
+            basis = f"empiris {emp_signal['n_events']} event historis"
+        else:
+            p_signal = next(
+                (p["p_hit"] for p in probs if p["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
+                None,
+            )
+        signal, reason = _build_signal(in_setup, distance_pct, drop_pct, p_signal, basis)
+        base["signal"] = signal
+        base["signal_reason"] = reason
+    else:
+        signal, reason = _build_signal(in_setup, distance_pct, drop_pct, None)
+        base["signal"] = signal
+        base["signal_reason"] = reason
+
+    if in_setup:
+        base["exit_plan"] = _build_exit_plan(price, ref_price)
+
+    # Posisi harga sekarang vs close N hari trading lalu (1D/1W/1M/3M)
+    lookbacks = []
+    for n in config.RECOVERY_VS_LOOKBACKS_DAYS:
+        if len(close) <= n:
+            continue
+        ref = float(close[-1 - n])
+        if ref <= 0:
+            continue
+        dist = (price - ref) / ref * 100.0
+
+        rets = []
+        for i in range(n, len(close)):
+            rets.append(close[i] / close[i - n] - 1.0)
+        
+        threshold_pct = None
+        if len(rets) > 1:
+            sigma_n = float(np.std(rets, ddof=1))
+            price_now = float(close[-1])
+            if price_now < 200:
+                cap = config.RECOVERY_AUTO_CAP_UNDER_200
+            elif price_now < 5000:
+                cap = config.RECOVERY_AUTO_CAP_200_TO_5000
+            else:
+                cap = config.RECOVERY_AUTO_CAP_AT_5000
+            
+            threshold_pct = round(
+                max(config.RECOVERY_AUTO_MIN, min(cap, config.RECOVERY_AUTO_SIGMA_MULT * sigma_n * 100.0)),
+                1,
+            )
+
+        status = "above" if dist >= 0 else "below"
+
+        lookbacks.append({
+            "days": n,
+            "label": config.RECOVERY_VS_LABELS.get(n, f"{n}D"),
+            "ref_price": round(ref, 2),
+            "distance_pct": round(dist, 2),
+            "status": status,
+            "threshold_pct": threshold_pct,
+        })
+    base["vs_lookbacks"] = lookbacks
+
+    base["accumulation"] = detect_accumulation(bars)
+
+    base["valid"] = True
+    return base

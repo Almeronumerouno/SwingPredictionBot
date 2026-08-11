@@ -7,6 +7,23 @@ import type { ReadyToFlyEntry } from "@/types/api";
 const fmtIdr = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
+const fmtDate = (d?: string | null) => {
+  if (!d) return "-";
+  const parts = d.split("-");
+  if (parts.length < 3) return d;
+  const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  const mIdx = parseInt(parts[1], 10) - 1;
+  return `${parts[2]} ${months[mIdx] || parts[1]}`;
+};
+
+const fmtVol = (v?: number | null) => {
+  if (v == null || v === 0) return "-";
+  if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(2)}B`;
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `${(v / 1_000).toFixed(0)}K`;
+  return new Intl.NumberFormat("id-ID").format(v);
+};
+
 type Tab = "ready" | "almost";
 
 function GateIndicator({ label, passed }: { label: string; passed: boolean }) {
@@ -74,8 +91,10 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
               <th className="px-4 py-2.5">Nama</th>
               <th className="px-4 py-2.5 text-right">Harga</th>
               <th className="px-4 py-2.5 text-right">% Change</th>
-              <th className="px-4 py-2.5 text-right">Jarak ARA</th>
-              <th className="px-4 py-2.5 text-right">Density</th>
+              <th className="px-4 py-2.5 text-center">Last ARA</th>
+              <th className="px-4 py-2.5 text-center">Vol Pasca-ARA</th>
+              <th className="px-4 py-2.5 text-center">Jarak ARA</th>
+              <th className="px-4 py-2.5 text-center">Density</th>
               <th className="px-4 py-2.5 text-center">Gates</th>
             </tr>
           </thead>
@@ -98,10 +117,16 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
                   <td className={`px-4 py-2.5 text-right tabular-nums font-bold ${pctColor}`}>
                     {e.pct_change >= 0 ? "+" : ""}{e.pct_change.toFixed(2)}%
                   </td>
-                  <td className={`px-4 py-2.5 text-right tabular-nums font-bold ${distColor}`}>
+                  <td className="px-4 py-2.5 text-center tabular-nums font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
+                    {fmtDate(e.ara_date)}
+                  </td>
+                  <td className="px-4 py-2.5 text-center tabular-nums font-semibold text-[var(--color-text-primary)] whitespace-nowrap" title={e.post_ara_volume ? `Volume: ${new Intl.NumberFormat("id-ID").format(e.post_ara_volume)} lembar | Est. Nilai: ${fmtIdr(e.post_ara_value || 0)}` : undefined}>
+                    {fmtVol(e.post_ara_volume)}
+                  </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${distColor}`}>
                     {e.distance_pct != null ? `${e.distance_pct.toFixed(1)}%` : "-"}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-bold text-[var(--color-text-primary)]">
+                  <td className="px-4 py-2.5 text-center tabular-nums font-bold text-[var(--color-text-primary)]">
                     {e.density_pct != null ? `${e.density_pct.toFixed(0)}%` : "-"}
                   </td>
                   <td className="px-4 py-2.5">

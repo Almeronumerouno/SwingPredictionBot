@@ -44,8 +44,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
             </svg>
           </div>
           <div>
-            <h2 className="text-[13px] font-bold text-[var(--color-text-primary)]">Mean Reversion / Recovery</h2>
-            <p className="text-[11px] text-[var(--color-text-muted)]">Peluang kembali ke harga acuan</p>
+            <h2 className="text-[13px] font-bold text-[var(--color-text-primary)]">Analisis Recovery</h2>
           </div>
         </div>
         <span className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
@@ -237,7 +236,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
                   })}
                 </div>
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-2.5 tabular-nums">
-                  Drift μ {((data.gbm.mu_annual ?? 0) * 100).toFixed(1)}% / th dan Vol σ {(data.gbm.sigma_annual ?? 0) * 100 >= 100 ? ((data.gbm.sigma_annual ?? 0) * 100).toFixed(0) : ((data.gbm.sigma_annual ?? 0) * 100).toFixed(1)}% / th
+                  Drift μ {((data.gbm.mu_annual ?? 0) * 100).toFixed(1)}% per tahun · Vol σ {(data.gbm.sigma_annual ?? 0) * 100 >= 100 ? ((data.gbm.sigma_annual ?? 0) * 100).toFixed(0) : ((data.gbm.sigma_annual ?? 0) * 100).toFixed(1)}% per tahun
                 </p>
               </div>
             )}

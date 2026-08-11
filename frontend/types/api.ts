@@ -238,6 +238,8 @@ export interface ReadyToFlyEntry {
   gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean } | null
   note: string | null
   reason: string | null
+  post_ara_volume?: number | null
+  post_ara_value?: number | null
 }
 
 export interface ReadyToFlyScannerResponse {

@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Optional
 
+import numpy as np
 import yfinance as yf
 
 import config
@@ -48,6 +49,10 @@ class DailyBar:
     low: float
     close: float
     volume: float
+    raw_close: float = 0.0   # harga MENTAH (tanpa adj dividen/split) - basis deteksi ARA
+    adj_close: float = 0.0   # harga DISESUAIKAN dividen/split (Adj Close Yahoo) —
+                             # basis analisis indikator & model recovery (tanpa gap
+                             # dividen palsu). 0.0 bila tidak tersedia (fallback ke close).
     approx_value: float = 0.0    # estimasi kasar: close x volume, BUKAN data riil
     frequency: float = 0.0       # tidak tersedia dari Yahoo, selalu 0
     bid: float = 0.0             # tidak tersedia dari Yahoo, selalu 0
@@ -99,11 +104,17 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
     start = end_d - timedelta(days=length)
 
     try:
+        # auto_adjust=False => Yahoo kasih DUA seri sekaligus dalam satu panggilan:
+        #   - Close     = harga MENTAH (riil, basis deteksi ARA di recovery.py)
+        #   - Adj Close = harga disesuaikan dividen/split (basis chart & analisis lama)
+        # Sebelumnya auto_adjust=True => cuma seri adjusted, sehingga ex-dividen besar
+        # (mis. DUTI Rp480 ≈ 10.7% dari harga) membuat kenaikan PALSU +10% di hari
+        # ex-date dan deteksi ARA menjadikannya sinyal akumulasi yang salah.
         df = yf.Ticker(ticker).history(
             start=start.isoformat(),
             end=end.isoformat(),
             interval="1d",
-            auto_adjust=config.YAHOO_AUTO_ADJUST,  # eksplisit (audit fix #15)
+            auto_adjust=False,
         )
     except Exception as e:  # noqa: BLE001
         raise YahooClientError(f"Gagal fetch {ticker} dari Yahoo Finance: {e}") from e
@@ -119,9 +130,13 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
     prev_close: Optional[float] = None
 
     for _, row in df.iterrows():
-        close = float(row["Close"])
+        close_raw = float(row["Close"])
+        close = close_raw
         volume = float(row["Volume"])
-        if not (math.isfinite(close) and math.isfinite(volume)):
+        # Adj Close tersedia saat auto_adjust=False — seri disesuaikan
+        # dividen/split (basis indikator & model; tanpa gap palsu).
+        adj_close = float(row["Adj Close"]) if "Adj Close" in row and np.isfinite(float(row["Adj Close"])) else close_raw
+        if not (math.isfinite(close_raw) and math.isfinite(close) and math.isfinite(volume)):
             continue
         bar = DailyBar(
             date=str(row[date_col].date()) if hasattr(row[date_col], "date") else str(row[date_col]),
@@ -130,6 +145,8 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
             high=float(row["High"]),
             low=float(row["Low"]),
             close=close,
+            raw_close=close_raw,
+            adj_close=adj_close,
             volume=volume,
             approx_value=close * volume,
         )

@@ -1,0 +1,134 @@
+167|
+168|class RecoveryProbability(BaseModel):
+169|    horizon_days: int
+170|    p_hit: float
+171|
+172|
+173|class RecoveryEmpirical(BaseModel):
+174|    horizon_days: int
+175|    n_events: int
+176|    n_recovered: int
+177|    rate: float | None
+178|
+179|
+180|class RecoveryGbm(BaseModel):
+181|    mu_daily: float
+182|    sigma_daily: float
+183|    mu_annual: float
+184|    sigma_annual: float
+185|    p_hit_ever: float
+186|    probabilities: list[RecoveryProbability]
+187|
+188|
+189|class RecoveryExitPlan(BaseModel):
+190|    target: float
+191|    time_stop_days: int
+192|    stop_loss: float
+193|    note: str
+194|
+195|
+196|class RecoveryVsLookback(BaseModel):
+197|    days: int
+198|    label: str
+199|    ref_price: float
+200|    distance_pct: float
+201|    status: str  # "above" = udah di atas harga acuan, "below" = masih di bawah
+202|    threshold_pct: float | None = None
+203|
+204|
+205|class RecoveryAccumulation(BaseModel):
+206|    valid: bool
+207|    ready_to_fly: bool = False
+208|    k_heavy: int = 0
+209|    window_days: int = 0
+210|    density_pct: float | None = None
+211|    rvol: float | None = None
+212|    max_rvol: float | None = None
+213|    ara_date: str | None = None
+214|    ara_ref_price: float | None = None
+215|    prev_ara_date: str | None = None
+216|    prev_ara_ref_price: float | None = None
+217|    days_since_prev_ara: int | None = None
+218|    double_ara: bool = False
+219|    gates: dict | None = None
+220|    sma20: float | None = None
+221|    state_ma20: str | None = None  # "above" | "breakout" | "below"
+222|    distance_pct: float | None = None
+223|    note: str | None = None
+224|    warning: str | None = None
+225|    reason: str | None = None
+226|    post_ara_volume: float | None = None
+227|    post_ara_value: float | None = None
+228|
+229|
+230|class RecoveryResponse(BaseModel):
+231|    kode: str
+232|    nama: str
+233|    valid: bool
+234|    harga: float | None
+235|    ref_price: float | None
+236|    ref_days: int | None = None
+237|    last_updated: str
+238|    distance_pct: float | None
+239|    drop_pct: float
+240|    drop_source: str
+241|    in_setup: bool
+242|    gbm: RecoveryGbm | None
+243|    empirical: list[RecoveryEmpirical]
+244|    signal: str
+245|    signal_reason: str
+246|    exit_plan: RecoveryExitPlan | None
+247|    vs_lookbacks: list[RecoveryVsLookback] = []
+248|    accumulation: RecoveryAccumulation | None = None
+249|
+250|
+251|class MarketStatusResponse(BaseModel):
+252|    is_open: bool
+253|    message: str
+254|    current_time: str
+255|    suggested_source: str
+256|
+257|
+258|class ReadyToFlyEntryResponse(BaseModel):
+259|    code: str
+260|    name: str
+261|    close: float
+262|    pct_change: float
+263|    status: str  # "ready" | "almost"
+264|    density_pct: float | None = None
+265|    k_heavy: int = 0
+266|    window_days: int = 0
+267|    ara_date: str | None = None
+268|    ara_ref_price: float | None = None
+269|    distance_pct: float | None = None
+270|    sma20: float | None = None
+271|    state_ma20: str | None = None
+272|    max_rvol: float | None = None
+273|    gates: dict | None = None
+274|    note: str | None = None
+275|    reason: str | None = None
+276|    post_ara_volume: float | None = 0.0
+277|    post_ara_value: float | None = 0.0
+278|
+279|
+280|class ReadyToFlyScannerResponse(BaseModel):
+281|    scraped_at: str
+282|    date: str
+283|    count_ready: int
+284|    count_almost: int
+285|    data: list[ReadyToFlyEntryResponse]
+286|
+287|
+288|for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
+289|               GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
+290|               AnalisisResponse, HistoryResponse, MarketStatusResponse,
+291|               RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
+292|               RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
+293|               GorenganScannerEntryResponse, GorenganScannerResponse,
+294|               ReadyToFlyEntryResponse, ReadyToFlyScannerResponse):
+295|    _model.model_rebuild()
+296|
+297|
+298|# ---------------------------------------------------------------------------
+299|# Service layer
+300|# ---------------------------------------------------------------------------

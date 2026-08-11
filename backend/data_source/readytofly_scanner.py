@@ -40,6 +40,10 @@ class ReadyToFlyEntry:
     gates: dict | None
     note: str | None
     reason: str | None
+    net_dist: float | None = None        # Net Distribution window post-ARA: [-1, +1]
+    sma_gap_pct: float | None = None     # (harga - SMA20)/SMA20 dalam %
+    post_ara_volume: float | None = 0.0
+    post_ara_value: float | None = 0.0
 
 
 def _ensure_cache_dir() -> None:
@@ -94,6 +98,15 @@ def _fetch_and_check_one(
 
         prev = float(daily_data.get("Previous", 0) or 0)
         c = float(daily_data.get("Close", close_now) or close_now)
+
+        # Mode yahoo (scan_all dengan force_source="yahoo") tidak punya snapshot
+        # IDX: daily_data cuma {StockCode, StockName}, jadi Previous/Close = 0 dan
+        # pct_change bakal 0.00% semua. Fallback: hitung dari dua bar terakhir
+        # Yahoo (harga mentah = % change riil pasar, konsisten dgn snapshot IDX).
+        if not prev and len(bars) >= 2:
+            raw = [(getattr(b, "raw_close", None) or b.close) for b in bars]
+            prev, c = float(raw[-2]), float(raw[-1])
+
         pct = ((c - prev) / prev * 100.0) if prev else 0.0
 
         return ReadyToFlyEntry(
@@ -108,12 +121,16 @@ def _fetch_and_check_one(
             ara_date=accum.get("ara_date"),
             ara_ref_price=accum.get("ara_ref_price"),
             distance_pct=accum.get("distance_pct"),
+            net_dist=accum.get("net_dist"),
+            sma_gap_pct=accum.get("sma_gap_pct"),
             sma20=accum.get("sma20"),
             state_ma20=accum.get("state_ma20"),
             max_rvol=accum.get("max_rvol"),
             gates=gates,
             note=accum.get("note"),
             reason=accum.get("reason"),
+            post_ara_volume=accum.get("post_ara_volume", 0.0),
+            post_ara_value=accum.get("post_ara_value", 0.0),
         )
     except Exception:
         return None
@@ -203,7 +220,13 @@ def get_cached_ready_to_fly(for_date: Optional[str] = None) -> Optional[dict]:
     with open(path, "r", encoding="utf-8") as f:
         raw = json.load(f)
 
+    data_rows = []
+    for row in raw.get("data", []):
+        row.setdefault("post_ara_volume", None)
+        row.setdefault("post_ara_value", None)
+        data_rows.append(ReadyToFlyEntry(**row))
+
     return {
         "scraped_at": raw["scraped_at"],
-        "data": [ReadyToFlyEntry(**row) for row in raw["data"]],
+        "data": data_rows,
     }

@@ -1,0 +1,71 @@
+831|    }
+832|
+833|
+834|@app.post("/scrape/readytofly")
+835|def trigger_scrape_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+836|    """
+837|    Trigger scan seluruh bursa untuk mendeteksi saham siap terbang (akumulasi post-ARA).
+838|    Proses ini memakan waktu beberapa menit.
+839|    """
+840|    try:
+841|        results = scan_ready_to_fly(target_date=date)
+842|        count_ready = sum(1 for r in results if r.status == "ready")
+843|        count_almost = sum(1 for r in results if r.status == "almost")
+844|        return {
+845|            "status": "success",
+846|            "count_ready": count_ready,
+847|            "count_almost": count_almost,
+848|            "message": f"Scan selesai: {count_ready} ready, {count_almost} hampir siap.",
+849|        }
+850|    except Exception as e:
+851|        logging.exception("Scrape ready-to-fly gagal")
+852|        raise HTTPException(status_code=500, detail=str(e))
+853|
+854|
+855|@app.get("/readytofly", response_model=ReadyToFlyScannerResponse)
+856|def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+857|    """
+858|    Mengambil data saham ready-to-fly yang sudah di-scan.
+859|    """
+860|    cached = get_cached_ready_to_fly(for_date=date)
+861|    if not cached:
+862|        raise HTTPException(
+863|            status_code=404,
+864|            detail="Data belum discan. Silakan klik tombol 'Scan Ready To Fly' terlebih dahulu.",
+865|        )
+866|
+867|    entries = cached["data"]
+868|    count_ready = sum(1 for e in entries if e.status == "ready")
+869|    count_almost = sum(1 for e in entries if e.status == "almost")
+870|
+871|    return {
+872|        "scraped_at": cached["scraped_at"],
+873|        "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
+874|        "count_ready": count_ready,
+875|        "count_almost": count_almost,
+876|        "data": [
+877|            {
+878|                "code": e.code,
+879|                "name": e.name,
+880|                "close": e.close,
+881|                "pct_change": e.pct_change,
+882|                "status": e.status,
+883|                "density_pct": e.density_pct,
+884|                "k_heavy": e.k_heavy,
+885|                "window_days": e.window_days,
+886|                "ara_date": e.ara_date,
+887|                "ara_ref_price": e.ara_ref_price,
+888|                "distance_pct": e.distance_pct,
+889|                "sma20": e.sma20,
+890|                "state_ma20": e.state_ma20,
+891|                "max_rvol": e.max_rvol,
+892|                "gates": e.gates,
+893|                "note": e.note,
+894|                "reason": e.reason,
+895|                "post_ara_volume": e.post_ara_volume,
+896|                "post_ara_value": e.post_ara_value,
+897|            }
+898|            for e in entries
+899|        ],
+900|    }
+901|

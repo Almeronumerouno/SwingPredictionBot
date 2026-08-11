@@ -1,0 +1,36 @@
+"""
+recovery.py - Mean reversion: probabilitas harga balik ke level sebelumnya.
+
+Modul ini menghitung peluang harga saham kembali ke previous close dalam
+horizon 1 hari sampai 3 bulan, untuk saham yang baru gap-down / turun
+tajam X%.
+
+Dua pendekatan dipakai berbarengan:
+  1. First-passage time GBM (CDF Inverse Gaussian / Wald): a = ln(S_target/S_0),
+     drift mu dan volatilitas sigma diestimasi dari log-return historis,
+     lalu F(T) = peluang menyentuh target pada atau sebelum T hari. Semua
+     dihitung pakai numpy + math.erf saja, tanpa scipy/sklearn/lifelines.
+  2. Base rate empiris: dari histori harga saham itu sendiri, berapa persen
+     kejadian "turun X% dari previous close" yang akhirnya recovery (high
+     menyentuh level referensi) dalam horizon yang sama.
+
+Ini bukan rekomendasi beli - murni estimasi probabilitas, bukan jaminan.
+Exit plan (target/time-stop/stop-loss) sifatnya informasional saja.
+
+Dependensi: numpy dan math (stdlib).
+"""
+
+from __future__ import annotations
+
+import math
+from typing import Optional
+
+import numpy as np
+
+import config
+import indicators as ind
+
+
+# ---------------------------------------------------------------------------
+# Distribusi normal (via erf, stdlib - tanpa scipy)
+# ---------------------------------------------------------------------------

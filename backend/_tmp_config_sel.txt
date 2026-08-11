@@ -1,0 +1,26 @@
+142|RECOVERY_DROP_DEFAULT = 5.0        # X% di bawah previous close sebagai setup
+143|RECOVERY_HORIZONS_DAYS = [1, 3, 5, 10, 21, 42, 63]  # horizon trading day (1D → 3 bulan)
+144|RECOVERY_HISTORY_LOOKBACK_DAYS = 500  # kalender; estimasi mu/sigma & base rate lebih stabil
+145|RECOVERY_MIN_BARS = 150            # minimal bar agar estimasi GBM valid
+146|RECOVERY_MU_LOOKBACK_DAYS = 63     # drift diestimasi dari 3 bulan terakhir (momentum kini)
+147|RECOVERY_SIGMA_LOOKBACK_DAYS = 252 # vol diestimasi dari 1 tahun terakhir
+148|RECOVERY_SIGNAL_P_MIN = 0.68       # sinyal POTENTIAL jika P(hit ≤ 21d) ≥ 68%.
+151|RECOVERY_SIGNAL_HORIZON_DAYS = 21  # horizon acuan sinyal (~1 bulan)
+152|RECOVERY_TIME_STOP_DAYS = 63       # time stop: exit jika target belum tercapai (~3 bulan)
+153|RECOVERY_SL_DISTANCE_MULT = 2.0    # SL = entry - 2x jarak ke previous close
+157|RECOVERY_VS_LOOKBACKS_DAYS = [1, 5, 21, 63]  # 1D, 1W, 1M, 3M
+158|RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
+165|# ACCUM_MIN_HEAVY_DAYS hari heavy; ACCUM_DENSITY_PCT hanya info (bukan gate).
+166|# ACCUM_HEAVY_RVOL = knob sensitivitas (2.0x; turunkan ~1.5-1.8x bila lonjakan
+174|ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
+175|ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
+176|ACCUM_HEAVY_RVOL = 2.0          # multiplikator vs baseline volume POST-ARA (fallback: 20 hari pre-ARA / RVOL)
+177|ACCUM_RVOL_PERIOD = 20          # jendela fallback pre-ARA & ambang double-ARA; periode display RVOL
+178|ACCUM_DENSITY_PCT = 30.0        # GATE kepadatan hari heavy dlm jendela post-ARA (%) — WAJIB (validasi: 30-50%
+180|ACCUM_MIN_HEAVY_DAYS = 2        # minimal jumlah hari heavy di jendela
+181|ACCUM_MA20_DAYS = 20            # konfirmasi: close harus >= SMA(N) (di atas, bukan fresh cross)
+184|RECOVERY_AUTO_SIGMA_MULT = 2.5     # threshold auto = mult x sigma_daily
+185|RECOVERY_AUTO_MIN = 2.0            # floor (%)
+191|RECOVERY_AUTO_CAP_UNDER_200 = 13.0     # harga < Rp 200 (ARB 15%)
+192|RECOVERY_AUTO_CAP_200_TO_5000 = 13.0   # Rp 200 - <Rp 5000 (ARB 15%)
+193|RECOVERY_AUTO_CAP_AT_5000 = 13.0       # harga >= Rp 5000 (ARB 15%)

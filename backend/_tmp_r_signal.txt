@@ -1,0 +1,35 @@
+
+def _build_signal(in_setup: bool, distance_pct: float, drop_pct: float,
+                  p_signal: Optional[float], basis: str = "model GBM") -> tuple[str, str]:
+    if distance_pct >= 0:
+        return "NO_SETUP", "Harga di atas atau sama dengan previous close - tidak ada setup gap-down."
+    if not in_setup:
+        return "NO_SETUP", (
+            f"Belum turun cukup jauh (baru {distance_pct:.2f}% vs threshold {drop_pct:.1f}%)."
+        )
+    if p_signal is not None and p_signal >= config.RECOVERY_SIGNAL_P_MIN:
+        return "POTENTIAL", (
+            f"Setup aktif (drop {abs(distance_pct):.2f}% >= {drop_pct:.1f}%) dan "
+            f"P(recovery <= {config.RECOVERY_SIGNAL_HORIZON_DAYS} hari) = {p_signal:.0%} "
+            f"(basis: {basis}) >= {config.RECOVERY_SIGNAL_P_MIN:.0%}."
+        )
+    return "WATCH", (
+        f"Setup aktif tapi P(recovery <= {config.RECOVERY_SIGNAL_HORIZON_DAYS} hari) "
+        f"masih di bawah {config.RECOVERY_SIGNAL_P_MIN:.0%}."
+    )
+
+
+def _build_exit_plan(price: float, ref_price: float) -> dict:
+    sl = price - config.RECOVERY_SL_DISTANCE_MULT * (ref_price - price)
+    return {
+        "target": round(ref_price, 0),
+        "time_stop_days": config.RECOVERY_TIME_STOP_DAYS,
+        "stop_loss": round(sl, 0),
+        "note": (
+            f"Exit saat harga menyentuh/menutup di atas target (previous close "
+            f"{ref_price:,.0f}), atau time-stop {config.RECOVERY_TIME_STOP_DAYS} "
+            f"hari trading (~3 bulan) jika target tak tercapai. "
+            f"SL proteksi: {sl:,.0f} (2x jarak drop)."
+        ),
+    }
+

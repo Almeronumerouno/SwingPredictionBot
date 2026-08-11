@@ -1,0 +1,61 @@
+140|
+141|# ---- Recovery ke Previous Price (Mean Reversion) ----
+142|RECOVERY_DROP_DEFAULT = 5.0        # X% di bawah previous close sebagai setup
+143|RECOVERY_HORIZONS_DAYS = [1, 3, 5, 10, 21, 42, 63]  # horizon trading day (1D → 3 bulan)
+144|RECOVERY_HISTORY_LOOKBACK_DAYS = 500  # kalender; estimasi mu/sigma & base rate lebih stabil
+145|RECOVERY_MIN_BARS = 150            # minimal bar agar estimasi GBM valid
+146|RECOVERY_MU_LOOKBACK_DAYS = 63     # drift diestimasi dari 3 bulan terakhir (momentum kini)
+147|RECOVERY_SIGMA_LOOKBACK_DAYS = 252 # vol diestimasi dari 1 tahun terakhir
+148|RECOVERY_SIGNAL_P_MIN = 0.68       # sinyal POTENTIAL jika P(hit ≤ 21d) ≥ 68%.
+149|                                   # >= breakeven R:R exit plan (66.7% utk R:R=0.5)
+150|                                   # + margin biaya transaksi (audit fix #12)
+151|RECOVERY_SIGNAL_HORIZON_DAYS = 21  # horizon acuan sinyal (~1 bulan)
+152|RECOVERY_TIME_STOP_DAYS = 63       # time stop: exit jika target belum tercapai (~3 bulan)
+153|RECOVERY_SL_DISTANCE_MULT = 2.0    # SL = entry - 2x jarak ke previous close
+154|                                   # => R:R = 1/2.0 = 0.5, breakeven WR = 66.7%
+155|
+156|# Posisi harga sekarang vs close N hari trading lalu (deteksi "masih di bawah / udah di atas")
+157|RECOVERY_VS_LOOKBACKS_DAYS = [1, 5, 21, 63]  # 1D, 1W, 1M, 3M
+158|RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
+159|
+160|# Accumulation ("siap terbang": ARA = puncak distribusi/dump, lalu volume besar
+161|# sambil harga masih stagnant + konfirmasi SMA20).
+162|# PERUBAHAN: baseline volume = mean SELURUH hari post-ARA sebelum hari berjalan
+163|# (jendela akumulasi itu sendiri, tanpa hari ARA & tanpa hari ini — anti-self-
+164|# referencing), bukan 20 hari pre-ARA. Sinyal = minimal
+165|# ACCUM_MIN_HEAVY_DAYS hari heavy; ACCUM_DENSITY_PCT hanya info (bukan gate).
+166|# ACCUM_HEAVY_RVOL = knob sensitivitas (2.0x; turunkan ~1.5-1.8x bila lonjakan
+167|# banyak yang kelewat).
+168|# Validasi HISTORIS (baseline pre-ARA + density>=40%, _validate_accum3.py,
+169|# 963 saham IDX, 2026, sub-arm yang masih di bawah ARA):
+170|#   pola: rec5=48.7% b5=26.8% b10=16.8% up1=34.0% (n=2958)
+171|#   kontrol: rec5=18.4% b5=9.6% b10=5.9% up1=26.5% (n=228459)
+172|#   => edge ~3x pada boom +10%/5d. Angka ini untuk logika LAMA; baseline
+173|#   post-ARA perlu re-validasi (menunggu logika final).
+174|ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
+175|ACCUM_RVOL_PERIOD = 20          # jendela fallback pre-ARA & ambang double-ARA; periode display RVOL
+176|ACCUM_DENSITY_PCT = 30.0        # GATE kepadatan hari heavy dlm jendela post-ARA (%) — WAJIB (validasi: 30-50%
+177|                                #   punya edge sama ~+13pp b10; 30% = sinyal paling banyak utk edge yg sama)
+178|ACCUM_MIN_HEAVY_DAYS = 2        # minimal jumlah hari heavy di jendela
+179|ACCUM_MA20_DAYS = 20            # konfirmasi: close harus >= SMA(N) (di atas, bukan fresh cross)
+180|
+181|# Auto-drop: threshold dihitung dari volatilitas saham biar setup bermakna per saham
+182|RECOVERY_AUTO_SIGMA_MULT = 2.5     # threshold auto = mult x sigma_daily
+183|RECOVERY_AUTO_MIN = 2.0            # floor (%)
+184|# Cap sesuai batas Auto Rejection BEI TERBARU (SK Direksi Kep-00003/BEI/04-2025,
+185|# efektif 8 April 2025): ARB (batas turun) diseragamkan FLAT 15% untuk semua
+186|# tier harga. Karena setup recovery berbicara soal PENURUNAN harga, acuan yang
+187|# relevan adalah ARB — jadi cap flat ~13% (margin di bawah 15% ARB) untuk
+188|# seluruh tier. (ARB lama bertingkat 35/25/20 sudah tidak berlaku.)
+189|RECOVERY_AUTO_CAP_UNDER_200 = 13.0     # harga < Rp 200 (ARB 15%)
+190|RECOVERY_AUTO_CAP_200_TO_5000 = 13.0   # Rp 200 - <Rp 5000 (ARB 15%)
+191|RECOVERY_AUTO_CAP_AT_5000 = 13.0       # harga >= Rp 5000 (ARB 15%)
+192|
+193|# ---- Gorengan Detection ----
+194|GORENGAN_PUMP_PCT = 80       # min % naik dari low ke peak utk dianggap pump
+195|GORENGAN_DUMP_PCT = 40       # min % turun dari peak utk dianggap dump
+196|GORENGAN_SWING_EXTREME = 150 # swing 20d dianggap ekstrem (buat hist P&D)
+197|GORENGAN_VOL_SPIKE_HIGH = 5  # RVOL Z-score mapping (unused — keep for ref)
+198|GORENGAN_VOL_SPIKE_MED = 3
+199|GORENGAN_VOL_SPIKE_LOW = 1.5
+200|GORENGAN_ATR_HIGH = 3        # ATR ratio mapping (unused)

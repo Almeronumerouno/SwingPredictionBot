@@ -1,0 +1,49 @@
+
+def empirical_base_rates(
+    close: np.ndarray,
+    high: np.ndarray,
+    drop_pct: float,
+    horizons: list[int] = config.RECOVERY_HORIZONS_DAYS,
+) -> list[dict]:
+    """
+    Untuk tiap bar i, event terjadi kalau close[i] <= close[i-1] * (1 - X/100).
+    Event dianggap recovery kalau max(high[i+1 .. i+h]) >= close[i-1] - cukup
+    disentuh, konsisten dengan definisi first-passage time di atas.
+
+    Event yang horizonnya belum lengkap (kurang data ke depan) tidak
+    dihitung, supaya tidak ada look-ahead bias.
+    """
+    close = np.asarray(close, dtype=float)
+    high = np.asarray(high, dtype=float)
+    n = len(close)
+    threshold = 1.0 - drop_pct / 100.0
+
+    events: list[int] = []
+    for i in range(1, n):
+        ref = close[i - 1]
+        if ref > 0 and close[i] <= ref * threshold:
+            events.append(i)
+
+    out: list[dict] = []
+    for h in horizons:
+        n_events = 0
+        n_recovered = 0
+        for i in events:
+            end = i + 1 + h
+            if end > n:
+                continue
+            n_events += 1
+            if np.nanmax(high[i + 1 : end]) >= close[i - 1]:
+                n_recovered += 1
+        out.append({
+            "horizon_days": h,
+            "n_events": n_events,
+            "n_recovered": n_recovered,
+            "rate": round(n_recovered / n_events, 3) if n_events else None,
+        })
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Signal & exit plan
+# ---------------------------------------------------------------------------

@@ -101,6 +101,13 @@ RVOL_WINDOW = 10
 RVOL_BREAKOUT_CONFIRM = 1.5
 SWING_BUY_THRESHOLD = 72
 SWING_SELL_THRESHOLD = 35
+# Status validasi (backtest_calibrate.py, 36 kombinasi x 5 saham, Agu 2026):
+#   - OOS 63 hari terakhir: Sharpe NEGATIF utk SEMUA kombinasi (market bearish,
+#     MaxDD ~24%), trade OOS cuma 3-4/saham -> statistik lemah, TIDAK ada
+#     rekomendasi konklusif. Threshold 68/72/76 setara (beda noise), SL 2.0 vs
+#     3.0xATR tidak konklusif -> parameter produksi DIPERTAHANKAN.
+#   - Sinyal RECOMMENDED tandingan terbaik (train) = adx 25, buy 68, sl 2.0,
+#     rvol 1.5 (train sharpe 0.22) — masih in-sample, belum layak produksi.
 SWING_BUY_VALIDATED = False
 SWING_SELL_VALIDATED = True
 RISK_ATR_LOOKBACK = 50
@@ -157,6 +164,22 @@ RECOVERY_SL_DISTANCE_MULT = 2.0    # SL = entry - 2x jarak ke previous close
 RECOVERY_VS_LOOKBACKS_DAYS = [1, 5, 21, 63]  # 1D, 1W, 1M, 3M
 RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
 
+# Model recovery EMPIRIS global (pengganti GBM yang menyesatkan):
+# P(hit prior high / "par") = 1/(1 + exp(a_t + b_t*dd_fraction)),
+# dd_fraction = 1 - harga/prior_peak, prior_peak = max(close) trailing
+# RECOVERY_PEAK_LOOKBACK_DAYS hari trading. Parameter a_t, b_t per horizon
+# dikalibrasi OFFLINE dari universe_ohlcv.npz (963 saham IDX, split temporal
+# 70/30, _calibrate_recovery_model.py) dan disimpan di RECOVERY_MODEL_PARAMS_FILE.
+#  - Basis harga mentah (konsisten jalur produksi).
+#  - AUC test ~0.83 (h=21), kalibrasi OOS deviasi <= 0.03 untuk dd >= 5%.
+#  - Sinyal fallback model dipakai kalau base rate empiris per-saham < 5 event,
+#    dengan threshold RECOVERY_MODEL_P_MIN (target beda = prior peak, jadi
+#    threshold beda dari RECOVERY_SIGNAL_P_MIN yang targetnya previous close).
+RECOVERY_PEAK_LOOKBACK_DAYS = 252     # prior high = max(close) trailing N hari trading
+RECOVERY_MODEL_P_MIN = 0.5            # sinyal fallback model: P(hit prior peak <= 21d) >= 50%
+RECOVERY_MODEL_DD_CLAMP = 0.85        # clamp dd_fraction ke [0, 0.85]
+RECOVERY_MODEL_PARAMS_FILE = "data/recovery_model_params.json"
+
 # Accumulation ("siap terbang": ARA = puncak distribusi/dump, lalu volume besar
 # sambil harga masih stagnant + konfirmasi SMA20).
 # PERUBAHAN: baseline volume = mean SELURUH hari post-ARA sebelum hari berjalan
@@ -172,8 +195,6 @@ RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
 #   => edge ~3x pada boom +10%/5d. Angka ini untuk logika LAMA; baseline
 #   post-ARA perlu re-validasi (menunggu logika final).
 ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
-ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
-ACCUM_HEAVY_RVOL = 2.0          # multiplikator vs baseline volume POST-ARA (fallback: 20 hari pre-ARA / RVOL)
 ACCUM_RVOL_PERIOD = 20          # jendela fallback pre-ARA & ambang double-ARA; periode display RVOL
 ACCUM_DENSITY_PCT = 30.0        # GATE kepadatan hari heavy dlm jendela post-ARA (%) — WAJIB (validasi: 30-50%
                                 #   punya edge sama ~+13pp b10; 30% = sinyal paling banyak utk edge yg sama)
@@ -235,10 +256,14 @@ GORENGAN_VOLA_HIGH = 2.0       # >2 → score 70
 GORENGAN_VOLA_MODERATE = 1.5   # >1.5 → score 40
 
 # ---- Level thresholds (diturunin biar lebih sensitif) ----
+# Kalibrasi empiris (_threshold_tuning.py, Top 10 Gainers 10 hari, Jul 2026,
+# 94 saham): base rate dump = 70.2%; precision hampir FLAT 65-78% di semua
+# threshold score (F1 max 76.5 @ 51-54, precision 77.8% @ 84+ dgn n=18).
+# Kesimpulan: skor gorengan TIDAK diskriminatif utk memprediksi dump — level
+# bersifat deskriptif/peringatan, bukan filter. Jangan jadikan cutoff tunggal.
 GORENGAN_LEVEL_EXTREME = 65
 GORENGAN_LEVEL_HIGH = 45
 GORENGAN_LEVEL_MEDIUM = 20
-
 # ---- Data Freshness & Validity Gates ----
 MAX_DATA_STALE_DAYS = 5         # max days bar terakhir vs target date
 STAGNATION_LOOKBACK = 5         # hari buat deteksi harga stagnan

@@ -186,6 +186,17 @@ class RecoveryGbm(BaseModel):
     probabilities: list[RecoveryProbability]
 
 
+class RecoveryModel(BaseModel):
+    """Model recovery empiris global (logistic drawdown, target = prior high)."""
+    kind: str
+    target: str
+    target_desc: str | None = None
+    dd_fraction: float | None = None
+    prior_peak: float | None = None
+    probabilities: list[RecoveryProbability] | None = None
+    params_version: str | None = None
+
+
 class RecoveryExitPlan(BaseModel):
     target: float
     time_stop_days: int
@@ -220,9 +231,13 @@ class RecoveryAccumulation(BaseModel):
     sma20: float | None = None
     state_ma20: str | None = None  # "above" | "breakout" | "below"
     distance_pct: float | None = None
+    net_dist: float | None = None       # Net Distribution window post-ARA: [-1, +1]
+    sma_gap_pct: float | None = None    # (harga - SMA20)/SMA20 dalam %
     note: str | None = None
     warning: str | None = None
     reason: str | None = None
+    post_ara_volume: float | None = None
+    post_ara_value: float | None = None
 
 
 class RecoveryResponse(BaseModel):
@@ -237,10 +252,12 @@ class RecoveryResponse(BaseModel):
     drop_pct: float
     drop_source: str
     in_setup: bool
-    gbm: RecoveryGbm | None
+    gbm: RecoveryGbm | None = None          # DEPRECATED — selalu None
+    model: RecoveryModel | None = None      # model empiris global (probs per horizon)
     empirical: list[RecoveryEmpirical]
     signal: str
     signal_reason: str
+    signal_basis: str | None = None
     exit_plan: RecoveryExitPlan | None
     vs_lookbacks: list[RecoveryVsLookback] = []
     accumulation: RecoveryAccumulation | None = None
@@ -265,12 +282,16 @@ class ReadyToFlyEntryResponse(BaseModel):
     ara_date: str | None = None
     ara_ref_price: float | None = None
     distance_pct: float | None = None
+    net_dist: float | None = None       # Net Distribution window post-ARA: [-1, +1]
+    sma_gap_pct: float | None = None    # (harga - SMA20)/SMA20 dalam %
     sma20: float | None = None
     state_ma20: str | None = None
     max_rvol: float | None = None
     gates: dict | None = None
     note: str | None = None
     reason: str | None = None
+    post_ara_volume: float | None = 0.0
+    post_ara_value: float | None = 0.0
 
 
 class ReadyToFlyScannerResponse(BaseModel):
@@ -285,7 +306,7 @@ for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
                AnalisisResponse, HistoryResponse, MarketStatusResponse,
                RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
-               RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
+               RecoveryModel, RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
                GorenganScannerEntryResponse, GorenganScannerResponse,
                ReadyToFlyEntryResponse, ReadyToFlyScannerResponse):
     _model.model_rebuild()
@@ -865,12 +886,16 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
                 "ara_date": e.ara_date,
                 "ara_ref_price": e.ara_ref_price,
                 "distance_pct": e.distance_pct,
+                "net_dist": e.net_dist,
+                "sma_gap_pct": e.sma_gap_pct,
                 "sma20": e.sma20,
                 "state_ma20": e.state_ma20,
                 "max_rvol": e.max_rvol,
                 "gates": e.gates,
                 "note": e.note,
                 "reason": e.reason,
+                "post_ara_volume": e.post_ara_volume,
+                "post_ara_value": e.post_ara_value,
             }
             for e in entries
         ],

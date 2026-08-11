@@ -1,0 +1,258 @@
+def detect_accumulation(bars: list) -> dict:
+    """
+    Deteksi pola "akumulasi post-ARA": saham yang baru saja distribusi besar
+    (ARA), lalu terkumpul lagi diam-diam sebelum berpotensi naik.
+
+    Logika:
+      - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) dianggap hari
+        distribusi/dump, bukan hari akumulasi - jadi hari ARA itu sendiri
+        tidak ikut dihitung sebagai bagian window.
+      - Window akumulasi = semua hari trading sejak ARA, panjangnya dinamis
+        (bukan jendela tetap). Kalau ARA kedua muncul dalam <= ACCUM_RVOL_PERIOD
+        hari setelah ARA pertama, keduanya dianggap satu gelombang: window
+        di-anchor ke ARA pertama (supaya hari di antara dua ARA tidak
+        terbuang), tapi harga acuannya tetap ARA terbaru/puncak. Hari ARA
+        kedua sendiri tetap ikut dihitung di window, baseline, dan k - yang
+        dikecualikan hanya ARA pertama (si anchor).
+      - "Heavy" dihitung per hari (point-in-time): untuk bar i di window,
+        baseline-nya adalah rata-rata volume post-ARA sebelum hari i (anti
+        self-reference, anti look-ahead, konsisten dengan konvensi RVOL di
+        indicators.py; fallback ke rata-rata 20 hari pre-ARA, lalu ke RVOL
+        biasa kalau masih kosong). Hari i dianggap heavy kalau volumenya
+        >= ACCUM_HEAVY_RVOL x baseline itu. Baseline ini sifatnya lagging
+        (hari bervolume besar ikut menaikkan baseline berikutnya), jadi
+        ACCUM_HEAVY_RVOL adalah parameter sensitivitas utama - default 2.0x,
+        bisa diturunkan ke 1.5-1.8x kalau banyak lonjakan volume terlewat.
+      - Sinyal dianggap kuat kalau minimal ACCUM_MIN_HEAVY_DAYS hari heavy
+        muncul di window (default 2), dan kepadatannya (density_pct) >=
+        ACCUM_DENSITY_PCT (30%). Density ini gate wajib: tanpa filter ini,
+        pola kehilangan edge-nya sepenuhnya (lihat hasil validasi di bawah).
+      - Konfirmasi tambahan: harga harus berada di atas SMA(ACCUM_MA20_DAYS).
+        Validasi atas 963 saham menunjukkan posisi harga yang sudah stabil
+        di atas MA (b10 51.9%) lebih kuat daripada baru saja cross ke atas
+        MA dalam <=2 hari (b10 36.4%) - jadi yang dipakai adalah posisi
+        harga saat ini, bukan momen crossing-nya.
+      - Syarat wajib lain: harga masih di bawah level ARA (belum recovery).
+        Kalau harga sudah di atas ARA, itu masuk fase recovery/distribusi,
+        bukan akumulasi lagi, jadi sinyalnya tidak bermakna di situasi itu.
+
+    Hasil validasi walk-forward terbaru (_validate_accum4.py, 915 saham IDX,
+    panjang data 800 hari, baseline post-ARA + gate density, anti look-ahead):
+      - density >= 30%: win-rate 10 hari (b10) = 18.4% (n=8092) vs kontrol
+        (harga di bawah ARA tanpa sinyal) 5.4% (n=217521) -> edge ~3.4x,
+        p < 1e-16.
+      - density >= 40%: b10 = 18.6% (n=5546) vs kontrol 5.6% (n=222932).
+      - Tanpa gate density: b10 = 8.7%, sama persis dengan kontrol (p~1) -
+        artinya tanpa filter density, edge-nya hilang total. Ini alasan
+        density dijadikan gate wajib, bukan opsional.
+    Sebagai perbandingan, versi lama (baseline pre-ARA + density>=40%)
+    memberi b10=16.8% vs kontrol 5.9% (n=2958). Baseline post-ARA dengan
+    density>=30% memberi edge yang setara atau lebih baik (b10 18.4%),
+    dengan jumlah sinyal ~2.7x lebih banyak.
+
+    Return: dict parameter dengan valid=False kalau tidak ada sinyal akumulasi.
+    """
+    # Basis harga MENTAH (raw_close): % change riil pasar. Seri adjusted (close)
+    # punya lompatan artifisial di batas ex-dividen/split (kasus DUTI: -1.3% riil
+    # jadi +10.4% di seri adjusted -> ARA palsu). Semua gate harga di fungsi ini
+    # (ARA, below level, SMA20, distance) konsisten satu basis: riil.
+    close = np.array([(getattr(b, "raw_close", None) or b.close) for b in bars], dtype=float)
+    volume = np.array([b.volume for b in bars], dtype=float)
+
+    n = len(close)
+    if n < config.ACCUM_RVOL_PERIOD + config.ACCUM_MA20_DAYS + 5:
+        return {"valid": False, "reason": "data terlalu pendek"}
+
+    rv = ind.rvol(volume, config.ACCUM_RVOL_PERIOD)  # rolling RVOL (utk display / max_rvol)
+
+    # SMA (posisi harga vs MA) - tanpa look-ahead
+    sma = np.full(n, np.nan)
+    if n >= config.ACCUM_MA20_DAYS:
+        cs = np.cumsum(np.concatenate(([0.0], close)))
+        sma[config.ACCUM_MA20_DAYS - 1:] = (
+            cs[config.ACCUM_MA20_DAYS:] - cs[:-config.ACCUM_MA20_DAYS]
+        ) / config.ACCUM_MA20_DAYS
+
+    # Cari 2 ARA terakhir sebelum bar terakhir (ara_idx = terbaru, prev_ara_idx = sebelumnya)
+    t = n - 1
+    ara_idx = None
+    prev_ara_idx = None
+    for i in range(t, 0, -1):
+        if close[i - 1] > 0 and close[i] >= close[i - 1] * (1.0 + config.ACCUM_ARA_RISE_PCT / 100.0):
+            if ara_idx is None:
+                ara_idx = i
+            else:
+                prev_ara_idx = i
+                break
+
+    if ara_idx is None:
+        return {
+            "valid": False,
+            "ready_to_fly": False,
+            "reason": "Belum pernah ada ARA (+{}%) dalam history - tidak ada acuan distribusi.".format(
+                config.ACCUM_ARA_RISE_PCT),
+        }
+
+    # Baseline volume "normal" dihitung dari hari-hari setelah ARA, bukan sebelum.
+    # Kalau ada ARA kedua dalam <= ACCUM_RVOL_PERIOD hari setelah ARA pertama, keduanya
+    # dianggap satu gelombang akumulasi (bukan reset): window di-anchor ke ARA pertama
+    # supaya hari di antara ARA #1 dan #2 tidak terbuang, dan anti-look-ahead tetap
+    # terjaga karena anchor-nya tetap ARA paling awal. Harga acuan pakai ARA terbaru (puncak).
+    double_ara = prev_ara_idx is not None and (ara_idx - prev_ara_idx) <= config.ACCUM_RVOL_PERIOD
+    anchor_idx = prev_ara_idx if double_ara else ara_idx
+    ref_ara_idx = ara_idx  # harga acuan = ARA terbaru (puncak gelombang)
+
+    # Baseline volume dihitung per hari (point-in-time, sama seperti di
+    # _validate_accum4.py): untuk hari i di window, baseline = rata-rata volume
+    # post-ARA sebelum hari i (hari i sendiri tidak ikut menghitung baseline-nya,
+    # dan tidak memakai data setelah i). Kalau windownya masih < 2 bar, fallback
+    # ke rata-rata ACCUM_RVOL_PERIOD hari sebelum ARA; kalau masih NaN, pakai RVOL biasa.
+    base_start = max(0, anchor_idx - config.ACCUM_RVOL_PERIOD)
+    pre_ara_avg = float(volume[base_start:anchor_idx].mean()) if anchor_idx > base_start else float("nan")
+
+    heavy = np.zeros(n, dtype=bool)
+    post_cum = np.concatenate(([0.0], np.cumsum(volume[anchor_idx + 1 : t + 1])))
+    for i in range(anchor_idx + 1, t + 1):
+        cnt = i - anchor_idx - 1  # jumlah bar post-ARA sebelum hari i
+        if cnt >= 2:
+            base = post_cum[cnt] / cnt  # mean(volume[anchor+1 : i])
+        elif np.isfinite(pre_ara_avg) and pre_ara_avg > 0:
+            base = pre_ara_avg
+        elif np.isfinite(rv[i]):
+            heavy[i] = rv[i] >= config.ACCUM_HEAVY_RVOL
+            continue
+        else:
+            continue
+        heavy[i] = volume[i] >= config.ACCUM_HEAVY_RVOL * base
+
+    ara_meta = {
+        "prev_ara_date": str(bars[prev_ara_idx].date)[:10] if prev_ara_idx is not None else None,
+        "prev_ara_ref_price": round(float(close[prev_ara_idx]), 2) if prev_ara_idx is not None else None,
+        "days_since_prev_ara": (ara_idx - prev_ara_idx) if prev_ara_idx is not None else None,
+        "double_ara": double_ara,
+    }
+
+    window = t - anchor_idx  # hari trading setelah ARA anchor (tanpa hari ARA itu sendiri)
+    if window < 1:
+        return {
+            "valid": False,
+            "ready_to_fly": False,
+            "k_heavy": 0,  # belum ada jendela akumulasi
+            "window_days": 0,
+            "density_pct": None,
+            "ara_date": str(bars[ara_idx].date)[:10],
+            "ara_ref_price": round(float(close[ara_idx]), 2),
+            "prev_ara_date": ara_meta["prev_ara_date"],
+            "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
+            "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+            "double_ara": ara_meta["double_ara"],
+            "reason": "Hari ini hari ARA belum ada jendela akumulasi.",
+        }
+
+    k = int(heavy[anchor_idx + 1: t + 1].sum())
+    density_pct = k / window * 100.0
+
+    price = float(close[t])
+    above_ma = bool(np.isfinite(sma[t]) and price >= sma[t])
+    ma_price = float(sma[t]) if np.isfinite(sma[t]) else None
+
+    below = price < float(close[ref_ara_idx])
+
+    dist_ara = (price - float(close[ref_ara_idx])) / float(close[ref_ara_idx]) * 100.0
+
+    density_ok = density_pct >= config.ACCUM_DENSITY_PCT  # GATE (validasi: tanpa density, edge mati)
+    k_ok = k >= config.ACCUM_MIN_HEAVY_DAYS
+
+    ready = below and k_ok and density_ok and above_ma
+
+    def _finite(v: float) -> float | None:
+        return float(v) if np.isfinite(v) else None
+
+    post_vol = volume[anchor_idx + 1: t + 1]
+    post_cls = close[anchor_idx + 1: t + 1]
+    post_vol_sum = float(post_vol.sum()) if len(post_vol) > 0 else 0.0
+    post_val_sum = float((post_vol * post_cls).sum()) if len(post_vol) > 0 else 0.0
+
+    if not ready:
+        parts = []
+        if not below:
+            if t == ara_idx:
+                parts.append("hari ini = ARA terbaru (belum ada bar setelah puncak)")
+            else:
+                parts.append("harga SUDAH di atas level ARA (recovery/distribusi, bukan akumulasi)")
+        if not k_ok:
+            parts.append(f"baru {k} dari {window} hari volume >= {config.ACCUM_HEAVY_RVOL}x "
+                         f"baseline (butuh min {config.ACCUM_MIN_HEAVY_DAYS} hari)")
+        if not density_ok:
+            parts.append(f"volume tidak konsisten: kepadatan baru {density_pct:.1f}% "
+                         f"(wajib >= {config.ACCUM_DENSITY_PCT}%)")
+        if not above_ma:
+            parts.append(f"harga BELUM di atas SMA{config.ACCUM_MA20_DAYS}")
+        return {
+            "valid": False,
+            "ready_to_fly": False,
+            "k_heavy": k,
+            "window_days": window,
+            "density_pct": round(density_pct, 1),
+            "post_ara_volume": round(post_vol_sum, 0),
+            "post_ara_value": round(post_val_sum, 0),
+            "rvol": _finite(rv[t]),
+            "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
+            "ara_date": str(bars[ara_idx].date)[:10],
+            "ara_ref_price": round(float(close[ref_ara_idx]), 2),
+            "prev_ara_date": ara_meta["prev_ara_date"],
+            "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
+            "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+            "double_ara": double_ara,
+        "sma20": round(ma_price, 2) if ma_price is not None else None,
+        "state_ma20": "above" if above_ma else "below",
+        "distance_pct": round(dist_ara, 2),
+        "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
+                  "above_ma": above_ma},
+        "reason": "Belum pola akumulasi post-ARA " + "; ".join(parts) + ".",
+    }
+
+    state_ma = "above"
+    if above_ma:
+        # deteksi fresh cross: salah satu dari 2 bar terakhir masih di bawah SMA
+        state_ma = "breakout" if (
+            (t - 1 >= 0 and np.isfinite(sma[t - 1]) and close[t - 1] < sma[t - 1])
+            or (t - 2 >= 0 and np.isfinite(sma[t - 2]) and close[t - 2] < sma[t - 2])
+        ) else "above"
+
+    return {
+        "valid": True,
+        "ready_to_fly": True,
+        "k_heavy": k,
+        "window_days": window,
+        "density_pct": round(density_pct, 1),
+        "post_ara_volume": round(post_vol_sum, 0),
+        "post_ara_value": round(post_val_sum, 0),
+        "rvol": _finite(rv[t]),
+        "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
+        "ara_date": str(bars[ara_idx].date)[:10],
+        "ara_ref_price": round(float(close[ref_ara_idx]), 2),
+        "prev_ara_date": ara_meta["prev_ara_date"],
+        "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
+        "days_since_prev_ara": ara_meta["days_since_prev_ara"],
+        "double_ara": double_ara,
+        "sma20": round(ma_price, 2) if ma_price is not None else None,
+        "state_ma20": state_ma,
+        "distance_pct": round(dist_ara, 2),
+        "gates": {"below": True, "min_heavy": True, "above_ma": True, "density": density_ok},
+        "note": (
+            f"{k} dari {window} hari sejak ARA ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
+            f"= {bars[ara_idx].date}) volume di atas {config.ACCUM_HEAVY_RVOL}x baseline "
+            f"post-ARA (kepadatan {density_pct:.1f}% >= {config.ACCUM_DENSITY_PCT:.0f}%) sambil "
+            f"harga masih DI BAWAH level ARA ({dist_ara:+.1f}%) dan di atas "
+            f"SMA{config.ACCUM_MA20_DAYS} = pola akumulasi post-ARA "
+            f"(validasi walk-forward 915 saham: b10 {18.4:.1f}% vs kontrol {5.4:.1f}%, edge ~3.3x)."
+        ),
+        "warning": "Akumulasi post-ARA (harga belum recovery ke level ARA) + konfirmasi SMA20 "
+                   "probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Analisis lengkap
+# ---------------------------------------------------------------------------

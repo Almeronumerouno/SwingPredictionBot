@@ -5,14 +5,23 @@ Modul ini menghitung peluang harga saham kembali ke previous close dalam
 horizon 1 hari sampai 3 bulan, untuk saham yang baru gap-down / turun
 tajam X%.
 
-Dua pendekatan dipakai berbarengan:
-  1. First-passage time GBM (CDF Inverse Gaussian / Wald): a = ln(S_target/S_0),
-     drift mu dan volatilitas sigma diestimasi dari log-return historis,
-     lalu F(T) = peluang menyentuh target pada atau sebelum T hari. Semua
-     dihitung pakai numpy + math.erf saja, tanpa scipy/sklearn/lifelines.
-  2. Base rate empiris: dari histori harga saham itu sendiri, berapa persen
-     kejadian "turun X% dari previous close" yang akhirnya recovery (high
-     menyentuh level referensi) dalam horizon yang sama.
+Pendekatan:
+  1. Base rate empiris per-saham: dari histori harga saham itu sendiri,
+     berapa persen kejadian "turun X% dari previous close" yang akhirnya
+     recovery (high menyentuh level referensi) dalam horizon yang sama.
+     - basis sinyal UTAMA (target: previous close).
+  2. Model recovery EMPIRIS GLOBAL (logistic drawdown, kalibrasi offline
+     dari 963 saham IDX, target: prior high / "par" = max(close) trailing
+     252 hari): P(hit par dalam h hari) = 1/(1 + exp(a_h + b_h*dd_fraction)).
+     - fallback sinyal kalau base rate per-saham < 5 event, diekspos di
+       response sebagai field "model" (probs per horizon + dd_fraction).
+     - kalibrasi: python _calibrate_recovery_model.py -> 
+       data/recovery_model_params.json. Hasil h=21: AUC test 0.83,
+       Brier 0.118, deviasi OOS <= 0.03 utk dd >= 5%.
+  3. First-passage time GBM (CDF Inverse Gaussian / Wald) - DEPRECATED:
+     bisa memberi P>0.9 utk drop kecil saat drift tinggi, padahal empiris
+     ~30-70% (menyesatkan). Fungsi tetap ada utk kompatibilitas tapi tidak
+     dipakai lagi di jalur sinyal/response (gbm = None).
 
 Ini bukan rekomendasi beli - murni estimasi probabilitas, bukan jaminan.
 Exit plan (target/time-stop/stop-loss) sifatnya informasional saja.
@@ -23,6 +32,8 @@ Dependensi: numpy dan math (stdlib).
 from __future__ import annotations
 
 import math
+import os
+import json
 from typing import Optional
 
 import numpy as np
@@ -155,6 +166,76 @@ def p_hit_ever(mu: float, sigma: float, a: float) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Model recovery empiris GLOBAL (logistic drawdown) - pengganti GBM
+# ---------------------------------------------------------------------------
+
+def _load_recovery_model_params() -> Optional[dict]:
+    """Load parameter model logistic-drawdown hasil kalibrasi offline.
+
+    File dibuat oleh _calibrate_recovery_model.py dari universe_ohlcv.npz
+    (963 saham IDX, split temporal 70/30, target = prior high). Return None
+    kalau file tidak ada / tidak valid -> pemanggil berjalan tanpa model.
+    """
+    try:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            config.RECOVERY_MODEL_PARAMS_FILE)
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if data.get("model") != "logistic_drawdown":
+            return None
+        return data
+    except Exception:
+        return None
+
+
+def dd_fraction(close: np.ndarray,
+                peak_lookback: int = config.RECOVERY_PEAK_LOOKBACK_DAYS,
+                clamp: float = config.RECOVERY_MODEL_DD_CLAMP) -> tuple[Optional[float], Optional[float]]:
+    """(dd_fraction, prior_peak) untuk bar terakhir.
+
+    dd_fraction = 1 - close[-1]/prior_peak, dengan prior_peak = max(close)
+    trailing peak_lookback hari (termasuk bar terakhir - konsisten dengan
+    kalibrasi). Di-clamp ke [0, clamp]. Return (None, None) kalau data
+    tidak cukup / harga tidak valid.
+    """
+    close = np.asarray(close, dtype=float)
+    n = len(close)
+    if n < peak_lookback:
+        return None, None
+    peak = float(np.nanmax(close[-peak_lookback:]))
+    if not np.isfinite(peak) or peak <= 0:
+        return None, None
+    price = float(close[-1])
+    if not np.isfinite(price) or price <= 0:
+        return None, None
+    dd = max(0.0, min(clamp, 1.0 - price / peak))
+    return dd, peak
+
+
+def recovery_model_probs(dd: float,
+                         horizons: Optional[list] = None,
+                         params: Optional[dict] = None) -> Optional[list[dict]]:
+    """P(hit prior peak dalam h hari) dari model logistic-drawdown.
+
+    P = 1 / (1 + exp(a_h + b_h * dd_fraction)). Return None kalau parameter
+    model tidak tersedia. Nilai dibulatkan 3 desimal (gaya API konsisten).
+    """
+    if params is None:
+        params = _load_recovery_model_params()
+    if params is None:
+        return None
+    horizons = horizons if horizons is not None else config.RECOVERY_HORIZONS_DAYS
+    out = []
+    for h in horizons:
+        r = params.get("horizons", {}).get(str(h))
+        if not r or not r.get("fitted"):
+            continue
+        p = 1.0 / (1.0 + math.exp(-(r["a"] + r["b"] * dd)))
+        out.append({"horizon_days": h, "p_hit": round(p, 3)})
+    return out or None
+
+
+# ---------------------------------------------------------------------------
 # Base rate empiris (dari history saham itu sendiri)
 # ---------------------------------------------------------------------------
 
@@ -208,34 +289,38 @@ def empirical_base_rates(
 # ---------------------------------------------------------------------------
 
 def _build_signal(in_setup: bool, distance_pct: float, drop_pct: float,
-                  p_signal: Optional[float], basis: str = "model GBM") -> tuple[str, str]:
+                  p_signal: Optional[float], basis: str = "model GBM",
+                  p_min: float = config.RECOVERY_SIGNAL_P_MIN) -> tuple[str, str]:
     if distance_pct >= 0:
         return "NO_SETUP", "Harga di atas atau sama dengan previous close - tidak ada setup gap-down."
     if not in_setup:
         return "NO_SETUP", (
             f"Belum turun cukup jauh (baru {distance_pct:.2f}% vs threshold {drop_pct:.1f}%)."
         )
-    if p_signal is not None and p_signal >= config.RECOVERY_SIGNAL_P_MIN:
+    if p_signal is not None and p_signal >= p_min:
         return "POTENTIAL", (
             f"Setup aktif (drop {abs(distance_pct):.2f}% >= {drop_pct:.1f}%) dan "
             f"P(recovery <= {config.RECOVERY_SIGNAL_HORIZON_DAYS} hari) = {p_signal:.0%} "
-            f"(basis: {basis}) >= {config.RECOVERY_SIGNAL_P_MIN:.0%}."
+            f"(basis: {basis}) >= {p_min:.0%}."
         )
     return "WATCH", (
         f"Setup aktif tapi P(recovery <= {config.RECOVERY_SIGNAL_HORIZON_DAYS} hari) "
-        f"masih di bawah {config.RECOVERY_SIGNAL_P_MIN:.0%}."
+        f"masih di bawah {p_min:.0%}."
     )
 
 
-def _build_exit_plan(price: float, ref_price: float) -> dict:
+def _build_exit_plan(price: float, ref_price: float,
+                     target_override: Optional[float] = None,
+                     target_note: str = "") -> dict:
     sl = price - config.RECOVERY_SL_DISTANCE_MULT * (ref_price - price)
+    target = target_override if target_override is not None else ref_price
     return {
-        "target": round(ref_price, 0),
+        "target": round(target, 0),
         "time_stop_days": config.RECOVERY_TIME_STOP_DAYS,
         "stop_loss": round(sl, 0),
         "note": (
-            f"Exit saat harga menyentuh/menutup di atas target (previous close "
-            f"{ref_price:,.0f}), atau time-stop {config.RECOVERY_TIME_STOP_DAYS} "
+            f"Exit saat harga menyentuh/menutup di atas target ({target_note or 'previous close'} "
+            f"{target:,.0f}), atau time-stop {config.RECOVERY_TIME_STOP_DAYS} "
             f"hari trading (~3 bulan) jika target tak tercapai. "
             f"SL proteksi: {sl:,.0f} (2x jarak drop)."
         ),
@@ -318,7 +403,11 @@ def detect_accumulation(bars: list) -> dict:
 
     Return: dict parameter dengan valid=False kalau tidak ada sinyal akumulasi.
     """
-    close = np.array([b.close for b in bars], dtype=float)
+    # Basis harga MENTAH (raw_close): % change riil pasar. Seri adjusted (close)
+    # punya lompatan artifisial di batas ex-dividen/split (kasus DUTI: -1.3% riil
+    # jadi +10.4% di seri adjusted -> ARA palsu). Semua gate harga di fungsi ini
+    # (ARA, below level, SMA20, distance) konsisten satu basis: riil.
+    close = np.array([(getattr(b, "raw_close", None) or b.close) for b in bars], dtype=float)
     volume = np.array([b.volume for b in bars], dtype=float)
 
     n = len(close)
@@ -430,6 +519,23 @@ def detect_accumulation(bars: list) -> dict:
     def _finite(v: float) -> float | None:
         return float(v) if np.isfinite(v) else None
 
+    post_vol = volume[anchor_idx + 1: t + 1]
+    post_cls = close[anchor_idx + 1: t + 1]
+    post_vol_sum = float(post_vol.sum()) if len(post_vol) > 0 else 0.0
+    post_val_sum = float((post_vol * post_cls).sum()) if len(post_vol) > 0 else 0.0
+
+    # Net Distribution window post-ARA: (vol hari naik - vol hari turun)/total
+    # vol, rentang [-1, +1]. Positif = buyer lebih dominan (akumulasi).
+    if len(post_vol) > 1 and post_vol_sum > 0:
+        chg = np.diff(post_cls)
+        up_v = float(post_vol[1:][chg > 0].sum())
+        dn_v = float(post_vol[1:][chg <= 0].sum())
+        net_dist = (up_v - dn_v) / post_vol_sum
+    else:
+        net_dist = None
+    # Gap harga vs SMA20 (net distance dari garis MA, dalam %)
+    sma_gap_pct = (price - ma_price) / ma_price * 100.0 if ma_price else None
+
     if not ready:
         parts = []
         if not below:
@@ -451,6 +557,8 @@ def detect_accumulation(bars: list) -> dict:
             "k_heavy": k,
             "window_days": window,
             "density_pct": round(density_pct, 1),
+            "post_ara_volume": round(post_vol_sum, 0),
+            "post_ara_value": round(post_val_sum, 0),
             "rvol": _finite(rv[t]),
             "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
             "ara_date": str(bars[ara_idx].date)[:10],
@@ -459,13 +567,15 @@ def detect_accumulation(bars: list) -> dict:
             "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
             "days_since_prev_ara": ara_meta["days_since_prev_ara"],
             "double_ara": double_ara,
-            "sma20": round(ma_price, 2) if ma_price is not None else None,
-            "state_ma20": "above" if above_ma else "below",
-            "distance_pct": round(dist_ara, 2),
-            "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
-                      "above_ma": above_ma},
-            "reason": "Belum pola akumulasi post-ARA " + "; ".join(parts) + ".",
-        }
+        "sma20": round(ma_price, 2) if ma_price is not None else None,
+        "state_ma20": "above" if above_ma else "below",
+        "distance_pct": round(dist_ara, 2),
+        "net_dist": round(net_dist, 4) if net_dist is not None else None,
+        "sma_gap_pct": round(sma_gap_pct, 2) if sma_gap_pct is not None else None,
+        "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
+                  "above_ma": above_ma},
+        "reason": "Belum pola akumulasi post-ARA " + "; ".join(parts) + ".",
+    }
 
     state_ma = "above"
     if above_ma:
@@ -481,6 +591,8 @@ def detect_accumulation(bars: list) -> dict:
         "k_heavy": k,
         "window_days": window,
         "density_pct": round(density_pct, 1),
+        "post_ara_volume": round(post_vol_sum, 0),
+        "post_ara_value": round(post_val_sum, 0),
         "rvol": _finite(rv[t]),
         "max_rvol": _finite(np.nanmax(rv[anchor_idx + 1: t + 1])) if window else None,
         "ara_date": str(bars[ara_idx].date)[:10],
@@ -492,6 +604,8 @@ def detect_accumulation(bars: list) -> dict:
         "sma20": round(ma_price, 2) if ma_price is not None else None,
         "state_ma20": state_ma,
         "distance_pct": round(dist_ara, 2),
+        "net_dist": round(net_dist, 4) if net_dist is not None else None,
+        "sma_gap_pct": round(sma_gap_pct, 2) if sma_gap_pct is not None else None,
         "gates": {"below": True, "min_heavy": True, "above_ma": True, "density": density_ok},
         "note": (
             f"{k} dari {window} hari sejak ARA ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
@@ -548,7 +662,8 @@ def build_recovery_analysis(
         "drop_pct": drop_pct,
         "drop_source": "manual",
         "in_setup": False,
-        "gbm": None,
+        "gbm": None,          # DEPRECATED - selalu None, lihat field "model"
+        "model": None,        # model recovery empiris global (logistic drawdown)
         "empirical": [],
         "signal": "NO_SETUP",
         "signal_reason": "",
@@ -605,24 +720,19 @@ def build_recovery_analysis(
     base["empirical"] = empirical_base_rates(close, high, drop_pct)
 
     if price < ref_price:
-        a = math.log(ref_price / price)
-        # estimate_gbm_params mengembalikan drift proses log-harga (mu_log),
-        # dan itu memang yang dibutuhkan first_passage_cdf/p_hit_ever - pakai
-        # apa adanya, jangan tambah +0.5*sigma^2 (itu koreksi Ito untuk drift harga).
-        mu_log, sigma = params if params else estimate_gbm_params(close)
-        mu_arith = mu_arithmetic_daily(mu_log, sigma)
-        probs = [
-            {"horizon_days": h, "p_hit": round(first_passage_cdf(a, mu_log, sigma, h), 3)}
-            for h in config.RECOVERY_HORIZONS_DAYS
-        ]
-        ever = p_hit_ever(mu_log, sigma, a)
-        base["gbm"] = {
-            "mu_daily": round(mu_arith, 6),
-            "sigma_daily": round(sigma, 6),
-            "mu_annual": round(mu_arith * 252, 4),
-            "sigma_annual": round(sigma * math.sqrt(252), 4),
-            "p_hit_ever": round(ever, 3),
+        # --- Model recovery empiris global: P(hit prior high dalam h hari) ---
+        dd_f, peak = dd_fraction(close)
+        model_params = _load_recovery_model_params()
+        probs = recovery_model_probs(dd_f, params=model_params) if dd_f is not None else None
+        base["model"] = {
+            "kind": "logistic_drawdown",
+            "target": "prior_peak",
+            "target_desc": "prior high = max(close) trailing "
+                           f"{config.RECOVERY_PEAK_LOOKBACK_DAYS} hari trading",
+            "dd_fraction": round(dd_f, 4) if dd_f is not None else None,
+            "prior_peak": round(peak, 2) if peak is not None else None,
             "probabilities": probs,
+            "params_version": model_params.get("generated") if model_params else None,
         }
 
         p_signal = None
@@ -631,27 +741,42 @@ def build_recovery_analysis(
             (e for e in base["empirical"] if e["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
             None,
         )
-        # Base rate empiris lebih representatif kalau sampelnya cukup; kalau
-        # tidak, fallback ke model GBM (drift log-nya sudah diestimasi dengan
-        # benar, jadi tidak ada bias over-optimis dari +0.5*sigma^2).
+        # Base rate empiris per-saham lebih representatif kalau sampelnya
+        # cukup; kalau tidak, fallback ke model empiris global (logistic
+        # drawdown, target prior peak). GBM dihapus dari jalur sinyal karena
+        # menyesatkan (over-optimis pada drift tinggi).
         if emp_signal and emp_signal["n_events"] >= 5 and emp_signal["rate"] is not None:
             p_signal = emp_signal["rate"]
             basis = f"empiris {emp_signal['n_events']} event historis"
         else:
-            p_signal = next(
-                (p["p_hit"] for p in probs if p["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
+            p_model = next(
+                (p["p_hit"] for p in (probs or [])
+                 if p["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
                 None,
             )
-        signal, reason = _build_signal(in_setup, distance_pct, drop_pct, p_signal, basis)
+            if p_model is not None:
+                p_signal = p_model
+                basis = "model empiris global (logistic drawdown)"
+        signal, reason = _build_signal(in_setup, distance_pct, drop_pct, p_signal, basis,
+                                       p_min=(config.RECOVERY_MODEL_P_MIN if basis.startswith("model")
+                                              else config.RECOVERY_SIGNAL_P_MIN))
         base["signal"] = signal
         base["signal_reason"] = reason
+        base["signal_basis"] = basis
     else:
         signal, reason = _build_signal(in_setup, distance_pct, drop_pct, None)
         base["signal"] = signal
         base["signal_reason"] = reason
+        base["signal_basis"] = "harga di atas acuan"
 
     if in_setup:
-        base["exit_plan"] = _build_exit_plan(price, ref_price)
+        if base["signal_basis"].startswith("model"):
+            # basis model -> target exit = prior high (par), bukan previous close
+            peak = (dd_fraction(close)[1]) if peak is None else peak
+            base["exit_plan"] = _build_exit_plan(
+                price, ref_price, target_override=peak, target_note="prior high")
+        else:
+            base["exit_plan"] = _build_exit_plan(price, ref_price)
 
     # Posisi harga sekarang vs close N hari trading lalu (1D/1W/1M/3M)
     lookbacks = []

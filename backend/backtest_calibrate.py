@@ -197,11 +197,14 @@ def run_calibration(
                 oos_agg[m] /= oos_valid
         r.oos_aggregate = oos_agg
 
-    # Rank utama: urut COMBINED (OOS bila ada, fallback train)
-    def _rank_key(r: CalibrationResult) -> tuple[float, float]:
-        oos = r.oos_aggregate.get(DEFAULT_METRIC, 0.0)
+    # Rank utama: kombinasi yang DIVALIDASI OOS selalu di atas yang tidak
+    # (fix: sebelumnya oos_aggregate kosong = 0.0, menang palsu atas OOS
+    #  sharpe negatif → leaderboard bisa dipenuhi kombinasi tanpa validasi)
+    def _rank_key(r: CalibrationResult) -> tuple[int, float, float]:
+        validated = 1 if r.oos_per_stock else 0
+        oos = r.oos_aggregate.get(DEFAULT_METRIC, 0.0) if validated else 0.0
         train = r.aggregate.get(DEFAULT_METRIC, 0.0)
-        return (oos, train)
+        return (validated, oos, train)
 
     results.sort(key=_rank_key, reverse=True)
     return results
@@ -219,7 +222,8 @@ def print_leaderboard(
     """Print top-N parameter combinations ranked by (OOS, train) metric."""
     sorted_results = sorted(
         results,
-        key=lambda r: (r.oos_aggregate.get(metric, 0.0),
+        key=lambda r: (1 if r.oos_per_stock else 0,
+                       r.oos_aggregate.get(metric, 0.0) if r.oos_per_stock else 0.0,
                        r.aggregate.get(metric, 0.0)),
         reverse=True,
     )
@@ -240,23 +244,30 @@ def print_leaderboard(
     for rank, r in enumerate(sorted_results[:top_n], 1):
         a = r.aggregate
         oos_a = r.oos_aggregate
-        oos_trades = oos_a.get("total_trades", 0)
+        validated = bool(r.oos_per_stock)
+        oos_trades = int(oos_a.get("total_trades", 0)) if validated else -1
         param_str = " ".join(f"{k}={v}" for k, v in r.params.items())
         print(
             f"  {rank:>4}  "
             f"{a.get('win_rate', 0):>6.1f}%  "
             f"{a.get('total_return_pct', 0):>+7.2f}%  "
-            f"{oos_a.get(metric, 0):>10.3f}  "
+            f"{oos_a.get(metric, 0) if validated else float('nan'):>10.3f}  "
             f"{a.get(metric, 0):>10.3f}  "
             f"{a.get('max_drawdown_pct', 0):>6.2f}%  "
-            f"{int(oos_trades):>10}  "
+            f"{str(oos_trades) if validated else '-':>10}  "
             f"{param_str}"
         )
 
     print("-" * 80)
 
-    # Best params per OOS (bukan train in-sample)
-    best = sorted_results[0]
+    # Best params per OOS (bukan train in-sample) — HANYA dari kombinasi
+    # yang benar-benar divalidasi di data TEST (fix: sebelumnya bisa memilih
+    # kombinasi tanpa validasi sama sekali)
+    validated_results = [r for r in sorted_results if r.oos_per_stock]
+    if not validated_results:
+        print("  TIDAK ADA kombinasi yang divalidasi OOS — cek train_top_n / data TEST.")
+        return
+    best = validated_results[0]
     print()
     print("  RECOMMENDED PARAMETERS (terbaik di data TEST/OOS):")
     print(f"    {best.params}")
