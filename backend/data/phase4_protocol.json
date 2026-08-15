@@ -1,0 +1,124 @@
+{
+  "protocol_id": "P4-2026-08-15",
+  "phase": "Phase 4 — Probability quality (evaluation protocol FROZEN sebelum evaluasi)",
+  "freeze_date": "2026-08-15",
+  "principle": "probability quality audit + optional minimal recalibration; BUKAN model improvement. Evaluasi production probability path, per target x horizon, PIT-integrity.",
+  "1_target_semantics": {
+    "previous_close": {
+      "definition": "event = close[i] <= close[i-1]*(1-drop/100); outcome = max(high[i+1..i+h]) >= close[i-1]; censored bila window tidak penuh",
+      "drop_pct_frozen": 5.0,
+      "drop_source": "RECOVERY_DROP_DEFAULT (setup standar; auto-drop per-saham tidak dipakai di audit agar konsisten & PIT-safe)",
+      "source": "empirical_base_rates + shrinkage beta-binomial (F2.4)"
+    },
+    "prior_peak": {
+      "definition": "observasi = setiap hari dalam drawdown (dd>0); peak = max(close) trailing 252 hari; outcome = max(high[i+1..i+h]) >= peak[i]; censored bila window tidak penuh",
+      "dd": "clip(1 - close/peak, 0, 0.85)",
+      "source": "logistic drawdown global (recovery_model_params.json)"
+    }
+  },
+  "2_horizons": [1, 3, 5, 10, 21, 42, 63],
+  "3_probability_source_version": {
+    "previous_close": {
+      "file": "data/recovery_shrinkage_params.json",
+      "sha256_prefix": "d329fe1662b12f24",
+      "generated": "2026-08-13T06:16:31+00:00",
+      "method": "beta_binomial_shrinkage",
+      "note": "p=(k+a0)/(n+a0+b0); prior per (bucket drop 2-20%, horizon); legacy hard switch n>=5 TIDAK dievaluasi sebagai production path"
+    },
+    "prior_peak": {
+      "file": "data/recovery_model_params.json",
+      "sha256_prefix": "abd9cedced0bae47",
+      "generated": "2026-08-12T02:10:58+00:00",
+      "method": "logistic_drawdown",
+      "note": "P=1/(1+exp(a_h+b_h*dd)); point probability dievaluasi (CI delta-method produksi tidak dipakai sebagai kriteria P4)"
+    },
+    "config_version": "config.py RECOVERY block: RECOVERY_DROP_DEFAULT=5.0, RECOVERY_SIGNAL_P_MIN=0.68, RECOVERY_MODEL_P_MIN=0.5, RECOVERY_PEAK_LOOKBACK_DAYS=252, RECOVERY_MODEL_DD_CLAMP=0.85, RECOVERY_HORIZONS_DAYS=[1,3,5,10,21,42,63]"
+  },
+  "4_episode_representation": {
+    "unit_observation_previous_close": "event gap-down (satu baris per event i)",
+    "unit_observation_prior_peak": "hari dalam drawdown (dd>0), setiap baris",
+    "episode_id": "(code, run_id) dengan run = run kontigu hari in-drawdown/in-setup",
+    "cluster_unit": "stock (bootstrap cluster, konsisten F2.3)",
+    "note": "n_episodes = jumlah run unik; n_events = jumlah observasi"
+  },
+  "5_split": {
+    "method": "global chronological; konsisten Phase 3 / F2.1",
+    "cutoff_date_absolute": "2026-01-23",
+    "cutoff_quantile": 0.7,
+    "purge_horizon_days": 63,
+    "embargo_days": 90,
+    "validation_start": "2026-04-23",
+    "dev": "date_s <= cutoff DAN future window (t+h) <= cutoff (purged)",
+    "validation": "date_s > embargo",
+    "gap": "dibuang",
+    "note": "validation window SUDAH dibuka oleh Phase 3 -> hanya temporal validation, BUKAN final locked holdout (P4.8)"
+  },
+  "6_regime_definition": {
+    "engine": "regime.py regime_series (PIT-safe: semua input <= t)",
+    "labels": ["bull", "bear", "sideways"],
+    "rules": "ADX14 < 20 -> sideways; selain itu close > SMA200 -> bull, else bear",
+    "note": "regime TIDAK di-tuning dari hasil P4"
+  },
+  "7_base_rate_reference": {
+    "method": "climatology per (target, horizon): event rate pada DEV (data <= cutoff, purged), dihitung SEBELUM melihat validation",
+    "prohibited": "validation/test prevalence TIDAK boleh dipakai sebagai reference",
+    "use": "BSS reference + O/E ratio (observed/expected)"
+  },
+  "8_bootstrap": {
+    "primary": {
+      "method": "stock-cluster resample (sample stock with replacement, retain semua observasi stock terpilih)",
+      "B": 1000,
+      "seed": 42,
+      "no_refit": true
+    },
+    "sensitivity": {
+      "method": "date-block bootstrap",
+      "B": 500,
+      "seed": 7
+    },
+    "metrics_ci": ["intercept", "slope", "brier", "bss", "logloss", "auc"]
+  },
+  "9_calibration_method_candidates": {
+    "only_if_material_miscalibration": true,
+    "order": ["frozen production probability (baseline)", "logistic intercept-only", "logistic intercept+slope"],
+    "isotonic": "diagnostic/sensitivity ONLY (data-hungry, overfit risk)",
+    "calibration_window": "subset temporal akhir DEV (126 hari trading terakhir sebelum cutoff, purged)",
+    "evaluation_window": "validation (bukan final holdout)",
+    "no_final_holdout_for_selection": true
+  },
+  "10_acceptance_criteria": {
+    "PASS_all_of": [
+      "CI intercept contains 0",
+      "CI slope contains 1",
+      "BSS > 0 (ideally CI > 0) terhadap reference yang di-freeze",
+      "flexible curve tanpa deviation material di region produksi (p ~ 0.68 utk previous_close, p ~ 0.5 utk prior_peak)",
+      "robust lintas stock/regime",
+      "tidak ada calibration collapse di regime utama dgn sample cukup"
+    ],
+    "FAIL_any_of": [
+      "CI eksklusi 0/1 secara robust",
+      "BSS <= 0 robust",
+      "curve materially misaligned",
+      "regime collapse robust",
+      "hasil tergantung segelintir saham",
+      "holdout hanya bisa diperoleh setelah tuning ulang"
+    ],
+    "INCONCLUSIVE": "CI lebar -> INSUFFICIENT PRECISION (bukan calibrated, bukan miscalibrated)",
+    "no_hl_test": "Hosmer-Lemeshow TIDAK dipakai sebagai primary test (grouping-dependent)",
+    "ece": "optional diagnostic ECE@10/ECE@20, bukan PASS/FAIL"
+  },
+  "11_sharpness": "diagnostic only: distribusi p (p10/p25/median/p75/p90 + histogram) — sharpness subject to calibration",
+  "12_prohibited": [
+    "ROC threshold optimization",
+    "tuning p_min",
+    "new recovery features",
+    "regime parameter tuning",
+    "ML calibration model kompleks",
+    "isotonic sebagai default",
+    "full model refit",
+    "Bayesian calibration tanpa kebutuhan",
+    "decision optimizer",
+    "memakai Phase 3 OOS sebagai final locked holdout"
+  ],
+  "generated": "2026-08-15T00:00:00+00:00"
+}

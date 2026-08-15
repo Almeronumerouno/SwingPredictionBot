@@ -1,0 +1,963 @@
+{
+  "generated": "2026-08-13T08:12:58.525069+00:00",
+  "summary": {
+    "seed": 42,
+    "n_sample": 10,
+    "n_codes_universe": 963,
+    "sample": [
+      "OMED",
+      "BEBS",
+      "AKRA",
+      "ROCK",
+      "DUCK",
+      "DAYA",
+      "COAL",
+      "BLTA",
+      "RIMO",
+      "BBRM"
+    ],
+    "elapsed_sec": 26.8,
+    "coverage_per_field": {
+      "PER": "8/10",
+      "PBV": "10/10",
+      "ROE": "8/10",
+      "Debt/Equity": "8/10",
+      "Market Cap": "10/10",
+      "Earnings (EPS)": "7/10",
+      "Earnings (Net Income)": "8/10",
+      "Revenue": "8/10"
+    },
+    "earnings_dates_available": "2/10",
+    "fundamentals_timeseries_available": "0/10"
+  },
+  "tickers": [
+    {
+      "code": "OMED",
+      "ticker": "OMED.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 14.615865
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 2.2335918
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.16099001
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 9.166
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 6319900196864.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 16.01
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 432658120704.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 2304764280832.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.34205769105324
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34205769140044
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Healthcare",
+      "industry": "Medical Instruments & Supplies",
+      "fetch_time_iso": "2026-08-13T08:12:33.784551+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "BEBS",
+      "ticker": "BEBS.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": false,
+          "value": null
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 0.27855152
+        },
+        "ROE": {
+          "coverage": true,
+          "value": -0.04501
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 0.466
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 224999997440.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": -0.84
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": -37607305216.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 90156482560.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1727654400,
+          "iso": "2024-09-30T00:00:00+00:00",
+          "age_days": 682.3420941326737
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1703980800,
+          "iso": "2023-12-31T00:00:00+00:00",
+          "age_days": 956.3420941330556
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Basic Materials",
+      "industry": "Building Materials",
+      "fetch_time_iso": "2026-08-13T08:12:36.933113+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "AKRA",
+      "ticker": "AKRA.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 10.204082
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 2.146772
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.19524999
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 33.327
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 27818675142656.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 137.69
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 2723338780672.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 55443443417088.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.34212116944445
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34212116981482
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": 1753704000,
+          "iso": "2025-07-28T12:00:00+00:00",
+          "age_days": 380.84212117005785
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Energy",
+      "industry": "Oil & Gas Refining & Marketing",
+      "fetch_time_iso": "2026-08-13T08:12:39.269103+00:00",
+      "earnings_dates": {
+        "available": true,
+        "n_rows": 8,
+        "rows": [
+          {
+            "quarter_iso": "2026-07-23T02:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2026-04-24T01:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2025-10-22T23:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2025-07-27T22:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2025-04-24T23:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2025-03-18T14:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2024-10-25T02:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2024-07-25T00:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          }
+        ]
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "ROCK",
+      "ticker": "ROCK.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 106.0606
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 3.8448534
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.03669
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 0.208
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 3214814740480.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 21.12
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 30221942784.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 138229710848.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.34215430634259
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34215430663195
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Real Estate",
+      "industry": "Real Estate Services",
+      "fetch_time_iso": "2026-08-13T08:12:42.132104+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "DUCK",
+      "ticker": "DUCK.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 3.0871778
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 0.24846931
+        },
+        "ROE": {
+          "coverage": false,
+          "value": null
+        },
+        "Debt/Equity": {
+          "coverage": false,
+          "value": null
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 225866088448.0
+        },
+        "Earnings (EPS)": {
+          "coverage": false,
+          "value": null
+        },
+        "Earnings (Net Income)": {
+          "coverage": false,
+          "value": null
+        },
+        "Revenue": {
+          "coverage": false,
+          "value": null
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": null,
+      "industry": null,
+      "fetch_time_iso": "2026-08-13T08:12:44.444452+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "DAYA",
+      "ticker": "DAYA.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 24.815723
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 12.796148
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.69385004
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 209.673
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 2444752584704.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 40.7
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 98514288640.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 3083241783296.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.34221310832176
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.3422131086111
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Consumer Cyclical",
+      "industry": "Specialty Retail",
+      "fetch_time_iso": "2026-08-13T08:12:47.212593+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "COAL",
+      "ticker": "COAL.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": false,
+          "value": null
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 0.5461881
+        },
+        "ROE": {
+          "coverage": true,
+          "value": -0.025829999
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 54.49
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 193749991424.0
+        },
+        "Earnings (EPS)": {
+          "coverage": false,
+          "value": null
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": -9301731328.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 116418699264.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1774915200,
+          "iso": "2026-03-31T00:00:00+00:00",
+          "age_days": 135.34224076552084
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34224076583334
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Energy",
+      "industry": "Thermal Coal",
+      "fetch_time_iso": "2026-08-13T08:12:49.602179+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "BLTA",
+      "ticker": "BLTA.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 31.48148
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 11333.333
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.02329
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 101.937
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 880911450112.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 1.08
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 1579486.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 48590572.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.342267900254626
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34226790052085
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Industrials",
+      "industry": "Marine Shipping",
+      "fetch_time_iso": "2026-08-13T08:12:51.946615+00:00",
+      "earnings_dates": {
+        "available": true,
+        "n_rows": 8,
+        "rows": [
+          {
+            "quarter_iso": "2010-04-15T20:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2008-08-13T10:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2008-03-07T10:00:00-05:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2007-11-13T15:00:00-05:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2007-08-13T13:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2007-05-14T10:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2007-03-29T20:00:00-04:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          },
+          {
+            "quarter_iso": "2006-11-13T07:00:00-05:00",
+            "eps_estimate": null,
+            "eps_actual": null,
+            "surprise_pct": null
+          }
+        ]
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "RIMO",
+      "ticker": "RIMO.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 18.248175
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 0.40448493
+        },
+        "ROE": {
+          "coverage": false,
+          "value": null
+        },
+        "Debt/Equity": {
+          "coverage": false,
+          "value": null
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 0.0
+        },
+        "Earnings (EPS)": {
+          "coverage": false,
+          "value": null
+        },
+        "Earnings (Net Income)": {
+          "coverage": false,
+          "value": null
+        },
+        "Revenue": {
+          "coverage": false,
+          "value": null
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": null,
+      "industry": null,
+      "fetch_time_iso": "2026-08-13T08:12:54.322322+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    },
+    {
+      "code": "BBRM",
+      "ticker": "BBRM.JK",
+      "ok": true,
+      "fields": {
+        "PER": {
+          "coverage": true,
+          "value": 8.357558
+        },
+        "PBV": {
+          "coverage": true,
+          "value": 19166.666
+        },
+        "ROE": {
+          "coverage": true,
+          "value": 0.14899999
+        },
+        "Debt/Equity": {
+          "coverage": true,
+          "value": 15.04
+        },
+        "Market Cap": {
+          "coverage": true,
+          "value": 975141404672.0
+        },
+        "Earnings (EPS)": {
+          "coverage": true,
+          "value": 13.76
+        },
+        "Earnings (Net Income)": {
+          "coverage": true,
+          "value": 6556269.0
+        },
+        "Revenue": {
+          "coverage": true,
+          "value": 13581684.0
+        }
+      },
+      "pit": {
+        "period_end": {
+          "raw": 1782777600,
+          "iso": "2026-06-30T00:00:00+00:00",
+          "age_days": 44.34232373145833
+        },
+        "period_end_alt": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "fiscal_year_end": {
+          "raw": 1767139200,
+          "iso": "2025-12-31T00:00:00+00:00",
+          "age_days": 225.34232373207178
+        },
+        "available_at": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "available_at_end": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        },
+        "source_timestamp": {
+          "raw": null,
+          "iso": null,
+          "age_days": null
+        }
+      },
+      "sector": "Industrials",
+      "industry": "Marine Shipping",
+      "fetch_time_iso": "2026-08-13T08:12:56.770470+00:00",
+      "earnings_dates": {
+        "available": false,
+        "n_rows": 0,
+        "rows": []
+      },
+      "fundamentals_timeseries": {
+        "available": false,
+        "error": "AttributeError: 'Ticker' object has no attribute 'get_fundamentals_timeseries'"
+      }
+    }
+  ]
+}

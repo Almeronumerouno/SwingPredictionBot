@@ -103,6 +103,30 @@ export interface GorenganAnalysis {
   explanation: string
 }
 
+export interface FundamentalFlag {
+  flag: string
+  reason: string
+}
+
+export interface FundamentalCoverage {
+  observed: number
+  assumed: number
+  unknown: number
+  required: number
+  ratio: number
+}
+
+export interface FundamentalContext {
+  data_quality: string | null
+  coverage: FundamentalCoverage | null
+  context: {
+    market_cap?: number | null
+    market_cap_idr_b?: number | null
+    note?: string
+  } | null
+  fetch_errors: string[]
+}
+
 export interface AnalisisResponse {
   kode: string
   nama: string
@@ -115,6 +139,9 @@ export interface AnalisisResponse {
   raw_indicators: RawIndicators | null
   capital_used: number
   gorengan: GorenganAnalysis | null
+  fundamental_status?: string
+  fundamental_flags?: FundamentalFlag[]
+  fundamental_meta?: FundamentalContext
 }
 
 export interface HistoryBar {
@@ -134,6 +161,8 @@ export interface HistoryResponse {
 export interface RecoveryProbability {
   horizon_days: number
   p_hit: number
+  ci_low: number | null
+  ci_high: number | null
 }
 
 export interface RecoveryEmpirical {
@@ -150,6 +179,16 @@ export interface RecoveryGbm {
   sigma_annual: number
   p_hit_ever: number
   probabilities: RecoveryProbability[]
+}
+
+export interface RecoveryModel {
+  kind: string
+  target: string
+  target_desc: string
+  dd_fraction: number | null
+  prior_peak: number | null
+  probabilities: RecoveryProbability[] | null
+  params_version: string
 }
 
 export interface RecoveryExitPlan {
@@ -182,10 +221,17 @@ export interface RecoveryAccumulation {
   prev_ara_ref_price?: number | null
   days_since_prev_ara?: number | null
   double_ara?: boolean
-  gates?: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean } | null
+  gates?: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean; liquidity?: boolean } | null
   sma20: number | null
   state_ma20: "above" | "breakout" | "below" | null
   distance_pct: number | null
+  net_dist_heavy?: number | null
+  acc_density?: number | null
+  post_ara_decay?: number | null
+  adv_vol_20?: number | null
+  adv_val_20?: number | null
+  liquidity_ok?: boolean
+  liquidity_prima?: boolean
   note: string | null
   warning: string | null
   reason: string | null
@@ -204,6 +250,8 @@ export interface RecoveryResponse {
   drop_source: "auto" | "manual"
   in_setup: boolean
   gbm: RecoveryGbm | null
+  model: RecoveryModel | null
+  signal_basis: string | null
   empirical: RecoveryEmpirical[]
   signal: string
   signal_reason: string
@@ -232,10 +280,20 @@ export interface ReadyToFlyEntry {
   ara_date: string | null
   ara_ref_price: number | null
   distance_pct: number | null
+  net_dist: number | null
+  net_dist_heavy?: number | null
+  acc_density?: number | null
+  post_ara_decay?: number | null
+  strength?: number | null
+  adv_vol_20?: number | null
+  adv_val_20?: number | null
+  liquidity_ok?: boolean
+  liquidity_prima?: boolean
+  sma_gap_pct: number | null
   sma20: number | null
   state_ma20: string | null
   max_rvol: number | null
-  gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean } | null
+  gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean; liquidity?: boolean } | null
   note: string | null
   reason: string | null
   post_ara_volume?: number | null

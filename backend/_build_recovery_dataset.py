@@ -58,7 +58,7 @@ def build_dataset(codes: list[str], length: int, workers: int,
     os.makedirs(DATA_DIR, exist_ok=True)
 
     n = len(codes)
-    dates: list[object] = []
+    dates: dict[int, object] = {}          # per INDEKS kode (bukan urutan completion!)
     rows = np.zeros((n, MAX_BARS, N_FIELDS), dtype=np.float64)
     lens = np.zeros(n, dtype=np.int32)
     ok = np.zeros(n, dtype=bool)
@@ -89,7 +89,7 @@ def build_dataset(codes: list[str], length: int, workers: int,
             if len(bars) < 300:
                 warnings["short_data"].append(code)
             nb = min(len(bars), MAX_BARS)
-            dates.append(bars[-nb:])
+            dates[i] = bars[-nb:]         # ↔ rows[i]/lens[i] : sejajar per kode
             for j, b in enumerate(bars[-nb:]):
                 _, vals = _bar_to_row(b)
                 rows[i, j] = vals
@@ -128,10 +128,16 @@ def build_dataset(codes: list[str], length: int, workers: int,
 
 
 def _save(save_path: str, rows, lens, ok, dates, codes) -> None:
-    # dates: list of list of DailyBar → simpan string ISO (object array)
+    # dates: dict[int, list[DailyBar]] per indeks kode → simpan string ISO
+    # (object array); kode tanpa data → None. SEJARAH BUG F2.1 (12-Agu-2026):
+    #   versi lama memakai list dates yg di-append dalam urutan selesainya
+    #   thread pool, lalu menempelkannya ke dates_arr[i] berurutan — tanggal
+    #   kode A bisa menempel ke kode B (mismatch vs lens, kalender tak
+    #   konsisten). Diperbaiki: kunci tanggal berdasarkan indeks kode.
     dates_arr = np.empty(len(codes), dtype=object)
-    for i, bars in enumerate(dates):
-        dates_arr[i] = [b.date for b in bars]
+    for i in range(len(codes)):
+        bars = dates.get(i)
+        dates_arr[i] = [b.date for b in bars] if bars else None
     np.savez_compressed(
         save_path,
         codes=np.array(codes, dtype="S12"),

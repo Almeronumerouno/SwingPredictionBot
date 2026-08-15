@@ -1,0 +1,121 @@
+{
+  "phase": "P5.0 Freeze & Safety Check",
+  "checked_at": "2026-08-15",
+  "verdict": "PASS",
+  "acceptance": {
+    "pass_rule": "semua frozen state cocok -> PASS",
+    "stop_rule": "ada mismatch -> STOP, jangan lanjut ke P5.1"
+  },
+  "checks": [
+    {
+      "check": "snapshot_hash",
+      "expected": "284B40C7B92B7C26B823A7C50C477FC6AE553DF250B76423C4C7DD21D0CB8FB2",
+      "actual": "284B40C7B92B7C26B823A7C50C477FC6AE553DF250B76423C4C7DD21D0CB8FB2",
+      "pass": true
+    },
+    {
+      "check": "config_py_hash",
+      "expected": "85351777724228CB50C15FA6C8B33AB3F4757D4A3C52CADB45B19053211BC0A2",
+      "actual": "85351777724228CB50C15FA6C8B33AB3F4757D4A3C52CADB45B19053211BC0A2",
+      "pass": true
+    },
+    {
+      "check": "rtf_config_ACCUM_DENSITY_PCT",
+      "expected": 30.0,
+      "actual": 30.0,
+      "pass": true
+    },
+    {
+      "check": "rtf_config_ACCUM_HEAVY_RVOL",
+      "expected": 2.0,
+      "actual": 2.0,
+      "pass": true
+    },
+    {
+      "check": "rtf_config_ACCUM_MIN_HEAVY_DAYS",
+      "expected": 2,
+      "actual": 2,
+      "pass": true
+    },
+    {
+      "check": "rtf_config_ACCUM_DECAY_TAU",
+      "expected": 2.0,
+      "actual": 2.0,
+      "pass": true
+    },
+    {
+      "check": "rtf_config_ACCUM_DECAY_CUTOFF_DAYS",
+      "expected": 5,
+      "actual": 5,
+      "pass": true
+    },
+    {
+      "check": "snapshot_n_codes",
+      "expected": 963,
+      "actual": 963,
+      "pass": true
+    },
+    {
+      "check": "snapshot_n_rows_total",
+      "expected": 526169,
+      "actual": 526169,
+      "pass": true
+    },
+    {
+      "check": "snapshot_date_range",
+      "expected": "2024-02-26..2026-08-13",
+      "actual": "2024-02-26..2026-08-13",
+      "pass": true
+    },
+    {
+      "check": "snapshot_date_end",
+      "expected": "2026-08-13",
+      "actual": "2026-08-13",
+      "pass": true
+    },
+    {
+      "check": "split_cutoff",
+      "expected": "2026-01-23",
+      "actual": "2026-01-23",
+      "pass": true
+    },
+    {
+      "check": "split_purge",
+      "expected": "21",
+      "actual": "21",
+      "pass": true
+    },
+    {
+      "check": "split_embargo_days",
+      "expected": 90,
+      "actual": "90",
+      "pass": true
+    },
+    {
+      "check": "split_oos_start",
+      "expected": "2026-04-23",
+      "actual": "2026-04-23",
+      "pass": true
+    },
+    {
+      "check": "live_npz_vs_snapshot",
+      "note": "live npz == snapshot (belum ada update)",
+      "pass": true
+    },
+    {
+      "check": "m1_not_used",
+      "pass": true,
+      "note": "Phase 5 memakai RTF production score ranking; M1 recovery candidate di luar scope"
+    },
+    {
+      "check": "p_min_untouched",
+      "pass": true,
+      "note": "p_min=0.68 frozen; Phase 5 tidak memakai signal gate recovery"
+    },
+    {
+      "check": "config_py_not_written",
+      "pass": true,
+      "note": "script Phase 5 read-only terhadap config.py"
+    }
+  ]
+}

@@ -50,6 +50,12 @@ class BacktestConfig:
     long_only: bool = CFG.LONG_ONLY_MODE
     breakeven_trigger: float = CFG.BREAKEVEN_TRIGGER
     trailing_stop_multiplier: float = 0.0  # 0=disabled, >0 trail by N×ATR below peak
+    # P6.4 (Agu 2026): realisme eksekusi — audit C5/C6.
+    #   entry_mode "close" = perilaku lama (eksekusi close bar sinyal, C5)
+    #   entry_mode "open"  = eksekusi open bar berikutnya (konvensi market order)
+    #   slippage_bps       = slippage satu sisi (bps); buy naik, sell turun
+    entry_mode: str = "close"
+    slippage_bps: float = 0.0
 
 
 # ──────────────────────────────────────────────
@@ -319,6 +325,7 @@ def run_backtest(
     target_date: str | None = None,
     sim_start_idx: int = 0,
     sim_end_idx: Optional[int] = None,
+    bars: Optional[list] = None,
 ) -> BacktestMetrics:
     """
     Run full backtest untuk satu kode saham.
@@ -331,6 +338,9 @@ def run_backtest(
         target_date: Format YYYY-MM-DD, batas akhir data
         sim_start_idx: Index pertama walk simulation (buat walk-forward)
         sim_end_idx: Index terakhir+1 walk simulation (None = sampai akhir)
+        bars: Opsional, list bar (mirip DailyBar) yang SUDAH dimuat pemanggil.
+              Bila diberikan, fetch Yahoo di-skip (dipakai walk-forward dgn
+              dataset lokal universe_ohlcv.npz).
 
     Returns:
         BacktestMetrics dengan semua metrik + daftar trade
@@ -339,7 +349,8 @@ def run_backtest(
         bt_config = BacktestConfig()
 
     # ── 1. Fetch data ──
-    bars = fetch_trading_info(code, length=length, target_date=target_date)
+    if bars is None:
+        bars = fetch_trading_info(code, length=length, target_date=target_date)
     if len(bars) < CFG.MIN_TRADING_DAYS:
         raise ValueError(
             f"Data {code} tidak cukup: {len(bars)} hari < {CFG.MIN_TRADING_DAYS} minimum"
@@ -450,6 +461,12 @@ def run_backtest(
                 continue
 
             entry_price = close[i]
+            if bt_config.entry_mode == "open":
+                entry_price = open_[i]      # P6.4: market order -> next bar open
+            slip_in = bt_config.slippage_bps / 10000.0
+            if slip_in > 0:
+                entry_price *= (1.0 + slip_in) if direction == "BUY" \
+                    else (1.0 - slip_in)
 
             risk_lvl = _risk_level(atr_val, i)
             regime_i = signals["regimes"][i - 1]
@@ -566,6 +583,12 @@ def run_backtest(
 
             if exit_reason is not None:
                 holding = i - pos["entry_idx"]
+                # P6.4: slippage satu sisi pada harga exit (sell side turun,
+                # buy side naik). SL/TP sudah gap-aware via open_[i] di atas.
+                slip_out = bt_config.slippage_bps / 10000.0
+                if slip_out > 0:
+                    exit_price_candidate *= (1.0 - slip_out) if direction == "BUY" \
+                        else (1.0 + slip_out)
                 ret = (exit_price_candidate - pos["entry_price"]) / pos["entry_price"]
                 if direction == "SELL":
                     ret = -ret
@@ -606,6 +629,13 @@ def run_backtest(
         ret = (close[last_idx] - pos["entry_price"]) / pos["entry_price"]
         if pos["direction"] == "SELL":
             ret = -ret
+        # P6.4: slippage sisi jual saat tutup posisi akhir window
+        slip_out = bt_config.slippage_bps / 10000.0
+        if slip_out > 0:
+            adj = (1.0 - slip_out) if pos["direction"] == "BUY" else (1.0 + slip_out)
+            ret = (close[last_idx] * adj - pos["entry_price"]) / pos["entry_price"]
+            if pos["direction"] == "SELL":
+                ret = -ret
 
         fee_exit = close[last_idx] * pos["shares"] * bt_config.fee_sell_pct / 100
         total_fees += fee_exit
@@ -807,6 +837,11 @@ Contoh:
     parser.add_argument("--long-only", action="store_true",
                         help="Nonaktifkan short entry (SELL cuma jadi exit signal)")
     parser.add_argument("--breakeven-trigger", type=float, default=None)
+    parser.add_argument("--entry-mode", type=str, default=None,
+                        choices=["close", "open"],
+                        help="P6.4: 'close'=lama (eksekusi close bar sinyal), 'open'=next bar open")
+    parser.add_argument("--slippage-bps", type=float, default=None,
+                        help="P6.4: slippage satu sisi dalam basis poin (0/25/50/100)")
 
     args = parser.parse_args()
 
@@ -835,6 +870,10 @@ Contoh:
         bt_config.long_only = True
     if args.breakeven_trigger is not None:
         bt_config.breakeven_trigger = args.breakeven_trigger
+    if args.entry_mode is not None:
+        bt_config.entry_mode = args.entry_mode
+    if args.slippage_bps is not None:
+        bt_config.slippage_bps = args.slippage_bps
 
     results: list[BacktestMetrics] = []
     for code in args.codes:

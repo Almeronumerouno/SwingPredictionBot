@@ -70,19 +70,31 @@ def _trailing_peak(close: np.ndarray, window: int) -> np.ndarray:
 
 
 def _collect_rows(rows: np.ndarray, lens: np.ndarray,
-                  window: int) -> dict[int, dict]:
+                  window: int,
+                  dates_list: np.ndarray | None = None) -> dict[int, dict]:
     """Per-horizon: kumpulkan (dd_fraction, y) semua saham, point-in-time.
 
     Menggunakan seri RAW (kolom 3 = close_raw, kolom 1 = high).
-    Hasil: {h: {"dd": np.ndarray, "y": np.ndarray, "date_idx": np.ndarray}}
-    date_idx = indeks bar global per saham (buat split temporal berbasis posisi).
+    Hasil: {h: {"dd", "y", "pos", "code", "date_s", "date_e"}}
+      pos     = indeks bar observasi (split berbasis posisi, kompatibel lama)
+      code    = indeks kode utk tiap observasi
+      date_s  = tanggal bar observasi (start event), datetime64[D]
+      date_e  = tanggal bar POS + h (bar terakhir label), datetime64[D]
+    date_s/date_e hanya terisi bila dates_list diberikan (len==lens), dipakai
+    utk purge/embargo temporal (F2.1). Tanpa dates_list -> array kosong.
     """
     n_codes = len(lens)
-    out: dict[int, dict] = {h: {"dd": [], "y": [], "pos": []} for h in HORIZONS}
+    out: dict[int, dict] = {h: {"dd": [], "y": [], "pos": [], "code": [],
+                                "date_s": [], "date_e": []} for h in HORIZONS}
     for c in range(n_codes):
         m = int(lens[c])
         if m < window + max(HORIZONS) + 5:
             continue
+        dt = None
+        if dates_list is not None and c < len(dates_list):
+            dl = dates_list[c]
+            if dl is not None and len(dl) == m:
+                dt = np.asarray(dl, dtype="datetime64[D]")
         close = rows[c, :m, 3]
         high = rows[c, :m, 1]
         peak = _trailing_peak(close, window)
@@ -106,10 +118,21 @@ def _collect_rows(rows: np.ndarray, lens: np.ndarray,
             out[h]["dd"].append(dd[i_h])
             out[h]["y"].append(y)
             out[h]["pos"].append(i_h)
+            out[h]["code"].append(np.full(len(i_h), c, dtype=np.int32))
+            if dt is not None:
+                out[h]["date_s"].append(dt[i_h])
+                out[h]["date_e"].append(dt[i_h + h])  # bar terakhir label
     for h in HORIZONS:
-        out[h]["dd"] = np.concatenate(out[h]["dd"]) if out[h]["dd"] else np.array([])
-        out[h]["y"] = np.concatenate(out[h]["y"]) if out[h]["y"] else np.array([])
-        out[h]["pos"] = np.concatenate(out[h]["pos"]) if out[h]["pos"] else np.array([])
+        for k in ("dd", "y", "pos"):
+            out[h][k] = np.concatenate(out[h][k]) if out[h][k] else np.array([])
+        out[h]["code"] = (np.concatenate(out[h]["code"]) if out[h]["code"]
+                          else np.array([], dtype=np.int32))
+        if out[h]["date_s"]:
+            out[h]["date_s"] = np.concatenate(out[h]["date_s"])
+            out[h]["date_e"] = np.concatenate(out[h]["date_e"])
+        else:
+            out[h]["date_s"] = np.array([], dtype="datetime64[D]")
+            out[h]["date_e"] = np.array([], dtype="datetime64[D]")
     return out
 
 
@@ -137,6 +160,21 @@ def _fit_horizon(dd: np.ndarray, y: np.ndarray, pos: np.ndarray,
     a = float(clf.intercept_[0])
     b = float(clf.coef_[0][0])
 
+    # SE parameter via Hessian logistic: cov = inv(X'WX), W = p(1-p).
+    # Dipakai utk confidence interval P(recover) (delta method, ROMBAK#3).
+    def _param_se(x, yy):
+        p = 1.0 / (1.0 + np.exp(-(a + b * x)))
+        W = p * (1.0 - p)
+        Xd = np.column_stack([np.ones_like(x), x])
+        try:
+            cov = np.linalg.inv((Xd.T * W) @ Xd)
+            return (float(np.sqrt(cov[0, 0])), float(np.sqrt(cov[1, 1])),
+                    float(cov[0, 1]))
+        except np.linalg.LinAlgError:
+            return (None, None, None)
+
+    a_se, b_se, cov_ab = _param_se(dd_t, y_t)
+
     def _probs(x):
         return 1.0 / (1.0 + np.exp(-(a + b * x)))
 
@@ -162,6 +200,10 @@ def _fit_horizon(dd: np.ndarray, y: np.ndarray, pos: np.ndarray,
         "fitted": True,
         "a": round(a, 5),
         "b": round(b, 5),
+        "a_se": round(a_se, 5) if a_se is not None else None,
+        "b_se": round(b_se, 5) if b_se is not None else None,
+        "cov_ab": round(cov_ab, 6) if cov_ab is not None else None,
+        "ci_method": "delta method pada skala logit (90%)",
         "n_train": int(n_train),
         "n_test": int(n - n_train),
         "n_pos": int(y.sum()),

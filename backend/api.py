@@ -20,6 +20,7 @@ import scoring
 import gorengan
 import recovery
 import short_selling
+import fundamental_risk
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
 from data_source.readytofly_scanner import get_cached_ready_to_fly, scan_ready_to_fly
@@ -144,6 +145,27 @@ class GorenganResponse(BaseModel):
     explanation: str
 
 
+class FundamentalFlagResponse(BaseModel):
+    flag: str
+    reason: str
+
+
+class FundamentalCoverageResponse(BaseModel):
+    observed: int
+    assumed: int
+    unknown: int
+    required: int
+    ratio: float
+
+
+class FundamentalMetaResponse(BaseModel):
+    data_quality: str | None = None
+    coverage: FundamentalCoverageResponse | None = None
+    context: dict | None = None
+    fetch_errors: list[str] = []
+    note: str | None = None
+
+
 class AnalisisResponse(BaseModel):
     kode: str
     nama: str
@@ -158,6 +180,9 @@ class AnalisisResponse(BaseModel):
     gorengan: GorenganResponse | None = None
     buy_signal_validated: bool = False
     validation_note: str | None = None
+    fundamental_status: str | None = None
+    fundamental_flags: list[FundamentalFlagResponse] = []
+    fundamental_meta: FundamentalMetaResponse | None = None
 
 
 class HistoryResponse(BaseModel):
@@ -168,6 +193,8 @@ class HistoryResponse(BaseModel):
 class RecoveryProbability(BaseModel):
     horizon_days: int
     p_hit: float
+    ci_low: float | None = None
+    ci_high: float | None = None
 
 
 class RecoveryEmpirical(BaseModel):
@@ -175,6 +202,7 @@ class RecoveryEmpirical(BaseModel):
     n_events: int
     n_recovered: int
     rate: float | None
+    target: str = "previous_close"  # target recovery event (F2.5: eksplisit)
 
 
 class RecoveryGbm(BaseModel):
@@ -225,6 +253,12 @@ class RecoveryAccumulation(BaseModel):
     ara_ref_price: float | None = None
     prev_ara_date: str | None = None
     prev_ara_ref_price: float | None = None
+    # P6.7 (C14): alias user-facing — istilah "large upmove" (bukan "ARA"
+    # resmi BEI, yang bertingkat 35/25/20 dan berubah sesuai peraturan)
+    large_upmove_date: str | None = None
+    large_upmove_ref_price: float | None = None
+    prev_large_upmove_date: str | None = None
+    prev_large_upmove_ref_price: float | None = None
     days_since_prev_ara: int | None = None
     double_ara: bool = False
     gates: dict | None = None
@@ -232,6 +266,14 @@ class RecoveryAccumulation(BaseModel):
     state_ma20: str | None = None  # "above" | "breakout" | "below"
     distance_pct: float | None = None
     net_dist: float | None = None       # Net Distribution window post-ARA: [-1, +1]
+    net_dist_heavy: float | None = None  # heavy-day Close>Open ratio: [0,1] (definisi TODO audit)
+    acc_density: float | None = None    # k * net_dist_heavy / window: [0,1] (rombak TODO)
+    post_ara_decay: float | None = None  # exp(-d/tau), cutoff d>=5: ranking freshness
+    strength: float | None = None       # density * net_dist_heavy * decay (skor ranking RTF)
+    adv_vol_20: float | None = None     # ADV 20 hari point-in-time (lembar, tanpa hari ARA)
+    adv_val_20: float | None = None     # ADV 20 hari point-in-time (Rp, tanpa hari ARA)
+    liquidity_ok: bool = True           # gate likuiditas (floor BEI, rombak TODO)
+    liquidity_prima: bool = False       # flag display "likuiditas prima" (1jt lbr/Rp1M)
     sma_gap_pct: float | None = None    # (harga - SMA20)/SMA20 dalam %
     note: str | None = None
     warning: str | None = None
@@ -258,6 +300,7 @@ class RecoveryResponse(BaseModel):
     signal: str
     signal_reason: str
     signal_basis: str | None = None
+    signal_target: str | None = None  # F2.5: "previous_close" | "prior_high"
     exit_plan: RecoveryExitPlan | None
     vs_lookbacks: list[RecoveryVsLookback] = []
     accumulation: RecoveryAccumulation | None = None
@@ -281,8 +324,19 @@ class ReadyToFlyEntryResponse(BaseModel):
     window_days: int = 0
     ara_date: str | None = None
     ara_ref_price: float | None = None
+    # P6.7 (C14): alias user-facing
+    large_upmove_date: str | None = None
+    large_upmove_ref_price: float | None = None
     distance_pct: float | None = None
     net_dist: float | None = None       # Net Distribution window post-ARA: [-1, +1]
+    net_dist_heavy: float | None = None  # heavy-day Close>Open ratio: [0,1] (definisi TODO audit)
+    acc_density: float | None = None    # k * net_dist_heavy / window: [0,1] (rombak TODO)
+    post_ara_decay: float | None = None  # exp(-d/tau), cutoff d>=5: ranking freshness
+    strength: float | None = None       # density * net_dist_heavy * decay (skor ranking RTF)
+    adv_vol_20: float | None = None     # ADV 20 hari point-in-time (lembar, tanpa hari ARA)
+    adv_val_20: float | None = None     # ADV 20 hari point-in-time (Rp, tanpa hari ARA)
+    liquidity_ok: bool = True           # gate likuiditas (floor BEI, rombak TODO)
+    liquidity_prima: bool = False       # flag display "likuiditas prima" (1jt lbr/Rp1M)
     sma_gap_pct: float | None = None    # (harga - SMA20)/SMA20 dalam %
     sma20: float | None = None
     state_ma20: str | None = None
@@ -516,6 +570,38 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
     if short_gate_note:
         notes.append(short_gate_note)
 
+    # ── F3.5: fundamental risk context (terpisah dari skor, TANPA penalty) ──
+    # Contract user (13 Agu 2026): fundamental_status + fundamental_flags
+    # sebagai field TERPISAH. Bukan score, bukan predictor. Fetch fundamental
+    # (network tambahan) TIDAK boleh membuat endpoint gagal — semua exception
+    # dibungkus -> fundamental_status "UNKNOWN" + fetch_errors transparan.
+    fund = None
+    fund_fetch_error = None
+    try:
+        fund = fundamental_risk.assess_fundamental_risk(kode)
+    except Exception as exc:  # noqa: BLE001
+        fund_fetch_error = f"{type(exc).__name__}: {exc}"
+
+    if fund is None:
+        fund_status = "UNKNOWN"
+        fund_flags: list[dict] = []
+        fund_meta: dict[str, Any] = {
+            "data_quality": None,
+            "coverage": None,
+            "context": None,
+            "fetch_errors": [fund_fetch_error] if fund_fetch_error else [],
+            "note": "fundamental fetch gagal — status dianggap UNKNOWN (bukan RISK)",
+        }
+    else:
+        fund_status = fund.fundamental_health
+        fund_flags = [r.to_dict() for r in fund.reasons]
+        fund_meta = {
+            "data_quality": fund.data_quality,
+            "coverage": fund.coverage,
+            "context": fund.context,
+            "fetch_errors": list(fund.fetch_errors),
+        }
+
     return {
         "kode": kode,
         "harga": float(close[-1]),
@@ -529,6 +615,9 @@ def analyze_stock(kode: str, capital: float, target_date: str | None = None,
         "gorengan": gor_result,
         "buy_signal_validated": config.SWING_BUY_VALIDATED,
         "validation_note": " ".join(notes),
+        "fundamental_status": fund_status,
+        "fundamental_flags": fund_flags,
+        "fundamental_meta": fund_meta,
     }
 
 
@@ -885,8 +974,12 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
                 "window_days": e.window_days,
                 "ara_date": e.ara_date,
                 "ara_ref_price": e.ara_ref_price,
+                # P6.7 (C14): alias user-facing
+                "large_upmove_date": e.ara_date,
+                "large_upmove_ref_price": e.ara_ref_price,
                 "distance_pct": e.distance_pct,
                 "net_dist": e.net_dist,
+                "net_dist_heavy": e.net_dist_heavy,
                 "sma_gap_pct": e.sma_gap_pct,
                 "sma20": e.sma20,
                 "state_ma20": e.state_ma20,

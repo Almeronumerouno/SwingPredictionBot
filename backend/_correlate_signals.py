@@ -153,7 +153,8 @@ def correlate_stock(
         phi = (p11 * p00 - p10 * p01) / np.sqrt(denom) if denom > 0 else 0.0
 
     # overlap langsung & overlap ber-lag (recovery hari t, swing dalam t..t+lag)
-    overlap_same = int(np.sum(sw_arr & rec_arr))
+    both = np.logical_and(sw_arr, rec_arr)
+    overlap_same = int(np.sum(both))
     overlap_lag = 0
     first_overlap = None
     for i in range(len(rec_arr)):
@@ -164,7 +165,7 @@ def correlate_stock(
                 if first_overlap is None:
                     first_overlap = i
     if overlap_same and first_overlap is None:
-        first_overlap = int(np.argmax(sw_arr & rec_arr))
+        first_overlap = int(np.argmax(both))
 
     return {
         "code": code,

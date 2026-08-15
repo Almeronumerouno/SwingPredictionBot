@@ -1,0 +1,45 @@
+{
+  "phase": "Phase 3 — baseline comparison (OOS, parameter frozen)",
+  "method": "OOS = periode setelah cutoff + embargo 90d; semua baseline dievaluasi pada set yang sama (b10 horizon 10)",
+  "winner_arm": {
+    "config": {
+      "ACCUM_ARA_RISE_PCT": 10.0,
+      "ACCUM_RVOL_PERIOD": 20,
+      "ACCUM_DENSITY_PCT": 50.0,
+      "ACCUM_MIN_HEAVY_DAYS": 2,
+      "ACCUM_HEAVY_RVOL": 2.0,
+      "ACCUM_MA20_DAYS": 20,
+      "ACCUM_DECAY_TAU": 2.0,
+      "ACCUM_DECAY_CUTOFF_DAYS": null,
+      "ACCUM_MIN_ADV_VOL": 500000,
+      "ACCUM_MIN_ADV_VAL": 250000000
+    },
+    "n_signals": 366,
+    "b10_rate": 0.1961,
+    "lift_vs_ctrl": 2.735
+  },
+  "baselines": {
+    "random": {
+      "n_signals": 366,
+      "b10_rate": 0.0713,
+      "bootstrap_b": 1000,
+      "seed": 42
+    },
+    "momentum_5d": {
+      "n_signals": 366,
+      "b10_rate": 0.2338
+    },
+    "momentum_10d": {
+      "n_signals": 366,
+      "b10_rate": 0.2516
+    },
+    "density_only": {
+      "n_signals": 619,
+      "b10_rate": 0.1914,
+      "note": "below & k>=mh & density>=thr, TANPA above_ma & liq (v4 style)"
+    }
+  },
+  "ctrl_rate_b10_h10": 0.0717,
+  "n_ctrl": 50381,
+  "generated": "2026-08-14T17:22:22+00:00"
+}

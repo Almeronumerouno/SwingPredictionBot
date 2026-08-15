@@ -1,0 +1,1817 @@
+{
+  "phase": "P4.8 — Final Locked Holdout",
+  "selftest": true,
+  "selftest_note": "SELF_TEST - memakai data DEV, BUKAN bukti holdout",
+  "cutoff": "2025-11-01",
+  "last_data_date": "2026-08-14",
+  "config_sha": "B4A24F3E9998AB60A0B77898D2D3DF9C446CAFC0F5D607AB96CD41AB7001655E",
+  "generated": "2026-08-15T15:25:16+00:00",
+  "targets": {
+    "previous_close": {
+      "1": {
+        "n": 13522,
+        "p_ref_frozen": 0.2544,
+        "m0": {
+          "label": "M0",
+          "n_total": 13522,
+          "n_events": 3113,
+          "n_non_events": 10409,
+          "n_stocks": 858,
+          "n_episodes": 114,
+          "calibration": {
+            "intercept": 1.1848,
+            "slope": 1.1607,
+            "ci_intercept": [
+              0.665,
+              1.7045
+            ],
+            "ci_slope": [
+              0.9085,
+              1.413
+            ],
+            "O_over_E": 2.034
+          },
+          "curve": {
+            "ece10": 0.117,
+            "ece20": 0.117,
+            "max_bin_diff": 0.1665,
+            "n_bins": 20
+          },
+          "brier": 0.19016,
+          "bss": -0.0695,
+          "logloss": 0.59137,
+          "mean_p": 0.1132,
+          "observed_rate": 0.2302,
+          "decomposition_diagnostic": {
+            "rel": 0.35341,
+            "res": 0.01397,
+            "unc": 0.17722,
+            "check": 0.51666
+          },
+          "auc": 0.56579,
+          "ci_cluster": {
+            "oe": [
+              1.961,
+              2.115
+            ],
+            "brier": [
+              0.1839,
+              0.1972
+            ],
+            "bss": [
+              -0.0815,
+              -0.0578
+            ],
+            "intercept": [
+              0.3949,
+              2.0396
+            ],
+            "slope": [
+              0.7818,
+              1.5737
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0133,
+            "bss": 0.0237,
+            "intercept": 1.6447,
+            "slope": 0.7919
+          },
+          "ci_dateblock": {
+            "oe": [
+              2.034,
+              2.034
+            ],
+            "brier": [
+              0.1902,
+              0.1902
+            ],
+            "bss": [
+              -0.0695,
+              -0.0695
+            ],
+            "intercept": [
+              1.1848,
+              1.1848
+            ],
+            "slope": [
+              1.1607,
+              1.1607
+            ]
+          }
+        },
+        "m1": {
+          "label": "M1",
+          "n_total": 13522,
+          "n_events": 3113,
+          "n_non_events": 10409,
+          "n_stocks": 858,
+          "n_episodes": 114,
+          "calibration": {
+            "intercept": 0.1272,
+            "slope": 1.1607,
+            "ci_intercept": [
+              -0.164,
+              0.4183
+            ],
+            "ci_slope": [
+              0.9085,
+              1.413
+            ],
+            "O_over_E": 0.958
+          },
+          "curve": {
+            "ece10": 0.0225,
+            "ece20": 0.0243,
+            "max_bin_diff": 0.0606,
+            "n_bins": 20
+          },
+          "brier": 0.17632,
+          "bss": 0.0083,
+          "logloss": 0.53697,
+          "mean_p": 0.2404,
+          "observed_rate": 0.2302,
+          "decomposition_diagnostic": {
+            "rel": 0.3526,
+            "res": 0.00094,
+            "unc": 0.17722,
+            "check": 0.52888
+          },
+          "auc": 0.56579,
+          "ci_cluster": {
+            "oe": [
+              0.924,
+              0.995
+            ],
+            "brier": [
+              0.172,
+              0.181
+            ],
+            "bss": [
+              0.0043,
+              0.0124
+            ],
+            "intercept": [
+              -0.3198,
+              0.6058
+            ],
+            "slope": [
+              0.7818,
+              1.5737
+            ]
+          },
+          "ci_width": {
+            "brier": 0.009,
+            "bss": 0.0081,
+            "intercept": 0.9256,
+            "slope": 0.7919
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.958,
+              0.958
+            ],
+            "brier": [
+              0.1763,
+              0.1763
+            ],
+            "bss": [
+              0.0083,
+              0.0083
+            ],
+            "intercept": [
+              0.1272,
+              0.1272
+            ],
+            "slope": [
+              1.1607,
+              1.1607
+            ]
+          }
+        },
+        "operational": {
+          "p0": {
+            "1": 0.0954,
+            "25": 0.1026,
+            "50": 0.108,
+            "75": 0.1166,
+            "99": 0.1735
+          },
+          "p1": {
+            "1": 0.2078,
+            "25": 0.2213,
+            "50": 0.2315,
+            "75": 0.2471,
+            "99": 0.3431
+          },
+          "n_observations": 13522,
+          "potential_old": 0,
+          "potential_new": 0,
+          "potential_share_new": 0.0,
+          "watch_old": 13522,
+          "watch_new": 13522,
+          "flips": {
+            "out_potential_to_watch": 0,
+            "out_valid_y1": 0,
+            "in_watch_to_potential": 0,
+            "in_valid_y1": 0
+          },
+          "precision_old": null,
+          "precision_new": null,
+          "false_positives_old": 0,
+          "false_positives_new": 0,
+          "signal_count_old": 0,
+          "signal_count_new": 0,
+          "top1_stock_share_potential": null,
+          "n_stocks_with_potential": 0,
+          "regime_distribution": {
+            "0": {
+              "n": 3458,
+              "n_potential": 0
+            },
+            "1": {
+              "n": 5472,
+              "n_potential": 0
+            },
+            "2": {
+              "n": 4592,
+              "n_potential": 0
+            }
+          }
+        },
+        "acceptance": {
+          "status": "PASS",
+          "rules": {
+            "1": "PASS",
+            "2": "PASS",
+            "3": "PASS",
+            "4": "PASS",
+            "5": "PASS",
+            "6": "PASS",
+            "7": "PASS",
+            "8": "PASS"
+          }
+        }
+      },
+      "3": {
+        "n": 13462,
+        "p_ref_frozen": 0.4394,
+        "m0": {
+          "label": "M0",
+          "n_total": 13462,
+          "n_events": 5756,
+          "n_non_events": 7706,
+          "n_stocks": 858,
+          "n_episodes": 112,
+          "calibration": {
+            "intercept": 0.3048,
+            "slope": 0.6321,
+            "ci_intercept": [
+              0.1647,
+              0.4448
+            ],
+            "ci_slope": [
+              0.488,
+              0.7763
+            ],
+            "O_over_E": 1.516
+          },
+          "curve": {
+            "ece10": 0.1455,
+            "ece20": 0.1455,
+            "max_bin_diff": 0.1988,
+            "n_bins": 20
+          },
+          "brier": 0.26488,
+          "bss": -0.0816,
+          "logloss": 0.72963,
+          "mean_p": 0.2821,
+          "observed_rate": 0.4276,
+          "decomposition_diagnostic": {
+            "rel": 0.486,
+            "res": 0.02363,
+            "unc": 0.24475,
+            "check": 0.70712
+          },
+          "auc": 0.54812,
+          "ci_cluster": {
+            "oe": [
+              1.481,
+              1.551
+            ],
+            "brier": [
+              0.2609,
+              0.2689
+            ],
+            "bss": [
+              -0.0936,
+              -0.07
+            ],
+            "intercept": [
+              0.1257,
+              0.5118
+            ],
+            "slope": [
+              0.4476,
+              0.8453
+            ]
+          },
+          "ci_width": {
+            "brier": 0.008,
+            "bss": 0.0236,
+            "intercept": 0.3861,
+            "slope": 0.3977
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.516,
+              1.516
+            ],
+            "brier": [
+              0.2649,
+              0.2649
+            ],
+            "bss": [
+              -0.0816,
+              -0.0816
+            ],
+            "intercept": [
+              0.3048,
+              0.3048
+            ],
+            "slope": [
+              0.6321,
+              0.6321
+            ]
+          }
+        },
+        "m1": {
+          "label": "M1",
+          "n_total": 13462,
+          "n_events": 5756,
+          "n_non_events": 7706,
+          "n_stocks": 858,
+          "n_episodes": 112,
+          "calibration": {
+            "intercept": -0.1619,
+            "slope": 0.6321,
+            "ci_intercept": [
+              -0.207,
+              -0.1168
+            ],
+            "ci_slope": [
+              0.488,
+              0.7763
+            ],
+            "O_over_E": 0.953
+          },
+          "curve": {
+            "ece10": 0.0266,
+            "ece20": 0.0269,
+            "max_bin_diff": 0.1119,
+            "n_bins": 20
+          },
+          "brier": 0.24432,
+          "bss": 0.0023,
+          "logloss": 0.68171,
+          "mean_p": 0.4487,
+          "observed_rate": 0.4276,
+          "decomposition_diagnostic": {
+            "rel": 0.48524,
+            "res": 0.00384,
+            "unc": 0.24475,
+            "check": 0.72615
+          },
+          "auc": 0.54812,
+          "ci_cluster": {
+            "oe": [
+              0.932,
+              0.974
+            ],
+            "brier": [
+              0.2426,
+              0.246
+            ],
+            "bss": [
+              -0.0031,
+              0.0079
+            ],
+            "intercept": [
+              -0.2151,
+              -0.099
+            ],
+            "slope": [
+              0.4476,
+              0.8453
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0034,
+            "bss": 0.011,
+            "intercept": 0.1161,
+            "slope": 0.3977
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.953,
+              0.953
+            ],
+            "brier": [
+              0.2443,
+              0.2443
+            ],
+            "bss": [
+              0.0023,
+              0.0023
+            ],
+            "intercept": [
+              -0.1619,
+              -0.1619
+            ],
+            "slope": [
+              0.6321,
+              0.6321
+            ]
+          }
+        },
+        "operational": {
+          "p0": {
+            "1": 0.2098,
+            "25": 0.2459,
+            "50": 0.2722,
+            "75": 0.3058,
+            "99": 0.4375
+          },
+          "p1": {
+            "1": 0.3571,
+            "25": 0.4055,
+            "50": 0.439,
+            "75": 0.4796,
+            "99": 0.6194
+          },
+          "n_observations": 13462,
+          "potential_old": 0,
+          "potential_new": 24,
+          "potential_share_new": 0.0018,
+          "watch_old": 13462,
+          "watch_new": 13438,
+          "flips": {
+            "out_potential_to_watch": 0,
+            "out_valid_y1": 0,
+            "in_watch_to_potential": 24,
+            "in_valid_y1": 10
+          },
+          "precision_old": null,
+          "precision_new": 0.4167,
+          "false_positives_old": 0,
+          "false_positives_new": 14,
+          "signal_count_old": 0,
+          "signal_count_new": 24,
+          "top1_stock_share_potential": 1.0,
+          "n_stocks_with_potential": 1,
+          "regime_distribution": {
+            "0": {
+              "n": 3443,
+              "n_potential": 11
+            },
+            "1": {
+              "n": 5452,
+              "n_potential": 8
+            },
+            "2": {
+              "n": 4567,
+              "n_potential": 5
+            }
+          }
+        },
+        "acceptance": {
+          "status": "FAIL",
+          "rules": {
+            "1": "PASS",
+            "2": "PASS",
+            "3": "PASS",
+            "4": "PASS",
+            "5": "PASS",
+            "6": "PASS",
+            "7": "PASS",
+            "8": "FAIL"
+          }
+        }
+      },
+      "5": {
+        "n": 13354,
+        "p_ref_frozen": 0.5355,
+        "m0": {
+          "label": "M0",
+          "n_total": 13354,
+          "n_events": 6871,
+          "n_non_events": 6483,
+          "n_stocks": 858,
+          "n_episodes": 112,
+          "calibration": {
+            "intercept": 1.1894,
+            "slope": 2.0732,
+            "ci_intercept": [
+              0.8897,
+              1.4892
+            ],
+            "ci_slope": [
+              1.5278,
+              2.6185
+            ],
+            "O_over_E": 1.402
+          },
+          "curve": {
+            "ece10": 0.1475,
+            "ece20": 0.1475,
+            "max_bin_diff": 0.1875,
+            "n_bins": 20
+          },
+          "brier": 0.27081,
+          "bss": -0.0823,
+          "logloss": 0.73623,
+          "mean_p": 0.367,
+          "observed_rate": 0.5145,
+          "decomposition_diagnostic": {
+            "rel": 0.49863,
+            "res": 0.02197,
+            "unc": 0.24979,
+            "check": 0.72644
+          },
+          "auc": 0.54521,
+          "ci_cluster": {
+            "oe": [
+              1.377,
+              1.428
+            ],
+            "brier": [
+              0.2683,
+              0.2734
+            ],
+            "bss": [
+              -0.0955,
+              -0.0692
+            ],
+            "intercept": [
+              0.8126,
+              1.6225
+            ],
+            "slope": [
+              1.3864,
+              2.8465
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0051,
+            "bss": 0.0263,
+            "intercept": 0.8099,
+            "slope": 1.4601
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.402,
+              1.402
+            ],
+            "brier": [
+              0.2708,
+              0.2708
+            ],
+            "bss": [
+              -0.0823,
+              -0.0823
+            ],
+            "intercept": [
+              1.1894,
+              1.1894
+            ],
+            "slope": [
+              2.0732,
+              2.0732
+            ]
+          }
+        },
+        "m1": {
+          "label": "M1",
+          "n_total": 13354,
+          "n_events": 6871,
+          "n_non_events": 6483,
+          "n_stocks": 858,
+          "n_episodes": 112,
+          "calibration": {
+            "intercept": -0.342,
+            "slope": 2.0732,
+            "ci_intercept": [
+              -0.4524,
+              -0.2316
+            ],
+            "ci_slope": [
+              1.5278,
+              2.6185
+            ],
+            "O_over_E": 0.939
+          },
+          "curve": {
+            "ece10": 0.0336,
+            "ece20": 0.0346,
+            "max_bin_diff": 0.1004,
+            "n_bins": 20
+          },
+          "brier": 0.25015,
+          "bss": 0.0003,
+          "logloss": 0.69345,
+          "mean_p": 0.5481,
+          "observed_rate": 0.5145,
+          "decomposition_diagnostic": {
+            "rel": 0.49857,
+            "res": 0.00137,
+            "unc": 0.24979,
+            "check": 0.74699
+          },
+          "auc": 0.54521,
+          "ci_cluster": {
+            "oe": [
+              0.922,
+              0.956
+            ],
+            "brier": [
+              0.2491,
+              0.2511
+            ],
+            "bss": [
+              -0.0013,
+              0.0021
+            ],
+            "intercept": [
+              -0.4932,
+              -0.2041
+            ],
+            "slope": [
+              1.3864,
+              2.8465
+            ]
+          },
+          "ci_width": {
+            "brier": 0.002,
+            "bss": 0.0034,
+            "intercept": 0.2891,
+            "slope": 1.4601
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.939,
+              0.939
+            ],
+            "brier": [
+              0.2501,
+              0.2501
+            ],
+            "bss": [
+              0.0003,
+              0.0003
+            ],
+            "intercept": [
+              -0.342,
+              -0.342
+            ],
+            "slope": [
+              2.0732,
+              2.0732
+            ]
+          }
+        },
+        "operational": {
+          "p0": {
+            "1": 0.3459,
+            "25": 0.3568,
+            "50": 0.3634,
+            "75": 0.3728,
+            "99": 0.4141
+          },
+          "p1": {
+            "1": 0.5254,
+            "25": 0.5373,
+            "50": 0.5444,
+            "75": 0.5544,
+            "99": 0.5967
+          },
+          "n_observations": 13354,
+          "potential_old": 0,
+          "potential_new": 0,
+          "potential_share_new": 0.0,
+          "watch_old": 13354,
+          "watch_new": 13354,
+          "flips": {
+            "out_potential_to_watch": 0,
+            "out_valid_y1": 0,
+            "in_watch_to_potential": 0,
+            "in_valid_y1": 0
+          },
+          "precision_old": null,
+          "precision_new": null,
+          "false_positives_old": 0,
+          "false_positives_new": 0,
+          "signal_count_old": 0,
+          "signal_count_new": 0,
+          "top1_stock_share_potential": null,
+          "n_stocks_with_potential": 0,
+          "regime_distribution": {
+            "0": {
+              "n": 3417,
+              "n_potential": 0
+            },
+            "1": {
+              "n": 5411,
+              "n_potential": 0
+            },
+            "2": {
+              "n": 4526,
+              "n_potential": 0
+            }
+          }
+        },
+        "acceptance": {
+          "status": "PASS",
+          "rules": {
+            "1": "PASS",
+            "2": "PASS",
+            "3": "PASS",
+            "4": "PASS",
+            "5": "PASS",
+            "6": "PASS",
+            "7": "PASS",
+            "8": "PASS"
+          }
+        }
+      },
+      "10": {
+        "n": 13247,
+        "p_ref_frozen": 0.6542,
+        "m0": {
+          "label": "M0",
+          "n_total": 13247,
+          "n_events": 8375,
+          "n_non_events": 4872,
+          "n_stocks": 856,
+          "n_episodes": 110,
+          "calibration": {
+            "intercept": 0.5127,
+            "slope": 0.7149,
+            "ci_intercept": [
+              0.4766,
+              0.5489
+            ],
+            "ci_slope": [
+              0.5156,
+              0.9142
+            ],
+            "O_over_E": 1.238
+          },
+          "curve": {
+            "ece10": 0.1214,
+            "ece20": 0.1214,
+            "max_bin_diff": 0.1516,
+            "n_bins": 20
+          },
+          "brier": 0.2466,
+          "bss": -0.0584,
+          "logloss": 0.68632,
+          "mean_p": 0.5108,
+          "observed_rate": 0.6322,
+          "decomposition_diagnostic": {
+            "rel": 0.46238,
+            "res": 0.01674,
+            "unc": 0.23252,
+            "check": 0.67815
+          },
+          "auc": 0.54213,
+          "ci_cluster": {
+            "oe": [
+              1.218,
+              1.259
+            ],
+            "brier": [
+              0.2454,
+              0.2478
+            ],
+            "bss": [
+              -0.0728,
+              -0.0452
+            ],
+            "intercept": [
+              0.471,
+              0.5583
+            ],
+            "slope": [
+              0.4652,
+              0.971
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0024,
+            "bss": 0.0276,
+            "intercept": 0.0873,
+            "slope": 0.5058
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.238,
+              1.238
+            ],
+            "brier": [
+              0.2466,
+              0.2466
+            ],
+            "bss": [
+              -0.0584,
+              -0.0584
+            ],
+            "intercept": [
+              0.5127,
+              0.5127
+            ],
+            "slope": [
+              0.7149,
+              0.7149
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "21": {
+        "n": 12899,
+        "p_ref_frozen": 0.7575,
+        "m0": {
+          "label": "M0",
+          "n_total": 12899,
+          "n_events": 9323,
+          "n_non_events": 3576,
+          "n_stocks": 855,
+          "n_episodes": 107,
+          "calibration": {
+            "intercept": 0.2756,
+            "slope": 1.809,
+            "ci_intercept": [
+              -0.0544,
+              0.6057
+            ],
+            "ci_slope": [
+              0.9385,
+              2.6796
+            ],
+            "O_over_E": 1.218
+          },
+          "curve": {
+            "ece10": 0.1294,
+            "ece20": 0.1294,
+            "max_bin_diff": 0.1761,
+            "n_bins": 20
+          },
+          "brier": 0.21688,
+          "bss": -0.0759,
+          "logloss": 0.62619,
+          "mean_p": 0.5934,
+          "observed_rate": 0.7228,
+          "decomposition_diagnostic": {
+            "rel": 0.4004,
+            "res": 0.01686,
+            "unc": 0.20037,
+            "check": 0.58391
+          },
+          "auc": 0.52833,
+          "ci_cluster": {
+            "oe": [
+              1.202,
+              1.235
+            ],
+            "brier": [
+              0.215,
+              0.2187
+            ],
+            "bss": [
+              -0.0942,
+              -0.059
+            ],
+            "intercept": [
+              -0.1524,
+              0.7045
+            ],
+            "slope": [
+              0.6843,
+              2.9843
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0037,
+            "bss": 0.0352,
+            "intercept": 0.8569,
+            "slope": 2.3
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.218,
+              1.218
+            ],
+            "brier": [
+              0.2169,
+              0.2169
+            ],
+            "bss": [
+              -0.0759,
+              -0.0759
+            ],
+            "intercept": [
+              0.2756,
+              0.2756
+            ],
+            "slope": [
+              1.809,
+              1.809
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "42": {
+        "n": 11753,
+        "p_ref_frozen": 0.8334,
+        "m0": {
+          "label": "M0",
+          "n_total": 11753,
+          "n_events": 9150,
+          "n_non_events": 2603,
+          "n_stocks": 846,
+          "n_episodes": 102,
+          "calibration": {
+            "intercept": -0.0697,
+            "slope": 1.6129,
+            "ci_intercept": [
+              -0.7059,
+              0.5666
+            ],
+            "ci_slope": [
+              0.8399,
+              2.3859
+            ],
+            "O_over_E": 1.12
+          },
+          "curve": {
+            "ece10": 0.0836,
+            "ece20": 0.0836,
+            "max_bin_diff": 0.1329,
+            "n_bins": 20
+          },
+          "brier": 0.17917,
+          "bss": -0.0213,
+          "logloss": 0.54566,
+          "mean_p": 0.695,
+          "observed_rate": 0.7785,
+          "decomposition_diagnostic": {
+            "rel": 0.34447,
+            "res": 0.00713,
+            "unc": 0.17242,
+            "check": 0.50976
+          },
+          "auc": 0.52717,
+          "ci_cluster": {
+            "oe": [
+              1.105,
+              1.135
+            ],
+            "brier": [
+              0.1751,
+              0.1831
+            ],
+            "bss": [
+              -0.039,
+              -0.0047
+            ],
+            "intercept": [
+              -0.9636,
+              0.7966
+            ],
+            "slope": [
+              0.5745,
+              2.6933
+            ]
+          },
+          "ci_width": {
+            "brier": 0.008,
+            "bss": 0.0343,
+            "intercept": 1.7602,
+            "slope": 2.1188
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.12,
+              1.12
+            ],
+            "brier": [
+              0.1792,
+              0.1792
+            ],
+            "bss": [
+              -0.0213,
+              -0.0213
+            ],
+            "intercept": [
+              -0.0697,
+              -0.0697
+            ],
+            "slope": [
+              1.6129,
+              1.6129
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "63": {
+        "n": 8922,
+        "p_ref_frozen": 0.8701,
+        "m0": {
+          "label": "M0",
+          "n_total": 8922,
+          "n_events": 6986,
+          "n_non_events": 1936,
+          "n_stocks": 815,
+          "n_episodes": 96,
+          "calibration": {
+            "intercept": 0.5486,
+            "slope": 0.668,
+            "ci_intercept": [
+              0.0644,
+              1.0328
+            ],
+            "ci_slope": [
+              0.2291,
+              1.1069
+            ],
+            "O_over_E": 1.044
+          },
+          "curve": {
+            "ece10": 0.0329,
+            "ece20": 0.0334,
+            "max_bin_diff": 0.0643,
+            "n_bins": 20
+          },
+          "brier": 0.17089,
+          "bss": 0.0372,
+          "logloss": 0.52569,
+          "mean_p": 0.7501,
+          "observed_rate": 0.783,
+          "decomposition_diagnostic": {
+            "rel": 0.33926,
+            "res": 0.00154,
+            "unc": 0.16991,
+            "check": 0.50762
+          },
+          "auc": 0.52351,
+          "ci_cluster": {
+            "oe": [
+              1.028,
+              1.059
+            ],
+            "brier": [
+              0.1655,
+              0.1768
+            ],
+            "bss": [
+              0.022,
+              0.052
+            ],
+            "intercept": [
+              -0.1808,
+              1.2385
+            ],
+            "slope": [
+              0.0653,
+              1.3285
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0113,
+            "bss": 0.03,
+            "intercept": 1.4193,
+            "slope": 1.2632
+          },
+          "ci_dateblock": {
+            "oe": [
+              1.044,
+              1.044
+            ],
+            "brier": [
+              0.1709,
+              0.1709
+            ],
+            "bss": [
+              0.0372,
+              0.0372
+            ],
+            "intercept": [
+              0.5486,
+              0.5486
+            ],
+            "slope": [
+              0.668,
+              0.668
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "n": 157113,
+        "p_ref_frozen": 0.0411,
+        "m0": {
+          "label": "M0",
+          "n_total": 157113,
+          "n_events": 3603,
+          "n_non_events": 153510,
+          "n_stocks": 885,
+          "n_episodes": 2521,
+          "calibration": {
+            "intercept": -0.1578,
+            "slope": 0.9614,
+            "ci_intercept": [
+              -0.217,
+              -0.0986
+            ],
+            "ci_slope": [
+              0.9338,
+              0.9889
+            ],
+            "O_over_E": 0.931
+          },
+          "curve": {
+            "ece10": 0.0032,
+            "ece20": 0.0033,
+            "max_bin_diff": 0.02,
+            "n_bins": 20
+          },
+          "brier": 0.01715,
+          "bss": 0.2457,
+          "logloss": 0.06229,
+          "mean_p": 0.0246,
+          "observed_rate": 0.0229,
+          "decomposition_diagnostic": {
+            "rel": 0.03402,
+            "res": 0.00553,
+            "unc": 0.02241,
+            "check": 0.0509
+          },
+          "auc": 0.95532,
+          "ci_cluster": {
+            "oe": [
+              0.842,
+              1.018
+            ],
+            "brier": [
+              0.0157,
+              0.0187
+            ],
+            "bss": [
+              0.2103,
+              0.2724
+            ],
+            "intercept": [
+              -0.3701,
+              0.0404
+            ],
+            "slope": [
+              0.8885,
+              1.0335
+            ]
+          },
+          "ci_width": {
+            "brier": 0.003,
+            "bss": 0.0621,
+            "intercept": 0.4105,
+            "slope": 0.145
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.931,
+              0.931
+            ],
+            "brier": [
+              0.0172,
+              0.0172
+            ],
+            "bss": [
+              0.2457,
+              0.2457
+            ],
+            "intercept": [
+              -0.1578,
+              -0.1578
+            ],
+            "slope": [
+              0.9614,
+              0.9614
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "3": {
+        "n": 155400,
+        "p_ref_frozen": 0.0816,
+        "m0": {
+          "label": "M0",
+          "n_total": 155400,
+          "n_events": 7140,
+          "n_non_events": 148260,
+          "n_stocks": 885,
+          "n_episodes": 2509,
+          "calibration": {
+            "intercept": -0.1712,
+            "slope": 0.9816,
+            "ci_intercept": [
+              -0.2121,
+              -0.1303
+            ],
+            "ci_slope": [
+              0.9606,
+              1.0025
+            ],
+            "O_over_E": 0.9
+          },
+          "curve": {
+            "ece10": 0.0067,
+            "ece20": 0.0075,
+            "max_bin_diff": 0.0563,
+            "n_bins": 20
+          },
+          "brier": 0.03314,
+          "bss": 0.2653,
+          "logloss": 0.11807,
+          "mean_p": 0.0511,
+          "observed_rate": 0.0459,
+          "decomposition_diagnostic": {
+            "rel": 0.06536,
+            "res": 0.01161,
+            "unc": 0.04383,
+            "check": 0.09759
+          },
+          "auc": 0.92343,
+          "ci_cluster": {
+            "oe": [
+              0.829,
+              0.97
+            ],
+            "brier": [
+              0.0307,
+              0.0356
+            ],
+            "bss": [
+              0.2349,
+              0.2886
+            ],
+            "intercept": [
+              -0.341,
+              -0.018
+            ],
+            "slope": [
+              0.9173,
+              1.0519
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0049,
+            "bss": 0.0537,
+            "intercept": 0.323,
+            "slope": 0.1346
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.9,
+              0.9
+            ],
+            "brier": [
+              0.0331,
+              0.0331
+            ],
+            "bss": [
+              0.2653,
+              0.2653
+            ],
+            "intercept": [
+              -0.1712,
+              -0.1712
+            ],
+            "slope": [
+              0.9816,
+              0.9816
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "5": {
+        "n": 153694,
+        "p_ref_frozen": 0.1112,
+        "m0": {
+          "label": "M0",
+          "n_total": 153694,
+          "n_events": 9716,
+          "n_non_events": 143978,
+          "n_stocks": 885,
+          "n_episodes": 2501,
+          "calibration": {
+            "intercept": -0.1752,
+            "slope": 1.0021,
+            "ci_intercept": [
+              -0.2098,
+              -0.1406
+            ],
+            "ci_slope": [
+              0.9831,
+              1.0211
+            ],
+            "O_over_E": 0.88
+          },
+          "curve": {
+            "ece10": 0.0103,
+            "ece20": 0.0131,
+            "max_bin_diff": 0.0701,
+            "n_bins": 20
+          },
+          "brier": 0.04482,
+          "bss": 0.2714,
+          "logloss": 0.15697,
+          "mean_p": 0.0719,
+          "observed_rate": 0.0632,
+          "decomposition_diagnostic": {
+            "rel": 0.08805,
+            "res": 0.01599,
+            "unc": 0.05922,
+            "check": 0.13127
+          },
+          "auc": 0.90441,
+          "ci_cluster": {
+            "oe": [
+              0.815,
+              0.943
+            ],
+            "brier": [
+              0.0418,
+              0.0479
+            ],
+            "bss": [
+              0.2443,
+              0.2927
+            ],
+            "intercept": [
+              -0.3318,
+              -0.0331
+            ],
+            "slope": [
+              0.9352,
+              1.071
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0061,
+            "bss": 0.0484,
+            "intercept": 0.2987,
+            "slope": 0.1358
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.88,
+              0.88
+            ],
+            "brier": [
+              0.0448,
+              0.0448
+            ],
+            "bss": [
+              0.2714,
+              0.2714
+            ],
+            "intercept": [
+              -0.1752,
+              -0.1752
+            ],
+            "slope": [
+              1.0021,
+              1.0021
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "10": {
+        "n": 149429,
+        "p_ref_frozen": 0.169,
+        "m0": {
+          "label": "M0",
+          "n_total": 149429,
+          "n_events": 14516,
+          "n_non_events": 134913,
+          "n_stocks": 884,
+          "n_episodes": 2478,
+          "calibration": {
+            "intercept": -0.2134,
+            "slope": 1.03,
+            "ci_intercept": [
+              -0.2405,
+              -0.1862
+            ],
+            "ci_slope": [
+              1.0129,
+              1.0471
+            ],
+            "O_over_E": 0.843
+          },
+          "curve": {
+            "ece10": 0.0192,
+            "ece20": 0.0246,
+            "max_bin_diff": 0.1045,
+            "n_bins": 20
+          },
+          "brier": 0.06702,
+          "bss": 0.2783,
+          "logloss": 0.22714,
+          "mean_p": 0.1153,
+          "observed_rate": 0.0971,
+          "decomposition_diagnostic": {
+            "rel": 0.13004,
+            "res": 0.02468,
+            "unc": 0.08771,
+            "check": 0.19306
+          },
+          "auc": 0.87494,
+          "ci_cluster": {
+            "oe": [
+              0.785,
+              0.898
+            ],
+            "brier": [
+              0.063,
+              0.071
+            ],
+            "bss": [
+              0.2542,
+              0.301
+            ],
+            "intercept": [
+              -0.3347,
+              -0.0812
+            ],
+            "slope": [
+              0.9633,
+              1.102
+            ]
+          },
+          "ci_width": {
+            "brier": 0.008,
+            "bss": 0.0468,
+            "intercept": 0.2535,
+            "slope": 0.1387
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.843,
+              0.843
+            ],
+            "brier": [
+              0.067,
+              0.067
+            ],
+            "bss": [
+              0.2783,
+              0.2783
+            ],
+            "intercept": [
+              -0.2134,
+              -0.2134
+            ],
+            "slope": [
+              1.03,
+              1.03
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "21": {
+        "n": 139976,
+        "p_ref_frozen": 0.258,
+        "m0": {
+          "label": "M0",
+          "n_total": 139976,
+          "n_events": 21269,
+          "n_non_events": 118707,
+          "n_stocks": 884,
+          "n_episodes": 2458,
+          "calibration": {
+            "intercept": -0.2965,
+            "slope": 1.1015,
+            "ci_intercept": [
+              -0.3172,
+              -0.2759
+            ],
+            "ci_slope": [
+              1.0849,
+              1.1182
+            ],
+            "O_over_E": 0.783
+          },
+          "curve": {
+            "ece10": 0.0422,
+            "ece20": 0.0487,
+            "max_bin_diff": 0.1413,
+            "n_bins": 20
+          },
+          "brier": 0.10154,
+          "bss": 0.2752,
+          "logloss": 0.32763,
+          "mean_p": 0.1941,
+          "observed_rate": 0.1519,
+          "decomposition_diagnostic": {
+            "rel": 0.19278,
+            "res": 0.03762,
+            "unc": 0.12886,
+            "check": 0.28403
+          },
+          "auc": 0.84046,
+          "ci_cluster": {
+            "oe": [
+              0.733,
+              0.832
+            ],
+            "brier": [
+              0.0961,
+              0.1066
+            ],
+            "bss": [
+              0.2494,
+              0.3003
+            ],
+            "intercept": [
+              -0.4148,
+              -0.1912
+            ],
+            "slope": [
+              1.0248,
+              1.1836
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0105,
+            "bss": 0.0509,
+            "intercept": 0.2236,
+            "slope": 0.1588
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.783,
+              0.783
+            ],
+            "brier": [
+              0.1015,
+              0.1015
+            ],
+            "bss": [
+              0.2752,
+              0.2752
+            ],
+            "intercept": [
+              -0.2965,
+              -0.2965
+            ],
+            "slope": [
+              1.1015,
+              1.1015
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "42": {
+        "n": 121896,
+        "p_ref_frozen": 0.3747,
+        "m0": {
+          "label": "M0",
+          "n_total": 121896,
+          "n_events": 27680,
+          "n_non_events": 94216,
+          "n_stocks": 884,
+          "n_episodes": 2400,
+          "calibration": {
+            "intercept": -0.5074,
+            "slope": 1.2935,
+            "ci_intercept": [
+              -0.5232,
+              -0.4915
+            ],
+            "ci_slope": [
+              1.2741,
+              1.3128
+            ],
+            "O_over_E": 0.701
+          },
+          "curve": {
+            "ece10": 0.102,
+            "ece20": 0.1062,
+            "max_bin_diff": 0.1807,
+            "n_bins": 20
+          },
+          "brier": 0.1479,
+          "bss": 0.2504,
+          "logloss": 0.45337,
+          "mean_p": 0.3241,
+          "observed_rate": 0.2271,
+          "decomposition_diagnostic": {
+            "rel": 0.27149,
+            "res": 0.05192,
+            "unc": 0.17551,
+            "check": 0.39508
+          },
+          "auc": 0.80829,
+          "ci_cluster": {
+            "oe": [
+              0.657,
+              0.743
+            ],
+            "brier": [
+              0.1417,
+              0.1541
+            ],
+            "bss": [
+              0.2231,
+              0.2762
+            ],
+            "intercept": [
+              -0.6077,
+              -0.4041
+            ],
+            "slope": [
+              1.1889,
+              1.4043
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0124,
+            "bss": 0.0531,
+            "intercept": 0.2036,
+            "slope": 0.2154
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.701,
+              0.701
+            ],
+            "brier": [
+              0.1479,
+              0.1479
+            ],
+            "bss": [
+              0.2504,
+              0.2504
+            ],
+            "intercept": [
+              -0.5074,
+              -0.5074
+            ],
+            "slope": [
+              1.2935,
+              1.2935
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      },
+      "63": {
+        "n": 103783,
+        "p_ref_frozen": 0.4604,
+        "m0": {
+          "label": "M0",
+          "n_total": 103783,
+          "n_events": 29331,
+          "n_non_events": 74452,
+          "n_stocks": 884,
+          "n_episodes": 2356,
+          "calibration": {
+            "intercept": -0.8189,
+            "slope": 1.4419,
+            "ci_intercept": [
+              -0.8344,
+              -0.8034
+            ],
+            "ci_slope": [
+              1.419,
+              1.4647
+            ],
+            "O_over_E": 0.65
+          },
+          "curve": {
+            "ece10": 0.1555,
+            "ece20": 0.1605,
+            "max_bin_diff": 0.223,
+            "n_bins": 20
+          },
+          "brier": 0.18584,
+          "bss": 0.207,
+          "logloss": 0.54734,
+          "mean_p": 0.4346,
+          "observed_rate": 0.2826,
+          "decomposition_diagnostic": {
+            "rel": 0.32516,
+            "res": 0.06343,
+            "unc": 0.20275,
+            "check": 0.46447
+          },
+          "auc": 0.78943,
+          "ci_cluster": {
+            "oe": [
+              0.609,
+              0.69
+            ],
+            "brier": [
+              0.1795,
+              0.1927
+            ],
+            "bss": [
+              0.1786,
+              0.2331
+            ],
+            "intercept": [
+              -0.9302,
+              -0.7118
+            ],
+            "slope": [
+              1.3133,
+              1.5782
+            ]
+          },
+          "ci_width": {
+            "brier": 0.0132,
+            "bss": 0.0545,
+            "intercept": 0.2184,
+            "slope": 0.2649
+          },
+          "ci_dateblock": {
+            "oe": [
+              0.65,
+              0.65
+            ],
+            "brier": [
+              0.1858,
+              0.1858
+            ],
+            "bss": [
+              0.207,
+              0.207
+            ],
+            "intercept": [
+              -0.8189,
+              -0.8189
+            ],
+            "slope": [
+              1.4419,
+              1.4419
+            ]
+          }
+        },
+        "acceptance": {
+          "status": "M0_ONLY (tidak ada kandidat)",
+          "rules": {}
+        }
+      }
+    }
+  }
+}

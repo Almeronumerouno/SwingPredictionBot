@@ -1,0 +1,39 @@
+{
+  "generated": "2026-08-15",
+  "coverage": {
+    "n_universe_live": 963,
+    "n_delisted_seeds": 31,
+    "n_delisted_with_data": 16,
+    "n_delisted_no_data": 15,
+    "delisted_fraction_of_universe_pct": 3.12
+  },
+  "oos_overlap_phase5": {
+    "oos_window_start": "2025-11-24",
+    "n_delisted_with_bars_in_oos": 0,
+    "n_universe_with_bars_in_oos": 962,
+    "kesimpulan": "0 saham delisted punya bar di window OOS Phase 5 -> evaluasi OOS precision tidak tercemar langsung"
+  },
+  "train_overprediction_evidence": {
+    "h21": {
+      "mean_pred": 0.1263,
+      "rec_rate": 0.072,
+      "overpred": 0.0543,
+      "n": 1320
+    },
+    "h63": {
+      "mean_pred": 0.2797,
+      "rec_rate": 0.1354,
+      "overpred": 0.1443,
+      "n": 1278
+    },
+    "referensi": "Shumway (1997) The Delisting Bias in CRSP Data, J. Finance"
+  },
+  "refit_sensitivity": {
+    "max_rel_delta_b": 0.0013,
+    "worst_h": "63",
+    "n_train_universe": 179956,
+    "n_train_merged": 180880
+  },
+  "statement": "Backtest & kalibrasi recovery bersifat SURVIVORSHIP-LIMITED: universe live Yahoo (963 kode) hanya memuat saham yang MASIH AKTIF; saham yang delisted sejak 2017 tidak ikut. Dari 31 seed delisted yang ditelusuri, 16 punya data dan 15 tanpa data (Yahoo kosong). Semua bar delisted berakhir sebelum window OOS Phase 5, jadi evaluasi OOS tidak tercemar langsung; NAMUN train model recovery overpredict recovery pada saham yang akhirnya delisted (h=21: pred 0.126 vs aktual 0.072, overpred +0.054; h=63: +0.144) — konsisten bias delisting Shumway (1997). Dampak refit parameter universe+delisted kecil (delta relatif b terbesar 0.0013 pada h=63), karena delisted hanya menambah ~900-1000 observasi ke ~180k obs train. Label yang jujur: hasil backtest berlaku untuk saham yang bertahan; probabilitas recovery pada saham berisiko delisting cenderung OVERESTIMASI.",
+  "label_wajib": "survivorship-limited backtest"
+}

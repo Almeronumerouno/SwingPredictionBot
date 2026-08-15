@@ -1,2 +1,0 @@
-47|# Model fee ASIMETRIS (audit fix #14): beli < jual (PPh final 0.1% hanya sisi jual)
-831|# CLI compat: satu angka → set buy & sell sama (menimpa model asimetris)

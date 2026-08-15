@@ -95,6 +95,10 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
               <th className="px-4 py-2.5 text-center">Vol Pasca-ARA</th>
               <th className="px-4 py-2.5 text-center">Jarak ARA</th>
               <th className="px-4 py-2.5 text-center">Density</th>
+              <th className="px-4 py-2.5 text-center">Net Dist</th>
+              <th className="px-4 py-2.5 text-center">Dir Net</th>
+              <th className="px-4 py-2.5 text-center" title="Skor = kepadatan x Dir Net x kesegaran exp(-d/2), cutoff hari ke-5. Urutan tabel = skor ini">Skor</th>
+              <th className="px-4 py-2.5 text-center">Gap SMA20</th>
               <th className="px-4 py-2.5 text-center">Gates</th>
             </tr>
           </thead>
@@ -129,12 +133,26 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
                   <td className="px-4 py-2.5 text-center tabular-nums font-bold text-[var(--color-text-primary)]">
                     {e.density_pct != null ? `${e.density_pct.toFixed(0)}%` : "-"}
                   </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${(e.net_dist ?? 0) > 0.05 ? "text-[var(--color-up)]" : (e.net_dist ?? 0) < -0.05 ? "text-[var(--color-down)]" : "text-[var(--color-text-secondary)]"}`}>
+                    {e.net_dist != null ? `${e.net_dist >= 0 ? "+" : ""}${e.net_dist.toFixed(2)}` : "-"}
+                  </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${(e.net_dist_heavy ?? 0) > 0.5 ? "text-[var(--color-up)]" : (e.net_dist_heavy ?? 0) < 0.5 ? "text-[var(--color-down)]" : "text-[var(--color-text-secondary)]"}`} title="Proporsi heavy-day yang menutup di atas open (Close > Open)">
+                    {e.net_dist_heavy != null ? `${(e.net_dist_heavy * 100).toFixed(0)}%` : "-"}
+                  </td>
+                  <td className="px-4 py-2.5 text-center tabular-nums font-bold text-[var(--color-text-primary)]"
+                      title={`Skor ranking: ${e.strength != null ? e.strength.toFixed(3) : "-"} (kepadatan x DirNet x kesegaran). Likuiditas ADV20: ${e.adv_vol_20 != null ? new Intl.NumberFormat("id-ID").format(e.adv_vol_20) : "-"} lbr / ${e.adv_val_20 != null ? `Rp${new Intl.NumberFormat("id-ID").format(e.adv_val_20)}` : "-"} (${e.liquidity_prima ? "prima" : "floor"})`}>
+                    {e.strength != null ? e.strength.toFixed(3) : "-"}
+                  </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${(e.sma_gap_pct ?? 0) >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
+                    {e.sma_gap_pct != null ? `${e.sma_gap_pct >= 0 ? "+" : ""}${e.sma_gap_pct.toFixed(1)}%` : "-"}
+                  </td>
                   <td className="px-4 py-2.5">
                     <div className="flex flex-wrap items-center justify-center gap-1">
                       <GateIndicator label="Below" passed={e.gates?.below ?? false} />
                       <GateIndicator label="Density" passed={e.gates?.density ?? false} />
                       <GateIndicator label="Heavy" passed={e.gates?.min_heavy ?? false} />
                       <GateIndicator label="SMA20" passed={e.gates?.above_ma ?? false} />
+                      <GateIndicator label="Liq" passed={e.gates?.liquidity ?? true} />
                     </div>
                   </td>
                 </tr>

@@ -178,6 +178,89 @@ export default async function SahamPage({
         />
       </div>
 
+      {/* Fundamental Context (F3.6) — terpisah dari skor, tanpa penalty */}
+      {analisis.fundamental_status && (
+        <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm mb-6 sm:mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            </div>
+            <div className="mr-auto">
+              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Fundamental Context</h2>
+              <p className="text-xs text-[var(--color-text-muted)]">Konteks risiko fundamental — TIDAK memengaruhi skor</p>
+            </div>
+            {(() => {
+              const st = analisis.fundamental_status || "";
+              const meta: Record<string, { cls: string; sub: string }> = {
+                HEALTHY: { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", sub: "Data cukup, tanpa flag material" },
+                NEUTRAL: { cls: "bg-slate-100 text-slate-600 border-slate-200", sub: "Data parsial, tanpa flag material" },
+                RISK: { cls: "bg-red-50 text-red-700 border-red-200", sub: "Ada flag risiko fundamental" },
+                UNKNOWN: { cls: "bg-slate-50 text-slate-500 border-slate-200", sub: "Data fundamental tidak cukup" },
+              };
+              const m = meta[st] || meta.UNKNOWN;
+              return (
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded border ${m.cls}`}>{st}</span>
+                  {analisis.fundamental_meta?.data_quality && (
+                    <span className={`px-2 py-1 text-[10px] font-bold tracking-wide rounded border ${
+                      analisis.fundamental_meta.data_quality === "GOOD" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : analisis.fundamental_meta.data_quality === "PARTIAL" ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                    }`}>
+                      Data {analisis.fundamental_meta.data_quality}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4">{(() => {
+            const st = analisis.fundamental_status || "";
+            const sub: Record<string, string> = {
+              HEALTHY: "Data fundamental cukup dan tidak ada flag material terdeteksi.",
+              NEUTRAL: "Data fundamental parsial dan tidak ada flag material terdeteksi.",
+              RISK: "Terdekteksi flag risiko fundamental — periksa detail di bawah sebelum mengambil keputusan.",
+              UNKNOWN: "Data fundamental tidak cukup tersedia — status tidak dapat diklasifikasikan.",
+            };
+            return sub[st] || "";
+          })()}</p>
+
+          {analisis.fundamental_flags && analisis.fundamental_flags.length > 0 ? (
+            <ul className="space-y-2">
+              {analisis.fundamental_flags.map((f) => {
+                const labelMap: Record<string, { label: string; cls: string }> = {
+                  NEGATIVE_EARNINGS: { label: "Laba Negatif", cls: "bg-red-50 text-red-700 border-red-200" },
+                  HIGH_LEVERAGE: { label: "Leverage Tinggi", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+                  EXTREME_VALUATION: { label: "Valuasi Ekstrem", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+                  LOW_COVERAGE: { label: "Data Minim", cls: "bg-slate-100 text-slate-600 border-slate-200" },
+                };
+                const lm = labelMap[f.flag] || { label: f.flag, cls: "bg-slate-100 text-slate-600 border-slate-200" };
+                return (
+                  <li key={f.flag} className="flex items-start gap-2.5">
+                    <span className={`shrink-0 px-2 py-0.5 text-[11px] font-bold tracking-wide rounded border ${lm.cls}`}>{lm.label}</span>
+                    <span className="text-xs text-[var(--color-text-secondary)]">{f.reason}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="text-xs text-[var(--color-text-muted)]">Tidak ada flag risiko fundamental terdeteksi.</p>
+          )}
+
+          {analisis.fundamental_meta?.context?.market_cap_idr_b != null && (
+            <p className="text-[11px] text-[var(--color-text-muted)] mt-3">
+              Market Cap: Rp {new Intl.NumberFormat("id-ID").format(analisis.fundamental_meta.context.market_cap_idr_b)} miliar
+              (konteks likuiditas — bukan flag risiko)
+            </p>
+          )}
+          {analisis.fundamental_meta?.fetch_errors && analisis.fundamental_meta.fetch_errors.length > 0 && (
+            <p className="text-[11px] text-amber-600 mt-3">
+              Catatan fetch: {analisis.fundamental_meta.fetch_errors.join("; ")}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Score Components */}
       {s.components && (
         <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm mb-6 sm:mb-8">

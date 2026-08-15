@@ -41,6 +41,14 @@ class ReadyToFlyEntry:
     note: str | None
     reason: str | None
     net_dist: float | None = None        # Net Distribution window post-ARA: [-1, +1]
+    net_dist_heavy: float | None = None  # heavy-day Close>Open ratio: [0,1] (definisi TODO audit)
+    acc_density: float | None = None     # k * net_dist_heavy / window: [0,1] (rombak TODO)
+    post_ara_decay: float | None = None  # exp(-d/tau), cutoff d>=5: ranking freshness
+    strength: float | None = None        # density * net_dist_heavy * decay (skor ranking RTF)
+    adv_vol_20: float | None = None      # ADV 20 hari point-in-time (lembar, tanpa hari ARA)
+    adv_val_20: float | None = None      # ADV 20 hari point-in-time (Rp, tanpa hari ARA)
+    liquidity_ok: bool = True            # gate likuiditas (floor BEI, rombak TODO)
+    liquidity_prima: bool = False        # flag display "likuiditas prima" (1jt lbr/Rp1M)
     sma_gap_pct: float | None = None     # (harga - SMA20)/SMA20 dalam %
     post_ara_volume: float | None = 0.0
     post_ara_value: float | None = 0.0
@@ -54,11 +62,20 @@ def _get_cache_path(date_str: str) -> str:
     return os.path.join(config.CACHE_DIR, f"readytofly_{date_str}.json")
 
 
-def _count_gates_passed(gates: dict | None) -> int:
-    """Count how many of the 4 gates (below, density, min_heavy, above_ma) are True."""
+# Gate safety (wajib lolos utk status apa pun) vs gate kualitas (rombak fase 1
+# audit v2 §15): READY = semua safety + semua quality; ALMOST = semua safety +
+# minimal 2/3 quality. Sebelumnya ">=3 dari 5" bisa meloloskan ALMOST walaupun
+# safety gate (below) gagal — saham yang sudah recovery/di atas level event
+# tidak boleh muncul sebagai pola akumulasi.
+QUALITY_GATES = ("density", "min_heavy", "above_ma")
+SAFETY_GATES = ("below", "liquidity")
+
+
+def _count_gates_passed(gates: dict | None, keys: tuple[str, ...]) -> int:
+    """Count how many of the given gate keys are True."""
     if not gates:
         return 0
-    return sum(1 for k in ("below", "density", "min_heavy", "above_ma") if gates.get(k))
+    return sum(1 for k in keys if gates.get(k))
 
 
 def _fetch_and_check_one(
@@ -82,13 +99,17 @@ def _fetch_and_check_one(
 
         accum = detect_accumulation(bars)
 
-        # Determine status
+        # Determine status — rombak fase 1 (audit v2 §15):
+        #   READY  = semua safety (below, liquidity) + semua quality
+        #            (density, min_heavy, above_ma) — sudah dihitung engine.
+        #   ALMOST = semua safety + minimal 2/3 quality.
         is_ready = accum.get("ready_to_fly", False)
         gates = accum.get("gates")
-        gates_passed = _count_gates_passed(gates)
+        safety_ok = gates is not None and all(gates.get(k) for k in SAFETY_GATES)
+        quality_ok = _count_gates_passed(gates, QUALITY_GATES) >= 2
 
-        # Keep if ready OR almost ready (>= 3 of 4 gates passed)
-        if not is_ready and gates_passed < 3:
+        # Keep if ready OR almost (all safety + >=2/3 quality)
+        if not is_ready and not (safety_ok and quality_ok):
             return None
 
         status = "ready" if is_ready else "almost"
@@ -122,6 +143,14 @@ def _fetch_and_check_one(
             ara_ref_price=accum.get("ara_ref_price"),
             distance_pct=accum.get("distance_pct"),
             net_dist=accum.get("net_dist"),
+            net_dist_heavy=accum.get("net_dist_heavy"),
+            acc_density=accum.get("acc_density"),
+            post_ara_decay=accum.get("post_ara_decay"),
+            strength=accum.get("strength"),
+            adv_vol_20=accum.get("adv_vol_20"),
+            adv_val_20=accum.get("adv_val_20"),
+            liquidity_ok=accum.get("liquidity_ok", True),
+            liquidity_prima=accum.get("liquidity_prima", False),
             sma_gap_pct=accum.get("sma_gap_pct"),
             sma20=accum.get("sma20"),
             state_ma20=accum.get("state_ma20"),
@@ -193,8 +222,14 @@ def scan_ready_to_fly(target_date: Optional[str] = None) -> list[ReadyToFlyEntry
             if entry is not None:
                 results.append(entry)
 
-    # Sort: ready first, then by density descending
-    results.sort(key=lambda x: (0 if x.status == "ready" else 1, -(x.density_pct or 0)))
+    # Sort: ready first (urutkan strength = density*net_dist_heavy*decay kesegaran),
+    # lalu almost by density descending. Decay membuat sinyal lama (d>=5) di bawah
+    # sinyal segar — ranking = kesegaran pola, bukan hanya kepadatan volume.
+    def _sort_key(x: ReadyToFlyEntry):
+        score = x.strength if x.status == "ready" else (x.density_pct or 0.0)
+        return (0 if x.status == "ready" else 1, -(score or 0.0))
+
+    results.sort(key=_sort_key)
 
     # 4. Cache
     _ensure_cache_dir()

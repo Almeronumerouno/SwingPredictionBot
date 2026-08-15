@@ -1,0 +1,734 @@
+{
+  "phase": "P5.4 Dependency Audit",
+  "status": "PASS",
+  "checked_at": "2026-08-15",
+  "cache_hash": "97A361D30FF3D1D3719EF7063E3741A1620F747117DE2F035291381F92613244",
+  "cache_hash_matches_p53": true,
+  "dataset_hash_matches_protocol": true,
+  "n_dates": 81,
+  "method": {
+    "primary": "date-level (cross-sectional per tanggal); Spearman pada ranks (unique per date); intersection U_t^{RTF cap M} = rank_rtf>0 & rank_m>0",
+    "rtf_rankable": "rtf_score > 0 (P5.3); NaN & score-0 TIDAK masuk, tidak di-zero",
+    "overlap": "|TopK_RTF ∩ TopK_M| / K, K fixed; Jaccard = diagnostic tambahan",
+    "regime_liq_group": "date-level modus pada eligible rows (existing definitions); tie -> MIXED; UNKNOWN tetap UNKNOWN (tidak dipaksa)",
+    "pooled": "SECONDARY diagnostic only — tidak menggantikan date-level"
+  },
+  "rtf_m5": {
+    "label": "RTF vs M5",
+    "spearman": {
+      "n": 76,
+      "mean": 0.0796,
+      "median": 0.1042,
+      "q25": -0.2112,
+      "q75": 0.4015,
+      "min": -1.0,
+      "max": 1.0,
+      "bins": {
+        "lt_0": {
+          "n": 29,
+          "frac": 0.382
+        },
+        "0_to_0p25": {
+          "n": 20,
+          "frac": 0.263
+        },
+        "0p25_to_0p50": {
+          "n": 15,
+          "frac": 0.197
+        },
+        "0p50_to_0p75": {
+          "n": 8,
+          "frac": 0.105
+        },
+        "ge_0p75": {
+          "n": 4,
+          "frac": 0.053
+        }
+      }
+    },
+    "overlap_at_5": {
+      "n": 81,
+      "mean": 0.3333,
+      "median": 0.4,
+      "q25": 0.2,
+      "q75": 0.6,
+      "min": 0.0,
+      "max": 0.8
+    },
+    "overlap_at_10": {
+      "n": 81,
+      "mean": 0.3481,
+      "median": 0.4,
+      "q25": 0.2,
+      "q75": 0.5,
+      "min": 0.0,
+      "max": 0.7
+    },
+    "jaccard_at_5": {
+      "n": 81,
+      "mean": 0.2314,
+      "median": 0.25,
+      "q25": 0.1111,
+      "q75": 0.4286,
+      "min": 0.0,
+      "max": 0.6667
+    },
+    "jaccard_at_10": {
+      "n": 81,
+      "mean": 0.2658,
+      "median": 0.2727,
+      "q25": 0.1538,
+      "q75": 0.3636,
+      "min": 0.0,
+      "max": 0.6
+    },
+    "n_pairs_per_date": {
+      "n": 79,
+      "mean": 9.6709,
+      "median": 8.0,
+      "q25": 4.5,
+      "q75": 10.5,
+      "min": 1.0,
+      "max": 64.0
+    },
+    "n_dates_zero_pairs": 2,
+    "n_dates_insufficient_rho": 5,
+    "n_dates_topk_incomplete": 77
+  },
+  "rtf_m10": {
+    "label": "RTF vs M10",
+    "spearman": {
+      "n": 76,
+      "mean": 0.006,
+      "median": 0.0417,
+      "q25": -0.3586,
+      "q75": 0.2947,
+      "min": -1.0,
+      "max": 1.0,
+      "bins": {
+        "lt_0": {
+          "n": 35,
+          "frac": 0.461
+        },
+        "0_to_0p25": {
+          "n": 18,
+          "frac": 0.237
+        },
+        "0p25_to_0p50": {
+          "n": 12,
+          "frac": 0.158
+        },
+        "0p50_to_0p75": {
+          "n": 8,
+          "frac": 0.105
+        },
+        "ge_0p75": {
+          "n": 3,
+          "frac": 0.039
+        }
+      }
+    },
+    "overlap_at_5": {
+      "n": 81,
+      "mean": 0.1951,
+      "median": 0.2,
+      "q25": 0.0,
+      "q75": 0.4,
+      "min": 0.0,
+      "max": 0.6
+    },
+    "overlap_at_10": {
+      "n": 81,
+      "mean": 0.2494,
+      "median": 0.2,
+      "q25": 0.1,
+      "q75": 0.4,
+      "min": 0.0,
+      "max": 0.6
+    },
+    "jaccard_at_5": {
+      "n": 81,
+      "mean": 0.1249,
+      "median": 0.1111,
+      "q25": 0.0,
+      "q75": 0.25,
+      "min": 0.0,
+      "max": 0.4286
+    },
+    "jaccard_at_10": {
+      "n": 81,
+      "mean": 0.1743,
+      "median": 0.1765,
+      "q25": 0.0833,
+      "q75": 0.25,
+      "min": 0.0,
+      "max": 0.4615
+    },
+    "n_pairs_per_date": {
+      "n": 79,
+      "mean": 9.6709,
+      "median": 8.0,
+      "q25": 4.5,
+      "q75": 10.5,
+      "min": 1.0,
+      "max": 64.0
+    },
+    "n_dates_zero_pairs": 2,
+    "n_dates_insufficient_rho": 5,
+    "n_dates_topk_incomplete": 77
+  },
+  "pooled_secondary": {
+    "spearman_rtf_m5": 0.1909,
+    "spearman_rtf_m10": 0.4182,
+    "note": "satu rho atas semua OOS rows (bukan primary)"
+  },
+  "regime": {
+    "sideways": {
+      "n_rows": 7426,
+      "n_dates": 15,
+      "rtf_m5": {
+        "spearman": {
+          "n": 11,
+          "mean": 0.4318,
+          "median": 0.4188,
+          "q25": 0.3701,
+          "q75": 0.5918,
+          "min": 0.076,
+          "max": 0.717,
+          "bins": {
+            "lt_0": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0_to_0p25": {
+              "n": 2,
+              "frac": 0.182
+            },
+            "0p25_to_0p50": {
+              "n": 5,
+              "frac": 0.455
+            },
+            "0p50_to_0p75": {
+              "n": 4,
+              "frac": 0.364
+            },
+            "ge_0p75": {
+              "n": 0,
+              "frac": 0.0
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 15,
+          "mean": 0.32,
+          "median": 0.2,
+          "q25": 0.2,
+          "q75": 0.5,
+          "min": 0.0,
+          "max": 0.8
+        },
+        "overlap_at_10": {
+          "n": 15,
+          "mean": 0.3267,
+          "median": 0.4,
+          "q25": 0.1,
+          "q75": 0.5,
+          "min": 0.0,
+          "max": 0.6
+        }
+      },
+      "rtf_m10": {
+        "spearman": {
+          "n": 11,
+          "mean": 0.2617,
+          "median": 0.3235,
+          "q25": 0.0283,
+          "q75": 0.5148,
+          "min": -0.4104,
+          "max": 0.6671,
+          "bins": {
+            "lt_0": {
+              "n": 2,
+              "frac": 0.182
+            },
+            "0_to_0p25": {
+              "n": 3,
+              "frac": 0.273
+            },
+            "0p25_to_0p50": {
+              "n": 3,
+              "frac": 0.273
+            },
+            "0p50_to_0p75": {
+              "n": 3,
+              "frac": 0.273
+            },
+            "ge_0p75": {
+              "n": 0,
+              "frac": 0.0
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 15,
+          "mean": 0.1467,
+          "median": 0.2,
+          "q25": 0.0,
+          "q75": 0.2,
+          "min": 0.0,
+          "max": 0.6
+        },
+        "overlap_at_10": {
+          "n": 15,
+          "mean": 0.2533,
+          "median": 0.2,
+          "q25": 0.1,
+          "q75": 0.4,
+          "min": 0.0,
+          "max": 0.5
+        }
+      }
+    },
+    "bull": {
+      "n_rows": 548,
+      "n_dates": 2,
+      "rtf_m5": {
+        "spearman": {
+          "n": 1,
+          "mean": 0.5716,
+          "median": 0.5716,
+          "q25": 0.5716,
+          "q75": 0.5716,
+          "min": 0.5716,
+          "max": 0.5716,
+          "bins": {
+            "lt_0": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0_to_0p25": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0p25_to_0p50": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0p50_to_0p75": {
+              "n": 1,
+              "frac": 1.0
+            },
+            "ge_0p75": {
+              "n": 0,
+              "frac": 0.0
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 2,
+          "mean": 0.2,
+          "median": 0.2,
+          "q25": 0.1,
+          "q75": 0.3,
+          "min": 0.0,
+          "max": 0.4
+        },
+        "overlap_at_10": {
+          "n": 2,
+          "mean": 0.3,
+          "median": 0.3,
+          "q25": 0.15,
+          "q75": 0.45,
+          "min": 0.0,
+          "max": 0.6
+        }
+      },
+      "rtf_m10": {
+        "spearman": {
+          "n": 1,
+          "mean": 0.3917,
+          "median": 0.3917,
+          "q25": 0.3917,
+          "q75": 0.3917,
+          "min": 0.3917,
+          "max": 0.3917,
+          "bins": {
+            "lt_0": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0_to_0p25": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "0p25_to_0p50": {
+              "n": 1,
+              "frac": 1.0
+            },
+            "0p50_to_0p75": {
+              "n": 0,
+              "frac": 0.0
+            },
+            "ge_0p75": {
+              "n": 0,
+              "frac": 0.0
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 2,
+          "mean": 0.1,
+          "median": 0.1,
+          "q25": 0.05,
+          "q75": 0.15,
+          "min": 0.0,
+          "max": 0.2
+        },
+        "overlap_at_10": {
+          "n": 2,
+          "mean": 0.25,
+          "median": 0.25,
+          "q25": 0.125,
+          "q75": 0.375,
+          "min": 0.0,
+          "max": 0.5
+        }
+      }
+    },
+    "bear": {
+      "n_rows": 31642,
+      "n_dates": 64,
+      "rtf_m5": {
+        "spearman": {
+          "n": 64,
+          "mean": 0.0114,
+          "median": 0.0268,
+          "q25": -0.2841,
+          "q75": 0.2541,
+          "min": -1.0,
+          "max": 1.0,
+          "bins": {
+            "lt_0": {
+              "n": 29,
+              "frac": 0.453
+            },
+            "0_to_0p25": {
+              "n": 18,
+              "frac": 0.281
+            },
+            "0p25_to_0p50": {
+              "n": 10,
+              "frac": 0.156
+            },
+            "0p50_to_0p75": {
+              "n": 3,
+              "frac": 0.047
+            },
+            "ge_0p75": {
+              "n": 4,
+              "frac": 0.062
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 64,
+          "mean": 0.3406,
+          "median": 0.4,
+          "q25": 0.2,
+          "q75": 0.6,
+          "min": 0.0,
+          "max": 0.8
+        },
+        "overlap_at_10": {
+          "n": 64,
+          "mean": 0.3547,
+          "median": 0.4,
+          "q25": 0.2,
+          "q75": 0.5,
+          "min": 0.0,
+          "max": 0.7
+        }
+      },
+      "rtf_m10": {
+        "spearman": {
+          "n": 64,
+          "mean": -0.044,
+          "median": -0.0188,
+          "q25": -0.3829,
+          "q75": 0.2503,
+          "min": -1.0,
+          "max": 1.0,
+          "bins": {
+            "lt_0": {
+              "n": 33,
+              "frac": 0.516
+            },
+            "0_to_0p25": {
+              "n": 15,
+              "frac": 0.234
+            },
+            "0p25_to_0p50": {
+              "n": 8,
+              "frac": 0.125
+            },
+            "0p50_to_0p75": {
+              "n": 5,
+              "frac": 0.078
+            },
+            "ge_0p75": {
+              "n": 3,
+              "frac": 0.047
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 64,
+          "mean": 0.2094,
+          "median": 0.2,
+          "q25": 0.0,
+          "q75": 0.4,
+          "min": 0.0,
+          "max": 0.6
+        },
+        "overlap_at_10": {
+          "n": 64,
+          "mean": 0.2484,
+          "median": 0.25,
+          "q25": 0.1,
+          "q75": 0.4,
+          "min": 0.0,
+          "max": 0.6
+        }
+      }
+    }
+  },
+  "liquidity": {
+    "liquid": {
+      "n_rows": 39616,
+      "n_dates": 81,
+      "rtf_m5": {
+        "spearman": {
+          "n": 76,
+          "mean": 0.0796,
+          "median": 0.1042,
+          "q25": -0.2112,
+          "q75": 0.4015,
+          "min": -1.0,
+          "max": 1.0,
+          "bins": {
+            "lt_0": {
+              "n": 29,
+              "frac": 0.382
+            },
+            "0_to_0p25": {
+              "n": 20,
+              "frac": 0.263
+            },
+            "0p25_to_0p50": {
+              "n": 15,
+              "frac": 0.197
+            },
+            "0p50_to_0p75": {
+              "n": 8,
+              "frac": 0.105
+            },
+            "ge_0p75": {
+              "n": 4,
+              "frac": 0.053
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 81,
+          "mean": 0.3333,
+          "median": 0.4,
+          "q25": 0.2,
+          "q75": 0.6,
+          "min": 0.0,
+          "max": 0.8
+        },
+        "overlap_at_10": {
+          "n": 81,
+          "mean": 0.3481,
+          "median": 0.4,
+          "q25": 0.2,
+          "q75": 0.5,
+          "min": 0.0,
+          "max": 0.7
+        }
+      },
+      "rtf_m10": {
+        "spearman": {
+          "n": 76,
+          "mean": 0.006,
+          "median": 0.0417,
+          "q25": -0.3586,
+          "q75": 0.2947,
+          "min": -1.0,
+          "max": 1.0,
+          "bins": {
+            "lt_0": {
+              "n": 35,
+              "frac": 0.461
+            },
+            "0_to_0p25": {
+              "n": 18,
+              "frac": 0.237
+            },
+            "0p25_to_0p50": {
+              "n": 12,
+              "frac": 0.158
+            },
+            "0p50_to_0p75": {
+              "n": 8,
+              "frac": 0.105
+            },
+            "ge_0p75": {
+              "n": 3,
+              "frac": 0.039
+            }
+          }
+        },
+        "overlap_at_5": {
+          "n": 81,
+          "mean": 0.1951,
+          "median": 0.2,
+          "q25": 0.0,
+          "q75": 0.4,
+          "min": 0.0,
+          "max": 0.6
+        },
+        "overlap_at_10": {
+          "n": 81,
+          "mean": 0.2494,
+          "median": 0.2,
+          "q25": 0.1,
+          "q75": 0.4,
+          "min": 0.0,
+          "max": 0.6
+        }
+      }
+    }
+  },
+  "regime_cell_rho": {
+    "UNKNOWN": {
+      "rtf_m5": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "q25": null,
+        "q75": null,
+        "min": null,
+        "max": null
+      },
+      "rtf_m10": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "q25": null,
+        "q75": null,
+        "min": null,
+        "max": null
+      }
+    },
+    "sideways": {
+      "rtf_m5": {
+        "n": 26,
+        "mean": 0.1567,
+        "median": 0.2608,
+        "q25": -0.8684,
+        "q75": 1.0,
+        "min": -1.0,
+        "max": 1.0
+      },
+      "rtf_m10": {
+        "n": 26,
+        "mean": 0.1078,
+        "median": -0.0216,
+        "q25": -0.7884,
+        "q75": 1.0,
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "bull": {
+      "rtf_m5": {
+        "n": 56,
+        "mean": 0.2231,
+        "median": 0.3871,
+        "q25": -0.1336,
+        "q75": 0.7317,
+        "min": -1.0,
+        "max": 1.0
+      },
+      "rtf_m10": {
+        "n": 56,
+        "mean": 0.2368,
+        "median": 0.3991,
+        "q25": -0.2472,
+        "q75": 0.735,
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "bear": {
+      "rtf_m5": {
+        "n": 52,
+        "mean": 0.1696,
+        "median": 0.2341,
+        "q25": -0.3306,
+        "q75": 0.7447,
+        "min": -1.0,
+        "max": 1.0
+      },
+      "rtf_m10": {
+        "n": 52,
+        "mean": 0.0524,
+        "median": 0.1321,
+        "q25": -0.5997,
+        "q75": 0.6812,
+        "min": -1.0,
+        "max": 1.0
+      }
+    }
+  },
+  "liquidity_cell_rho": {
+    "liquid": {
+      "rtf_m5": {
+        "n": 76,
+        "mean": 0.0796,
+        "median": 0.1042,
+        "q25": -0.2112,
+        "q75": 0.4015,
+        "min": -1.0,
+        "max": 1.0
+      },
+      "rtf_m10": {
+        "n": 76,
+        "mean": 0.006,
+        "median": 0.0417,
+        "q25": -0.3586,
+        "q75": 0.2947,
+        "min": -1.0,
+        "max": 1.0
+      }
+    }
+  },
+  "breakdown_method": {
+    "regime_liq_group": "date-level modus pada eligible rows (existing definitions); tie -> MIXED; UNKNOWN tetap UNKNOWN; utk overlap@K & interpretasi",
+    "cell_rho": "Spearman pairwise per (date, segment) cell — primary utk segment dependency; tidak mengubah top-K global",
+    "caution": "rho ±1 pada cell kecil (n_pairs=2) adalah artefak ukuran sample — baca median/IQR & n_pairs, bukan min/max; bull/less-liquid dgn n_dates kecil = INSUFFICIENT utk kesimpulan"
+  },
+  "target_dependency": {
+    "deferred_to_p56": "AUC (Phase 3/5 metric) dihitung di P5.6; P5.4 bukan performance test"
+  },
+  "interpretation_cases": {
+    "A_high_dependency": "rho tinggi + overlap tinggi -> RTF mirip recent-return signal; combination mungkin redundant",
+    "B_low_dep_both_predictive": "rho/overlap rendah + RTF > random + M5/M10 > random -> complementary; P5.5 justified",
+    "C_low_dep_rtf_weak": "independence bukan berarti usefulness",
+    "D_conditional": "dependency berbeda per regime/liquidity -> hypothesis utk future; BELUM boleh regime-specific weighting"
+  },
+  "no_model_selection": true,
+  "no_config_modification": true,
+  "phase4_holdout_untouched": true
+}

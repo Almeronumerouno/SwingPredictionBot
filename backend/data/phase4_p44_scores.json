@@ -1,0 +1,473 @@
+{
+  "phase": "P4.4 — Proper probabilistic scoring",
+  "method": "Brier; BSS vs climatology DEV (frozen sebelum validation); dekomposisi Murphy; Log Loss (secondary)",
+  "targets": {
+    "previous_close": {
+      "1": {
+        "p_ref_dev_climatology": 0.2544,
+        "dev": {
+          "n": 22486,
+          "brier": 0.20898,
+          "brier_ref_climatology_dev": 0.18969,
+          "bss": -0.1017,
+          "logloss": 0.6421,
+          "decomposition": {
+            "rel": 0.3773,
+            "res": 0.02138,
+            "unc": 0.18969,
+            "check": 0.54561
+          },
+          "mean_p": 0.109,
+          "observed_rate": 0.2544
+        },
+        "validation": {
+          "n": 5476,
+          "brier": 0.19309,
+          "brier_ref_climatology_dev": 0.17999,
+          "bss": -0.0728,
+          "logloss": 0.59815,
+          "decomposition": {
+            "rel": 0.35781,
+            "res": 0.01487,
+            "unc": 0.17959,
+            "check": 0.52254
+          },
+          "mean_p": 0.1139,
+          "observed_rate": 0.2347
+        }
+      },
+      "3": {
+        "p_ref_dev_climatology": 0.4394,
+        "dev": {
+          "n": 21940,
+          "brier": 0.27333,
+          "brier_ref_climatology_dev": 0.24633,
+          "bss": -0.1096,
+          "logloss": 0.74965,
+          "decomposition": {
+            "rel": 0.48529,
+            "res": 0.03437,
+            "unc": 0.24633,
+            "check": 0.69725
+          },
+          "mean_p": 0.2605,
+          "observed_rate": 0.4394
+        },
+        "validation": {
+          "n": 5368,
+          "brier": 0.26691,
+          "brier_ref_climatology_dev": 0.24597,
+          "bss": -0.0851,
+          "logloss": 0.73345,
+          "decomposition": {
+            "rel": 0.48752,
+            "res": 0.02536,
+            "unc": 0.24596,
+            "check": 0.70812
+          },
+          "mean_p": 0.2851,
+          "observed_rate": 0.4365
+        }
+      },
+      "5": {
+        "p_ref_dev_climatology": 0.5355,
+        "dev": {
+          "n": 21513,
+          "brier": 0.27795,
+          "brier_ref_climatology_dev": 0.24874,
+          "bss": -0.1175,
+          "logloss": 0.75104,
+          "decomposition": {
+            "rel": 0.49584,
+            "res": 0.03085,
+            "unc": 0.24874,
+            "check": 0.71372
+          },
+          "mean_p": 0.3604,
+          "observed_rate": 0.5355
+        },
+        "validation": {
+          "n": 5333,
+          "brier": 0.275,
+          "brier_ref_climatology_dev": 0.24896,
+          "bss": -0.1046,
+          "logloss": 0.74478,
+          "decomposition": {
+            "rel": 0.49672,
+            "res": 0.02723,
+            "unc": 0.24895,
+            "check": 0.71844
+          },
+          "mean_p": 0.368,
+          "observed_rate": 0.5323
+        }
+      },
+      "10": {
+        "p_ref_dev_climatology": 0.6542,
+        "dev": {
+          "n": 20789,
+          "brier": 0.25169,
+          "brier_ref_climatology_dev": 0.22622,
+          "bss": -0.1125,
+          "logloss": 0.69652,
+          "decomposition": {
+            "rel": 0.44798,
+            "res": 0.02993,
+            "unc": 0.22622,
+            "check": 0.64427
+          },
+          "mean_p": 0.4873,
+          "observed_rate": 0.6542
+        },
+        "validation": {
+          "n": 5226,
+          "brier": 0.2443,
+          "brier_ref_climatology_dev": 0.22492,
+          "bss": -0.0862,
+          "logloss": 0.6817,
+          "decomposition": {
+            "rel": 0.44606,
+            "res": 0.02314,
+            "unc": 0.2249,
+            "check": 0.64782
+          },
+          "mean_p": 0.5131,
+          "observed_rate": 0.6584
+        }
+      },
+      "21": {
+        "p_ref_dev_climatology": 0.7575,
+        "dev": {
+          "n": 19285,
+          "brier": 0.21225,
+          "brier_ref_climatology_dev": 0.1837,
+          "bss": -0.1554,
+          "logloss": 0.6169,
+          "decomposition": {
+            "rel": 0.36697,
+            "res": 0.02899,
+            "unc": 0.1837,
+            "check": 0.52169
+          },
+          "mean_p": 0.5875,
+          "observed_rate": 0.7575
+        },
+        "validation": {
+          "n": 4892,
+          "brier": 0.21544,
+          "brier_ref_climatology_dev": 0.19871,
+          "bss": -0.0842,
+          "logloss": 0.62326,
+          "decomposition": {
+            "rel": 0.39518,
+            "res": 0.01813,
+            "unc": 0.19786,
+            "check": 0.57492
+          },
+          "mean_p": 0.5942,
+          "observed_rate": 0.7283
+        }
+      },
+      "42": {
+        "p_ref_dev_climatology": 0.8334,
+        "dev": {
+          "n": 17314,
+          "brier": 0.1598,
+          "brier_ref_climatology_dev": 0.13886,
+          "bss": -0.1508,
+          "logloss": 0.50517,
+          "decomposition": {
+            "rel": 0.27749,
+            "res": 0.02117,
+            "unc": 0.13886,
+            "check": 0.39518
+          },
+          "mean_p": 0.6884,
+          "observed_rate": 0.8334
+        },
+        "validation": {
+          "n": 3726,
+          "brier": 0.18136,
+          "brier_ref_climatology_dev": 0.17951,
+          "bss": -0.0103,
+          "logloss": 0.55024,
+          "decomposition": {
+            "rel": 0.35108,
+            "res": 0.00608,
+            "unc": 0.17579,
+            "check": 0.52079
+          },
+          "mean_p": 0.6954,
+          "observed_rate": 0.7724
+        }
+      },
+      "63": {
+        "p_ref_dev_climatology": 0.8701,
+        "dev": {
+          "n": 15576,
+          "brier": 0.13074,
+          "brier_ref_climatology_dev": 0.11306,
+          "bss": -0.1564,
+          "logloss": 0.43852,
+          "decomposition": {
+            "rel": 0.22578,
+            "res": 0.01803,
+            "unc": 0.11306,
+            "check": 0.32081
+          },
+          "mean_p": 0.7378,
+          "observed_rate": 0.8701
+        },
+        "validation": {
+          "n": 968,
+          "brier": 0.24278,
+          "brier_ref_climatology_dev": 0.28449,
+          "bss": 0.1466,
+          "logloss": 0.6839,
+          "decomposition": {
+            "rel": 0.46048,
+            "res": 0.01314,
+            "unc": 0.23084,
+            "check": 0.67818
+          },
+          "mean_p": 0.7508,
+          "observed_rate": 0.6384
+        }
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "p_ref_dev_climatology": 0.0411,
+        "dev": {
+          "n": 162273,
+          "brier": 0.02948,
+          "brier_ref_climatology_dev": 0.0394,
+          "bss": 0.2517,
+          "logloss": 0.10327,
+          "decomposition": {
+            "rel": 0.06008,
+            "res": 0.0088,
+            "unc": 0.0394,
+            "check": 0.09067
+          },
+          "mean_p": 0.0394,
+          "observed_rate": 0.0411
+        },
+        "validation": {
+          "n": 64502,
+          "brier": 0.00661,
+          "brier_ref_climatology_dev": 0.00923,
+          "bss": 0.2838,
+          "logloss": 0.0256,
+          "decomposition": {
+            "rel": 0.01218,
+            "res": 0.00257,
+            "unc": 0.00815,
+            "check": 0.01776
+          },
+          "mean_p": 0.0113,
+          "observed_rate": 0.0082
+        }
+      },
+      "3": {
+        "p_ref_dev_climatology": 0.0816,
+        "dev": {
+          "n": 160694,
+          "brier": 0.05559,
+          "brier_ref_climatology_dev": 0.07491,
+          "bss": 0.2579,
+          "logloss": 0.18973,
+          "decomposition": {
+            "rel": 0.11403,
+            "res": 0.01647,
+            "unc": 0.07491,
+            "check": 0.17247
+          },
+          "mean_p": 0.0752,
+          "observed_rate": 0.0816
+        },
+        "validation": {
+          "n": 62793,
+          "brier": 0.01324,
+          "brier_ref_climatology_dev": 0.02086,
+          "bss": 0.3651,
+          "logloss": 0.05142,
+          "decomposition": {
+            "rel": 0.02434,
+            "res": 0.0056,
+            "unc": 0.01669,
+            "check": 0.03543
+          },
+          "mean_p": 0.0243,
+          "observed_rate": 0.017
+        }
+      },
+      "5": {
+        "p_ref_dev_climatology": 0.1112,
+        "dev": {
+          "n": 159143,
+          "brier": 0.07375,
+          "brier_ref_climatology_dev": 0.09884,
+          "bss": 0.2539,
+          "logloss": 0.24672,
+          "decomposition": {
+            "rel": 0.1515,
+            "res": 0.02108,
+            "unc": 0.09884,
+            "check": 0.22926
+          },
+          "mean_p": 0.1001,
+          "observed_rate": 0.1112
+        },
+        "validation": {
+          "n": 61087,
+          "brier": 0.01817,
+          "brier_ref_climatology_dev": 0.03034,
+          "bss": 0.4012,
+          "logloss": 0.07031,
+          "decomposition": {
+            "rel": 0.03284,
+            "res": 0.00791,
+            "unc": 0.02258,
+            "check": 0.04752
+          },
+          "mean_p": 0.0349,
+          "observed_rate": 0.0231
+        }
+      },
+      "10": {
+        "p_ref_dev_climatology": 0.169,
+        "dev": {
+          "n": 157618,
+          "brier": 0.10588,
+          "brier_ref_climatology_dev": 0.14045,
+          "bss": 0.2462,
+          "logloss": 0.34205,
+          "decomposition": {
+            "rel": 0.21742,
+            "res": 0.02892,
+            "unc": 0.14045,
+            "check": 0.32896
+          },
+          "mean_p": 0.1474,
+          "observed_rate": 0.169
+        },
+        "validation": {
+          "n": 56820,
+          "brier": 0.02796,
+          "brier_ref_climatology_dev": 0.05127,
+          "bss": 0.4546,
+          "logloss": 0.10687,
+          "decomposition": {
+            "rel": 0.04814,
+            "res": 0.01295,
+            "unc": 0.03312,
+            "check": 0.06831
+          },
+          "mean_p": 0.0584,
+          "observed_rate": 0.0343
+        }
+      },
+      "21": {
+        "p_ref_dev_climatology": 0.258,
+        "dev": {
+          "n": 152163,
+          "brier": 0.14838,
+          "brier_ref_climatology_dev": 0.19145,
+          "bss": 0.225,
+          "logloss": 0.45898,
+          "decomposition": {
+            "rel": 0.30177,
+            "res": 0.03806,
+            "unc": 0.19145,
+            "check": 0.45516
+          },
+          "mean_p": 0.2187,
+          "observed_rate": 0.258
+        },
+        "validation": {
+          "n": 47356,
+          "brier": 0.04456,
+          "brier_ref_climatology_dev": 0.09127,
+          "bss": 0.5117,
+          "logloss": 0.16667,
+          "decomposition": {
+            "rel": 0.07019,
+            "res": 0.02279,
+            "unc": 0.04842,
+            "check": 0.09581
+          },
+          "mean_p": 0.1038,
+          "observed_rate": 0.051
+        }
+      },
+      "42": {
+        "p_ref_dev_climatology": 0.3747,
+        "dev": {
+          "n": 143300,
+          "brier": 0.18989,
+          "brier_ref_climatology_dev": 0.23429,
+          "bss": 0.1895,
+          "logloss": 0.56473,
+          "decomposition": {
+            "rel": 0.37763,
+            "res": 0.04655,
+            "unc": 0.23429,
+            "check": 0.56538
+          },
+          "mean_p": 0.3128,
+          "observed_rate": 0.3747
+        },
+        "validation": {
+          "n": 29279,
+          "brier": 0.07779,
+          "brier_ref_climatology_dev": 0.1603,
+          "bss": 0.5147,
+          "logloss": 0.27114,
+          "decomposition": {
+            "rel": 0.10711,
+            "res": 0.04387,
+            "unc": 0.07319,
+            "check": 0.13643
+          },
+          "mean_p": 0.1909,
+          "observed_rate": 0.0795
+        }
+      },
+      "63": {
+        "p_ref_dev_climatology": 0.4604,
+        "dev": {
+          "n": 131354,
+          "brier": 0.2077,
+          "brier_ref_climatology_dev": 0.24843,
+          "bss": 0.1639,
+          "logloss": 0.606,
+          "decomposition": {
+            "rel": 0.40602,
+            "res": 0.05011,
+            "unc": 0.24843,
+            "check": 0.60434
+          },
+          "mean_p": 0.3837,
+          "observed_rate": 0.4604
+        },
+        "validation": {
+          "n": 11161,
+          "brier": 0.12334,
+          "brier_ref_climatology_dev": 0.22077,
+          "bss": 0.4413,
+          "logloss": 0.39518,
+          "decomposition": {
+            "rel": 0.14608,
+            "res": 0.07616,
+            "unc": 0.0989,
+            "check": 0.16881
+          },
+          "mean_p": 0.3031,
+          "observed_rate": 0.1113
+        }
+      }
+    }
+  },
+  "generated": "2026-08-14T17:54:36+00:00"
+}

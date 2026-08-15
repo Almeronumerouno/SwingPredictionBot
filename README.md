@@ -70,16 +70,18 @@ python backtest_calibrate.py
 
 Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa peluangnya balik ke previous close dalam 1 hari sampai 1 bulan?"*
 
-- **Metode**: model GBM analitik (first-passage time, CDF Inverse Gaussian via `math.erf`, tanpa dependensi baru) + base rate empiris saham tsb (event = close turun ≥ X% di bawah previous close dalam 500 hari terakhir).
+- **Metode**: **model empiris global (logistic drawdown)** dikalibrasi dari 963 saham IDX (dataset lokal `data/universe_ohlcv.npz`, anti look-ahead, split temporal 70/30) + base rate empiris saham tsb (event = close turun ≥ X% di bawah previous close dalam 500 hari terakhir). Model: `P(hit prior high ≤ h hari) = 1/(1+exp(a_h + b_h × dd))`, dd = drawdown dari prior high (max close 252 hari), clamp 0–85%, horizon 1/3/5/10/21/42/63 hari. Parameter di `data/recovery_model_params.json`. GBM analitik di-deprecate (`gbm: null` di API).
 - **Signal**:
-  - `POTENTIAL` — P(recovery ≤ 21 hari) ≥ 60%
+  - `POTENTIAL` — P(recovery ≤ 21 hari) ≥ threshold (0.68 utk base rate empiris saham dgn ≥ 5 event; 0.50 utk model global)
   - `WATCH` — probabilitas menengah
   - `NO_SETUP` — belum turun cukup jauh atau data tidak valid
-  - Sinyal memakai **empirical base rate** saat `n_events ≥ 5` (lebih kalibrasi dari GBM), fallback ke GBM.
+  - Prioritas: base rate empiris per-saham (≥ 5 event) → fallback model global.
 - **Posisi vs Harga Acuan** — cek status harga sekarang vs close 1D/1W/1M/3M lalu (badge "Masih di Bawah" / "Udah di Atas" + jarak % per horizon).
-- **Volume & Akumulasi** — deteksi pola "akumulasi post-ARA lalu siap terbang": ARA (+10% harian) = puncak distribusi/dump, lalu tiap hari sejak ARA dibandingkan ke **rata-rata volume post-ARA** (baseline = seluruh bar post-ARA sebelum hari ini, tanpa hari ARA — anti-self-referencing) — minimal **2 hari** volume ≥ 2.0× baseline **dan kepadatan heavy ≥ 30%** (gate — tanpa ini edge mati) + harga **masih di bawah level ARA** (belum recovery) + harga **di atas SMA20** → badge "Siap Terbang". Divalidasi walk-forward anti-lookahead (915 saham IDX, 800 bar, 2026): P(boom +10%/5hari) arm **18.4%** vs kontrol **5.4%** (edge ~3.4x, p<1e-16, n=8.092; thr density 40%: 18.6% vs 5.6%, n=5.546). Baseline post-ARA teruji — kepadatan adalah kunci edge: tanpa gate density, sinyal 8.7% ≈ kontrol 8.7%.
-- **Exit plan** (bila entry): target = previous close, time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
-- **Validasi walk-forward** (BBCA BMRI BBRI ASII TLKM, 35 event, drop ≥ 5%): GBM **under-predict** peluang — Brier 1d 0.057 → 63d 0.372; pred vs aktual 3d: 7% vs 31%; 63d: 56% vs 73%. Karena itu sinyal mengutamakan base rate empiris.
+- **Volume & Akumulasi** — deteksi pola "akumulasi post-ARA lalu siap terbang": ARA (+10% harian) = puncak distribusi/dump, lalu tiap hari sejak ARA dibandingkan ke **rata-rata volume post-ARA** (baseline = seluruh bar post-ARA sebelum hari ini, tanpa hari ARA — anti-self-referencing) — minimal **2 hari** volume ≥ 2.0× baseline **dan kepadatan heavy ≥ 30%** (gate — tanpa ini edge mati) + harga **masih di bawah level ARA** (belum recovery) + harga **di atas SMA20** → badge "Siap Terbang". Divalidasi walk-forward anti-lookahead (915 saham IDX, 800 bar, 2026): P(boom +10%/5hari) arm **18.4%** vs kontrol **5.4%** (edge ~3.4x, p<1e-16, n=8.092; thr density 40%: 18.6% vs 5.6%, n=5.546). Baseline post-ARA teruji — kepadatan adalah kunci edge: tanpa gate density, sinyal 8.7% ≈ kontrol 8.7%. Info tambahan: `net_dist` (net distribution volume ±, skala −1..+1), `net_dist_heavy` (net distribution hanya hari heavy: #heavy dgn Close>Open / #heavy, skala 0..1 — definisi audit; komplementer dgn net_dist) & `sma_gap_pct` (jarak % ke SMA20).
+- **Confidence interval P(recover)** — tiap `p_hit` dilengkapi `ci_low/ci_high` (interval 90%, delta method skala logit; SE diskala faktor bootstrap 3.89/3.62 utk koreksi korelasi antar-bar — `ci_bootstrap` di params json). Di UI tampil sebagai range "(x-y%)".
+- **Hasil verifikasi data 2026 (keputusan desain)** — squeeze volatilitas (ATR/Bollinger) **bukan** leading signal breakout (OR 0.74–1.06, ditolak — `_validate_squeeze.py`); efek buruk post-ARA hanya terasa di hari ke-1 lalu netral di ≥5 hari (`_validate_post_ara.py`, penalti harus meluruh, bukan blanket); momentum murni tetap baseline terkuat vs RTF (B10 OR: RTF 1.47, momentum 1.52–1.58; deep-drawdown tanpa model 1.07–1.11 — `_baseline_compare.py`); bootstrap saham → parameter recovery stabil, ranking transfer antar-regime AUC 0.80–0.83 tapi level under-prediksi di regime bearish (`_bootstrap_recovery.py`).
+- **Exit plan** (bila entry): target = prior high (bila sinyal model) atau previous close (bila base rate empiris), time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
+- **Validasi OOS** (`python _validate_recovery.py --mode dataset`, 963 saham, test-split 30% murni, prediksi = parameter produksi): AUC test 0.83–0.95 (h=1..21), Brier 0.021–0.119, kalibrasi bucket pred≈actual (deviasi ≤ 0.09 di bucket dangkal, < 0.03 sisanya) — model tidak overfit dan layak produksi. (Versi lama GBM FPT under-predict — Brier 1d 0.057 → 63d 0.372 — di-deprecate.)
 
 **Cara pakai:**
 ```bash
@@ -89,8 +91,14 @@ curl "http://localhost:8000/recovery/BBCA"
 # API — manual override
 curl "http://localhost:8000/recovery/BBCA?drop_pct=5"
 
-# Validasi walk-forward
-python _validate_recovery.py BBCA BMRI BBRI ASII TLKM --drop 5 --length 800
+# Validasi walk-forward (model global atas dataset lokal — tanpa rate limit)
+python _validate_recovery.py --mode dataset
+# Mode lama (fetch live per saham, GBM FPT deprecated)
+python _validate_recovery.py --mode gbm BBCA BMRI BBRI --drop 5 --length 800
+# Kalibrasi ulang model recovery (perlu dataset lokal dulu)
+python _calibrate_recovery_model.py --npz data/universe_ohlcv.npz
+# Korelasi sinyal swing vs recovery
+python _correlate_signals.py --codes BBCA BMRI BBRI TLKM ASII ADRO
 ```
 
 Frontend: card "Mean Reversion / Recovery" di halaman detail saham + kontrol Recovery Setup (mode **Otomatis** = 2.5× σ_daily, clamp 2%–13% flat semua tier — ARB flat 15% sejak April 2025; atau **Manual** lewat `?drop_pct=`).

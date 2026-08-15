@@ -1,0 +1,518 @@
+{
+  "generated": "2026-08-12T06:43:45+00:00",
+  "file": "delisted_ohlcv.npz",
+  "n_seeds": 31,
+  "n_ok": 16,
+  "max_bars": 900,
+  "fields": [
+    "open",
+    "high",
+    "low",
+    "close_raw",
+    "adj_close",
+    "volume"
+  ],
+  "fetch_start": "2015-09-01",
+  "sumber": "SahamOK 2017-2020, IDXChannel 2021, CNBC 2020-2025; IDX API resmi tidak dapat diakses (Cloudflare 403/503)",
+  "entries": [
+    {
+      "kode": "CTRP",
+      "nama": "Ciputra Property Tbk",
+      "delisting_date": "2017-01-19",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "CTRS",
+      "nama": "Ciputra Surya Tbk",
+      "delisting_date": "2017-01-19",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "SOBI",
+      "nama": "Sorini Agro Asia Corporindo Tbk",
+      "delisting_date": "2017-07-03",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "CPGT",
+      "nama": "Citra Maharlika Nusantara Corpora Tbk",
+      "delisting_date": "2017-10-19",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "INVS",
+      "nama": "Inovisi Infracom Tbk",
+      "delisting_date": "2017-10-23",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "BRAU",
+      "nama": "Berau Coal Energy Tbk",
+      "delisting_date": "2017-11-16",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "TKGA",
+      "nama": "Permata Prima Sakti Tbk",
+      "delisting_date": "2017-11-16",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "LAMI",
+      "nama": "Lamicitra Nusantara Tbk",
+      "delisting_date": "2017-12-28",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "SQBB",
+      "nama": "Taisho Pharmaceutical Indonesia Tbk",
+      "delisting_date": "2018-03-21",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "DAJK",
+      "nama": "Dwi Aneka Jaya Kemasindo Tbk",
+      "delisting_date": "2018-05-18",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "TRUB",
+      "nama": "Truba Alam Manunggal Engineering Tbk",
+      "delisting_date": "2018-09-12",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "JPRS",
+      "nama": "Jaya Pari Steel Tbk",
+      "delisting_date": "2018-10-08",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "BBNP",
+      "nama": "Bank Nusantara Parahyangan Tbk",
+      "delisting_date": "2019-05-02",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "SIAP",
+      "nama": "Sekawan Intipratama Tbk",
+      "delisting_date": "2019-06-17",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "GMCW",
+      "nama": "Grahamas Citrawisata Tbk",
+      "delisting_date": "2019-08-13",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "NAGA",
+      "nama": "Bank Mitraniaga Tbk",
+      "delisting_date": "2019-08-23",
+      "sumber": "sahamok",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "ATPK",
+      "nama": "Bara Jaya Internasional Tbk",
+      "delisting_date": "2019-09-30",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "TMPI",
+      "nama": "Sigmagold Inti Perkasa Tbk",
+      "delisting_date": "2019-11-11",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "BORN",
+      "nama": "Borneo Lumbung Energi & Metal Tbk",
+      "delisting_date": "2020-01-20",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "ITTG",
+      "nama": "Leo Investments Tbk",
+      "delisting_date": "2020-01-23",
+      "sumber": "sahamok",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "FINN",
+      "nama": "First Indo American Leasing Tbk",
+      "delisting_date": "2021-03-02",
+      "sumber": "idxchannel",
+      "fetch_attempts": 4,
+      "fetch_error": null
+    },
+    {
+      "kode": "MAMI",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "FORZ",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "MYRX",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "KRAH",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "KPAS",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "KPAL",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "PRAS",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "NIPS",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "JKSW",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    },
+    {
+      "kode": "HDTX",
+      "nama": null,
+      "delisting_date": null,
+      "sumber": "cnbc",
+      "fetch_attempts": 1,
+      "fetch_error": null
+    }
+  ],
+  "qa": {
+    "CTRP": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "CTRS": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "SOBI": {
+      "n_bars": 103,
+      "last_date": "2018-08-09",
+      "first_date": "2018-03-15",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 103,
+      "gap_last_vs_delisting_days": -402,
+      "gap_ok": false,
+      "price_start": 1700.0,
+      "price_end": 1700.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "CPGT": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "INVS": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "BRAU": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "TKGA": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "LAMI": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "SQBB": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "DAJK": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "TRUB": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "JPRS": {
+      "n_bars": 751,
+      "last_date": "2018-10-05",
+      "first_date": "2015-08-27",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 65,
+      "gap_last_vs_delisting_days": 3,
+      "gap_ok": true,
+      "price_start": 168.0,
+      "price_end": 168.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "BBNP": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "SIAP": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "GMCW": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "NAGA": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "ATPK": {
+      "n_bars": 900,
+      "last_date": "2023-01-11",
+      "first_date": "2019-06-18",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "gap_last_vs_delisting_days": -1199,
+      "gap_ok": false,
+      "price_start": 194.0,
+      "price_end": 194.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "TMPI": {
+      "n_bars": 900,
+      "last_date": "2020-01-15",
+      "first_date": "2016-04-12",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 645,
+      "gap_last_vs_delisting_days": -65,
+      "gap_ok": false,
+      "price_start": 427.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": -0.8829
+    },
+    "BORN": {
+      "n_bars": 900,
+      "last_date": "2020-02-19",
+      "first_date": "2016-07-22",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "gap_last_vs_delisting_days": -30,
+      "gap_ok": false,
+      "price_start": 50.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "ITTG": {
+      "n_bars": 900,
+      "last_date": "2020-02-21",
+      "first_date": "2016-07-26",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "gap_last_vs_delisting_days": -29,
+      "gap_ok": false,
+      "price_start": 82.0,
+      "price_end": 82.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "FINN": {
+      "n_bars": 0,
+      "status": "no_data"
+    },
+    "MAMI": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 50.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "FORZ": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 50.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "MYRX": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 50.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "KRAH": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 436.0,
+      "price_end": 436.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "KPAS": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 62.0,
+      "price_end": 62.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "KPAL": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 50.0,
+      "price_end": 50.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "PRAS": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 336,
+      "price_start": 238.0,
+      "price_end": 97.0,
+      "drawdown_end_vs_start": -0.5924
+    },
+    "NIPS": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 282.0,
+      "price_end": 282.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "JKSW": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 60.0,
+      "price_end": 60.0,
+      "drawdown_end_vs_start": 0.0
+    },
+    "HDTX": {
+      "n_bars": 900,
+      "last_date": "2025-07-23",
+      "first_date": "2021-10-19",
+      "status": "ok",
+      "nan_cells": 0,
+      "zero_vol_bars": 900,
+      "price_start": 120.0,
+      "price_end": 120.0,
+      "drawdown_end_vs_start": 0.0
+    }
+  },
+  "catatan": "gap_ok=False = bar terakhir Yahoo lebih dari 45 hari sebelum tanggal delisting resmi (cek manual: bisa karena suspensi panjang / data Yahoo tidak lengkap). zero_vol_bars = indikasi hari suspensi."
+}

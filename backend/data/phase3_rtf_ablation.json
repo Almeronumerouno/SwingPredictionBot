@@ -1,0 +1,119 @@
+{
+  "phase": "Phase 3 — ablation study (OOS, parameter frozen, config winner)",
+  "method": "gates di-ablasikan satu per satu (rate b10 h10 & lift vs ctrl); komponen strength di-ablasikan (AUC ranking pada arm full)",
+  "winner_config": {
+    "ACCUM_ARA_RISE_PCT": 10.0,
+    "ACCUM_RVOL_PERIOD": 20,
+    "ACCUM_DENSITY_PCT": 50.0,
+    "ACCUM_MIN_HEAVY_DAYS": 2,
+    "ACCUM_HEAVY_RVOL": 2.0,
+    "ACCUM_MA20_DAYS": 20,
+    "ACCUM_DECAY_TAU": 2.0,
+    "ACCUM_DECAY_CUTOFF_DAYS": null,
+    "ACCUM_MIN_ADV_VOL": 500000,
+    "ACCUM_MIN_ADV_VAL": 250000000
+  },
+  "ctrl_rate_b10_h10": 0.0717,
+  "gates": {
+    "full": {
+      "n_signals": 306,
+      "b10_rate": 0.1961,
+      "lift_vs_ctrl": 2.735
+    },
+    "no_above_ma": {
+      "n_signals": 378,
+      "b10_rate": 0.2037,
+      "lift_vs_ctrl": 2.841
+    },
+    "no_liq": {
+      "n_signals": 423,
+      "b10_rate": 0.1868,
+      "lift_vs_ctrl": 2.605
+    },
+    "no_below": {
+      "n_signals": 490,
+      "b10_rate": 0.3531,
+      "lift_vs_ctrl": 4.924
+    },
+    "mh_1": {
+      "n_signals": 411,
+      "b10_rate": 0.1946,
+      "lift_vs_ctrl": 2.715
+    }
+  },
+  "strength": {
+    "full": {
+      "auc_up1_21": 0.3706,
+      "auc_b10_21": 0.5073,
+      "precision@5_up1_21": {
+        "K": 5,
+        "n_avail": 118,
+        "precision": 0.0,
+        "base_rate": 0.2458,
+        "lift": 0.0
+      },
+      "precision@10_up1_21": {
+        "K": 10,
+        "n_avail": 118,
+        "precision": 0.2,
+        "base_rate": 0.2458,
+        "lift": 0.814
+      }
+    },
+    "density_only": {
+      "auc_up1_21": 0.425,
+      "auc_b10_21": 0.4791,
+      "precision@5_up1_21": {
+        "K": 5,
+        "n_avail": 118,
+        "precision": 0.2,
+        "base_rate": 0.2458,
+        "lift": 0.814
+      },
+      "precision@10_up1_21": {
+        "K": 10,
+        "n_avail": 118,
+        "precision": 0.1,
+        "base_rate": 0.2458,
+        "lift": 0.407
+      }
+    },
+    "ndh_only": {
+      "auc_up1_21": 0.3892,
+      "auc_b10_21": 0.4883,
+      "precision@5_up1_21": {
+        "K": 5,
+        "n_avail": 118,
+        "precision": 0.2,
+        "base_rate": 0.2458,
+        "lift": 0.814
+      },
+      "precision@10_up1_21": {
+        "K": 10,
+        "n_avail": 118,
+        "precision": 0.3,
+        "base_rate": 0.2458,
+        "lift": 1.221
+      }
+    },
+    "decay_only": {
+      "auc_up1_21": 0.4111,
+      "auc_b10_21": 0.5099,
+      "precision@5_up1_21": {
+        "K": 5,
+        "n_avail": 118,
+        "precision": 0.2,
+        "base_rate": 0.2458,
+        "lift": 0.814
+      },
+      "precision@10_up1_21": {
+        "K": 10,
+        "n_avail": 118,
+        "precision": 0.1,
+        "base_rate": 0.2458,
+        "lift": 0.407
+      }
+    }
+  },
+  "generated": "2026-08-14T17:22:30+00:00"
+}

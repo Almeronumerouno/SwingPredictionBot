@@ -1,0 +1,177 @@
+{
+  "phase": "Phase 3 — diagnostic orientasi strength (read-only, config winner)",
+  "question": "apakah inverse relationship strength->up1 stabil di TRAIN vs OOS, antar stock, dan antar regime?",
+  "note": "Diagnostik MURNI; tidak ada parameter yang dipilih dari hasil ini.",
+  "winner_config": {
+    "ACCUM_ARA_RISE_PCT": 10.0,
+    "ACCUM_RVOL_PERIOD": 20,
+    "ACCUM_DENSITY_PCT": 50.0,
+    "ACCUM_MIN_HEAVY_DAYS": 2,
+    "ACCUM_HEAVY_RVOL": 2.0,
+    "ACCUM_MA20_DAYS": 20,
+    "ACCUM_DECAY_TAU": 2.0,
+    "ACCUM_DECAY_CUTOFF_DAYS": null,
+    "ACCUM_MIN_ADV_VOL": 500000,
+    "ACCUM_MIN_ADV_VAL": 250000000
+  },
+  "n_arm_total": 2899,
+  "n_arm_train": 1673,
+  "n_arm_oos": 366,
+  "train_vs_oos": {
+    "full": {
+      "up1_21": {
+        "train": 0.5247,
+        "oos": 0.3706
+      },
+      "up1_10": {
+        "train": 0.5264,
+        "oos": 0.4212
+      },
+      "b10_21": {
+        "train": 0.5667,
+        "oos": 0.5073
+      },
+      "b10_10": {
+        "train": 0.55,
+        "oos": 0.5511
+      }
+    },
+    "density_only": {
+      "up1_21": {
+        "train": 0.5132,
+        "oos": 0.425
+      },
+      "up1_10": {
+        "train": 0.5174,
+        "oos": 0.4151
+      },
+      "b10_21": {
+        "train": 0.5226,
+        "oos": 0.4791
+      },
+      "b10_10": {
+        "train": 0.5157,
+        "oos": 0.4885
+      }
+    }
+  },
+  "per_code": {
+    "full": {
+      "n_codes": 1,
+      "median_auc": 0.5165,
+      "frac_inverse_lt_0.5": 0.0,
+      "frac_pos_gt_0.5": 1.0,
+      "q25_q75": [
+        0.5165,
+        0.5165
+      ]
+    },
+    "density_only": {
+      "n_codes": 1,
+      "median_auc": 0.4008,
+      "frac_inverse_lt_0.5": 1.0,
+      "frac_pos_gt_0.5": 0.0,
+      "q25_q75": [
+        0.4008,
+        0.4008
+      ]
+    }
+  },
+  "per_quarter": {
+    "2024-Q2": {
+      "full": {
+        "n": 79,
+        "auc": 0.4542
+      },
+      "density_only": {
+        "n": 79,
+        "auc": 0.5454
+      }
+    },
+    "2024-Q3": {
+      "full": {
+        "n": 254,
+        "auc": 0.49
+      },
+      "density_only": {
+        "n": 254,
+        "auc": 0.5027
+      }
+    },
+    "2024-Q4": {
+      "full": {
+        "n": 238,
+        "auc": 0.5414
+      },
+      "density_only": {
+        "n": 238,
+        "auc": 0.5286
+      }
+    },
+    "2025-Q1": {
+      "full": {
+        "n": 190,
+        "auc": 0.5728
+      },
+      "density_only": {
+        "n": 190,
+        "auc": 0.4712
+      }
+    },
+    "2025-Q2": {
+      "full": {
+        "n": 264,
+        "auc": 0.4802
+      },
+      "density_only": {
+        "n": 264,
+        "auc": 0.5354
+      }
+    },
+    "2025-Q3": {
+      "full": {
+        "n": 518,
+        "auc": 0.5519
+      },
+      "density_only": {
+        "n": 518,
+        "auc": 0.5087
+      }
+    },
+    "2025-Q4": {
+      "full": {
+        "n": 525,
+        "auc": 0.4868
+      },
+      "density_only": {
+        "n": 525,
+        "auc": 0.4959
+      }
+    },
+    "2026-Q1": {
+      "full": {
+        "n": 315,
+        "auc": 0.4331
+      },
+      "density_only": {
+        "n": 315,
+        "auc": 0.519
+      }
+    },
+    "2026-Q2": {
+      "full": {
+        "n": 268,
+        "auc": 0.4794
+      },
+      "density_only": {
+        "n": 268,
+        "auc": 0.5407
+      }
+    },
+    "2026-Q3": {
+      "full": null,
+      "density_only": null
+    }
+  },
+  "generated": "2026-08-14T17:29:20+00:00"
+}

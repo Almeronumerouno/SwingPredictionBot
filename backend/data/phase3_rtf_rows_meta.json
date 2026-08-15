@@ -1,0 +1,31 @@
+{
+  "file": "phase3_rtf_rows.npz",
+  "generated": "2026-08-14T17:19:05+00:00",
+  "n_codes": 963,
+  "codes_ok": 846,
+  "total_rows": 365018,
+  "ncol": 44,
+  "columns": {
+    "0..6": "bar_idx, anchor_idx, ref_idx, window, pos_vs_ara, above_ma, liq_ok",
+    "7..21": "k_m, density_m, ndh_m x MULT_GRID",
+    "22..37": "rec/b5/b10/up1 x HORIZONS (NaN censored)",
+    "38..41": "ret_N x HORIZONS (NaN censored)",
+    "42..43": "ret_lag5, ret_lag10 (feature momentum)"
+  },
+  "horizons": [
+    5,
+    10,
+    21,
+    63
+  ],
+  "mult_grid": [
+    1.5,
+    1.75,
+    2.0,
+    2.5,
+    3.0
+  ],
+  "min_bar_idx": 24,
+  "censor_policy": "outcome NaN bila forward window [t+1..t+N] tidak penuh",
+  "source": "universe_ohlcv.npz (local, tanpa Yahoo)"
+}

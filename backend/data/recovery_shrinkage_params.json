@@ -1,0 +1,2790 @@
+{
+  "method": "beta_binomial_shrinkage",
+  "cutoff": "2025-11-24",
+  "embargo_days": 90,
+  "buckets": [
+    {
+      "lo": 2.0,
+      "hi": 3.0
+    },
+    {
+      "lo": 3.0,
+      "hi": 4.0
+    },
+    {
+      "lo": 4.0,
+      "hi": 5.0
+    },
+    {
+      "lo": 5.0,
+      "hi": 6.5
+    },
+    {
+      "lo": 6.5,
+      "hi": 8.0
+    },
+    {
+      "lo": 8.0,
+      "hi": 10.0
+    },
+    {
+      "lo": 10.0,
+      "hi": 13.0
+    },
+    {
+      "lo": 13.0,
+      "hi": 20.0
+    }
+  ],
+  "horizons": {
+    "1": {
+      "n_stocks_train": 810,
+      "n_stocks_test": 620,
+      "total_test_events": 2449,
+      "global_prior": {
+        "p0": 0.1764,
+        "m0": 4.45,
+        "a0": 0.785,
+        "b0": 3.668
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 20,
+          "prior": {
+            "p0": 0.1843,
+            "m0": 2.81,
+            "a0": 0.518,
+            "b0": 2.292
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0693,
+              "mad": 0.2211,
+              "n_saham": 20
+            },
+            "shrinkage": {
+              "brier": 0.0621,
+              "mad": 0.2017,
+              "n_saham": 20
+            },
+            "pooled_only": {
+              "brier": 0.0339,
+              "mad": 0.1598,
+              "n_saham": 20
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 18,
+                "mean_pred": 0.0721,
+                "mean_actual": 0.2747
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 2,
+                "mean_pred": 0.2138,
+                "mean_actual": 0.2453
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 40,
+          "prior": {
+            "p0": 0.0929,
+            "m0": 15.85,
+            "a0": 1.474,
+            "b0": 14.381
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0405,
+              "mad": 0.1415,
+              "n_saham": 40
+            },
+            "shrinkage": {
+              "brier": 0.029,
+              "mad": 0.1204,
+              "n_saham": 40
+            },
+            "pooled_only": {
+              "brier": 0.0268,
+              "mad": 0.1245,
+              "n_saham": 40
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 39,
+                "mean_pred": 0.0819,
+                "mean_actual": 0.1498
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 1,
+                "mean_pred": 0.2395,
+                "mean_actual": 0.25
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 52,
+          "prior": {
+            "p0": 0.081,
+            "m0": 500.0,
+            "a0": 40.498,
+            "b0": 459.502
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0245,
+              "mad": 0.1119,
+              "n_saham": 52
+            },
+            "shrinkage": {
+              "brier": 0.0261,
+              "mad": 0.127,
+              "n_saham": 52
+            },
+            "pooled_only": {
+              "brier": 0.0263,
+              "mad": 0.1278,
+              "n_saham": 52
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 52,
+                "mean_pred": 0.0816,
+                "mean_actual": 0.168
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 105,
+          "prior": {
+            "p0": 0.1004,
+            "m0": 500.0,
+            "a0": 50.176,
+            "b0": 449.824
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0388,
+              "mad": 0.1322,
+              "n_saham": 105
+            },
+            "shrinkage": {
+              "brier": 0.0379,
+              "mad": 0.1344,
+              "n_saham": 105
+            },
+            "pooled_only": {
+              "brier": 0.038,
+              "mad": 0.1345,
+              "n_saham": 105
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 105,
+                "mean_pred": 0.1001,
+                "mean_actual": 0.1253
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 83,
+          "prior": {
+            "p0": 0.1396,
+            "m0": 500.0,
+            "a0": 69.792,
+            "b0": 430.208
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0511,
+              "mad": 0.1714,
+              "n_saham": 83
+            },
+            "shrinkage": {
+              "brier": 0.0483,
+              "mad": 0.1763,
+              "n_saham": 83
+            },
+            "pooled_only": {
+              "brier": 0.0483,
+              "mad": 0.1763,
+              "n_saham": 83
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 83,
+                "mean_pred": 0.1396,
+                "mean_actual": 0.1971
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 103,
+          "prior": {
+            "p0": 0.1086,
+            "m0": 22.17,
+            "a0": 2.407,
+            "b0": 19.761
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0364,
+              "mad": 0.1339,
+              "n_saham": 103
+            },
+            "shrinkage": {
+              "brier": 0.0317,
+              "mad": 0.1282,
+              "n_saham": 103
+            },
+            "pooled_only": {
+              "brier": 0.0311,
+              "mad": 0.1292,
+              "n_saham": 103
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 103,
+                "mean_pred": 0.105,
+                "mean_actual": 0.1455
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 148,
+          "n_stocks_test": 121,
+          "prior": {
+            "p0": 0.127,
+            "m0": 9.08,
+            "a0": 1.152,
+            "b0": 7.924
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0517,
+              "mad": 0.1575,
+              "n_saham": 121
+            },
+            "shrinkage": {
+              "brier": 0.0489,
+              "mad": 0.1628,
+              "n_saham": 121
+            },
+            "pooled_only": {
+              "brier": 0.0458,
+              "mad": 0.1558,
+              "n_saham": 121
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 112,
+                "mean_pred": 0.1256,
+                "mean_actual": 0.1809
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 9,
+                "mean_pred": 0.2456,
+                "mean_actual": 0.0909
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 155,
+          "n_stocks_test": 96,
+          "prior": {
+            "p0": 0.3478,
+            "m0": 3.0,
+            "a0": 1.042,
+            "b0": 1.954
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0904,
+              "mad": 0.2512,
+              "n_saham": 96
+            },
+            "shrinkage": {
+              "brier": 0.0779,
+              "mad": 0.2273,
+              "n_saham": 96
+            },
+            "pooled_only": {
+              "brier": 0.0969,
+              "mad": 0.2853,
+              "n_saham": 96
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 36,
+                "mean_pred": 0.1401,
+                "mean_actual": 0.1413
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 49,
+                "mean_pred": 0.2776,
+                "mean_actual": 0.1333
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 10,
+                "mean_pred": 0.4522,
+                "mean_actual": 0.16
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 1,
+                "mean_pred": 0.6029,
+                "mean_actual": 0.0
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.0465,
+          "mad": 0.1596,
+          "n_saham": 620
+        },
+        "shrinkage": {
+          "brier": 0.0431,
+          "mad": 0.1547,
+          "n_saham": 620
+        },
+        "pooled_only": {
+          "brier": 0.0374,
+          "mad": 0.1535,
+          "n_saham": 620
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "0-20%",
+            "n_saham": 493,
+            "mean_pred": 0.1109,
+            "mean_actual": 0.167
+          },
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 124,
+            "mean_pred": 0.2517,
+            "mean_actual": 0.1729
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 3,
+            "mean_pred": 0.4568,
+            "mean_actual": 0.1429
+          }
+        ]
+      }
+    },
+    "3": {
+      "n_stocks_train": 810,
+      "n_stocks_test": 617,
+      "total_test_events": 2422,
+      "global_prior": {
+        "p0": 0.3097,
+        "m0": 5.66,
+        "a0": 1.751,
+        "b0": 3.904
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 20,
+          "prior": {
+            "p0": 0.3011,
+            "m0": 3.37,
+            "a0": 1.015,
+            "b0": 2.356
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1414,
+              "mad": 0.303,
+              "n_saham": 20
+            },
+            "shrinkage": {
+              "brier": 0.1169,
+              "mad": 0.2713,
+              "n_saham": 20
+            },
+            "pooled_only": {
+              "brier": 0.0635,
+              "mad": 0.1931,
+              "n_saham": 20
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 7,
+                "mean_pred": 0.1208,
+                "mean_actual": 0.4356
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 12,
+                "mean_pred": 0.3004,
+                "mean_actual": 0.4643
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 1,
+                "mean_pred": 0.4862,
+                "mean_actual": 0.125
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 40,
+          "prior": {
+            "p0": 0.2276,
+            "m0": 132.0,
+            "a0": 30.039,
+            "b0": 101.963
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0711,
+              "mad": 0.2083,
+              "n_saham": 40
+            },
+            "shrinkage": {
+              "brier": 0.0632,
+              "mad": 0.2037,
+              "n_saham": 40
+            },
+            "pooled_only": {
+              "brier": 0.0634,
+              "mad": 0.2022,
+              "n_saham": 40
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 40,
+                "mean_pred": 0.2254,
+                "mean_actual": 0.3828
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 52,
+          "prior": {
+            "p0": 0.2406,
+            "m0": 119.27,
+            "a0": 28.7,
+            "b0": 90.571
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0615,
+              "mad": 0.1774,
+              "n_saham": 52
+            },
+            "shrinkage": {
+              "brier": 0.0527,
+              "mad": 0.1783,
+              "n_saham": 52
+            },
+            "pooled_only": {
+              "brier": 0.0532,
+              "mad": 0.1796,
+              "n_saham": 52
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 52,
+                "mean_pred": 0.2421,
+                "mean_actual": 0.3508
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 105,
+          "prior": {
+            "p0": 0.2271,
+            "m0": 109.11,
+            "a0": 24.78,
+            "b0": 84.329
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0893,
+              "mad": 0.238,
+              "n_saham": 105
+            },
+            "shrinkage": {
+              "brier": 0.0773,
+              "mad": 0.2178,
+              "n_saham": 105
+            },
+            "pooled_only": {
+              "brier": 0.0777,
+              "mad": 0.2182,
+              "n_saham": 105
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 105,
+                "mean_pred": 0.2254,
+                "mean_actual": 0.3026
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 81,
+          "prior": {
+            "p0": 0.3096,
+            "m0": 57.22,
+            "a0": 17.718,
+            "b0": 39.506
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0807,
+              "mad": 0.2214,
+              "n_saham": 81
+            },
+            "shrinkage": {
+              "brier": 0.0732,
+              "mad": 0.2125,
+              "n_saham": 81
+            },
+            "pooled_only": {
+              "brier": 0.0733,
+              "mad": 0.2133,
+              "n_saham": 81
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 81,
+                "mean_pred": 0.3082,
+                "mean_actual": 0.3791
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 103,
+          "prior": {
+            "p0": 0.2332,
+            "m0": 21.12,
+            "a0": 4.924,
+            "b0": 16.194
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0808,
+              "mad": 0.2352,
+              "n_saham": 103
+            },
+            "shrinkage": {
+              "brier": 0.0713,
+              "mad": 0.2191,
+              "n_saham": 103
+            },
+            "pooled_only": {
+              "brier": 0.0683,
+              "mad": 0.2094,
+              "n_saham": 103
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 19,
+                "mean_pred": 0.1754,
+                "mean_actual": 0.3163
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 84,
+                "mean_pred": 0.2485,
+                "mean_actual": 0.3236
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 148,
+          "n_stocks_test": 120,
+          "prior": {
+            "p0": 0.2373,
+            "m0": 11.72,
+            "a0": 2.78,
+            "b0": 8.939
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0769,
+              "mad": 0.2131,
+              "n_saham": 120
+            },
+            "shrinkage": {
+              "brier": 0.0756,
+              "mad": 0.2164,
+              "n_saham": 120
+            },
+            "pooled_only": {
+              "brier": 0.0681,
+              "mad": 0.2054,
+              "n_saham": 120
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 22,
+                "mean_pred": 0.1813,
+                "mean_actual": 0.4898
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 97,
+                "mean_pred": 0.2539,
+                "mean_actual": 0.2746
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 1,
+                "mean_pred": 0.4391,
+                "mean_actual": 0.0
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 155,
+          "n_stocks_test": 96,
+          "prior": {
+            "p0": 0.4837,
+            "m0": 2.94,
+            "a0": 1.422,
+            "b0": 1.517
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.128,
+              "mad": 0.2913,
+              "n_saham": 96
+            },
+            "shrinkage": {
+              "brier": 0.1185,
+              "mad": 0.2747,
+              "n_saham": 96
+            },
+            "pooled_only": {
+              "brier": 0.1265,
+              "mad": 0.3012,
+              "n_saham": 96
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 9,
+                "mean_pred": 0.158,
+                "mean_actual": 0.3333
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 40,
+                "mean_pred": 0.2933,
+                "mean_actual": 0.2609
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 39,
+                "mean_pred": 0.4959,
+                "mean_actual": 0.3168
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 7,
+                "mean_pred": 0.6456,
+                "mean_actual": 0.1538
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 1,
+                "mean_pred": 0.8315,
+                "mean_actual": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.085,
+          "mad": 0.2281,
+          "n_saham": 617
+        },
+        "shrinkage": {
+          "brier": 0.0775,
+          "mad": 0.2179,
+          "n_saham": 617
+        },
+        "pooled_only": {
+          "brier": 0.0644,
+          "mad": 0.2002,
+          "n_saham": 617
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "0-20%",
+            "n_saham": 93,
+            "mean_pred": 0.1529,
+            "mean_actual": 0.3716
+          },
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 450,
+            "mean_pred": 0.2859,
+            "mean_actual": 0.3326
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 73,
+            "mean_pred": 0.4478,
+            "mean_actual": 0.3148
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 1,
+            "mean_pred": 0.7221,
+            "mean_actual": 0.5
+          }
+        ]
+      }
+    },
+    "5": {
+      "n_stocks_train": 810,
+      "n_stocks_test": 616,
+      "total_test_events": 2413,
+      "global_prior": {
+        "p0": 0.3952,
+        "m0": 7.52,
+        "a0": 2.973,
+        "b0": 4.55
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 20,
+          "prior": {
+            "p0": 0.3663,
+            "m0": 3.75,
+            "a0": 1.374,
+            "b0": 2.376
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1918,
+              "mad": 0.3364,
+              "n_saham": 20
+            },
+            "shrinkage": {
+              "brier": 0.1614,
+              "mad": 0.3103,
+              "n_saham": 20
+            },
+            "pooled_only": {
+              "brier": 0.0861,
+              "mad": 0.2297,
+              "n_saham": 20
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 3,
+                "mean_pred": 0.15,
+                "mean_actual": 0.697
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 13,
+                "mean_pred": 0.2911,
+                "mean_actual": 0.5326
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 4,
+                "mean_pred": 0.4702,
+                "mean_actual": 0.3662
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 40,
+          "prior": {
+            "p0": 0.3161,
+            "m0": 500.0,
+            "a0": 158.065,
+            "b0": 341.935
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0636,
+              "mad": 0.2059,
+              "n_saham": 40
+            },
+            "shrinkage": {
+              "brier": 0.0626,
+              "mad": 0.1986,
+              "n_saham": 40
+            },
+            "pooled_only": {
+              "brier": 0.0628,
+              "mad": 0.1982,
+              "n_saham": 40
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 40,
+                "mean_pred": 0.3154,
+                "mean_actual": 0.4498
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 52,
+          "prior": {
+            "p0": 0.3323,
+            "m0": 500.0,
+            "a0": 166.144,
+            "b0": 333.856
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0748,
+              "mad": 0.1908,
+              "n_saham": 52
+            },
+            "shrinkage": {
+              "brier": 0.0648,
+              "mad": 0.1985,
+              "n_saham": 52
+            },
+            "pooled_only": {
+              "brier": 0.0652,
+              "mad": 0.1995,
+              "n_saham": 52
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 52,
+                "mean_pred": 0.333,
+                "mean_actual": 0.4187
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 105,
+          "prior": {
+            "p0": 0.3534,
+            "m0": 500.0,
+            "a0": 176.678,
+            "b0": 323.322
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1071,
+              "mad": 0.2626,
+              "n_saham": 105
+            },
+            "shrinkage": {
+              "brier": 0.0847,
+              "mad": 0.2328,
+              "n_saham": 105
+            },
+            "pooled_only": {
+              "brier": 0.0848,
+              "mad": 0.2331,
+              "n_saham": 105
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 105,
+                "mean_pred": 0.3532,
+                "mean_actual": 0.3789
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 81,
+          "prior": {
+            "p0": 0.392,
+            "m0": 78.45,
+            "a0": 30.757,
+            "b0": 47.698
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.087,
+              "mad": 0.2368,
+              "n_saham": 81
+            },
+            "shrinkage": {
+              "brier": 0.07,
+              "mad": 0.2087,
+              "n_saham": 81
+            },
+            "pooled_only": {
+              "brier": 0.0702,
+              "mad": 0.2105,
+              "n_saham": 81
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 63,
+                "mean_pred": 0.3858,
+                "mean_actual": 0.4783
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 18,
+                "mean_pred": 0.409,
+                "mean_actual": 0.4563
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 102,
+          "prior": {
+            "p0": 0.3374,
+            "m0": 17.16,
+            "a0": 5.791,
+            "b0": 11.373
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0989,
+              "mad": 0.2666,
+              "n_saham": 102
+            },
+            "shrinkage": {
+              "brier": 0.0806,
+              "mad": 0.2387,
+              "n_saham": 102
+            },
+            "pooled_only": {
+              "brier": 0.0714,
+              "mad": 0.2176,
+              "n_saham": 102
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 1,
+                "mean_pred": 0.1805,
+                "mean_actual": 0.4706
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 90,
+                "mean_pred": 0.3213,
+                "mean_actual": 0.4226
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 11,
+                "mean_pred": 0.4161,
+                "mean_actual": 0.3636
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 148,
+          "n_stocks_test": 120,
+          "prior": {
+            "p0": 0.3202,
+            "m0": 13.55,
+            "a0": 4.341,
+            "b0": 9.214
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0918,
+              "mad": 0.2348,
+              "n_saham": 120
+            },
+            "shrinkage": {
+              "brier": 0.0866,
+              "mad": 0.2315,
+              "n_saham": 120
+            },
+            "pooled_only": {
+              "brier": 0.0796,
+              "mad": 0.2196,
+              "n_saham": 120
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 1,
+                "mean_pred": 0.1924,
+                "mean_actual": 0.0
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 110,
+                "mean_pred": 0.3217,
+                "mean_actual": 0.3683
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 9,
+                "mean_pred": 0.4194,
+                "mean_actual": 0.4545
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 155,
+          "n_stocks_test": 96,
+          "prior": {
+            "p0": 0.5441,
+            "m0": 3.27,
+            "a0": 1.781,
+            "b0": 1.492
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1345,
+              "mad": 0.299,
+              "n_saham": 96
+            },
+            "shrinkage": {
+              "brier": 0.122,
+              "mad": 0.2813,
+              "n_saham": 96
+            },
+            "pooled_only": {
+              "brier": 0.129,
+              "mad": 0.2992,
+              "n_saham": 96
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 3,
+                "mean_pred": 0.1858,
+                "mean_actual": 0.3333
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 27,
+                "mean_pred": 0.312,
+                "mean_actual": 0.3171
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 50,
+                "mean_pred": 0.5055,
+                "mean_actual": 0.4286
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 15,
+                "mean_pred": 0.6429,
+                "mean_actual": 0.2195
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 1,
+                "mean_pred": 0.8369,
+                "mean_actual": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.1009,
+          "mad": 0.2498,
+          "n_saham": 616
+        },
+        "shrinkage": {
+          "brier": 0.0862,
+          "mad": 0.231,
+          "n_saham": 616
+        },
+        "pooled_only": {
+          "brier": 0.073,
+          "mad": 0.2144,
+          "n_saham": 616
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "0-20%",
+            "n_saham": 8,
+            "mean_pred": 0.1663,
+            "mean_actual": 0.6164
+          },
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 373,
+            "mean_pred": 0.3263,
+            "mean_actual": 0.4182
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 232,
+            "mean_pred": 0.4596,
+            "mean_actual": 0.3993
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 3,
+            "mean_pred": 0.618,
+            "mean_actual": 0.5714
+          }
+        ]
+      }
+    },
+    "10": {
+      "n_stocks_train": 810,
+      "n_stocks_test": 614,
+      "total_test_events": 2381,
+      "global_prior": {
+        "p0": 0.4902,
+        "m0": 7.62,
+        "a0": 3.737,
+        "b0": 3.887
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 20,
+          "prior": {
+            "p0": 0.4389,
+            "m0": 3.8,
+            "a0": 1.667,
+            "b0": 2.132
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.176,
+              "mad": 0.3453,
+              "n_saham": 20
+            },
+            "shrinkage": {
+              "brier": 0.1392,
+              "mad": 0.3081,
+              "n_saham": 20
+            },
+            "pooled_only": {
+              "brier": 0.0781,
+              "mad": 0.2317,
+              "n_saham": 20
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 2,
+                "mean_pred": 0.1153,
+                "mean_actual": 0.8889
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 9,
+                "mean_pred": 0.2746,
+                "mean_actual": 0.5059
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 8,
+                "mean_pred": 0.4807,
+                "mean_actual": 0.6458
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 1,
+                "mean_pred": 0.6772,
+                "mean_actual": 0.5
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 40,
+          "prior": {
+            "p0": 0.4078,
+            "m0": 500.0,
+            "a0": 203.883,
+            "b0": 296.117
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0795,
+              "mad": 0.2421,
+              "n_saham": 40
+            },
+            "shrinkage": {
+              "brier": 0.0727,
+              "mad": 0.2203,
+              "n_saham": 40
+            },
+            "pooled_only": {
+              "brier": 0.0728,
+              "mad": 0.2195,
+              "n_saham": 40
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 1,
+                "mean_pred": 0.3998,
+                "mean_actual": 0.5
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 39,
+                "mean_pred": 0.4077,
+                "mean_actual": 0.5581
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 51,
+          "prior": {
+            "p0": 0.4146,
+            "m0": 500.0,
+            "a0": 207.278,
+            "b0": 292.722
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0992,
+              "mad": 0.2361,
+              "n_saham": 51
+            },
+            "shrinkage": {
+              "brier": 0.0835,
+              "mad": 0.2313,
+              "n_saham": 51
+            },
+            "pooled_only": {
+              "brier": 0.0839,
+              "mad": 0.2323,
+              "n_saham": 51
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 51,
+                "mean_pred": 0.4151,
+                "mean_actual": 0.5328
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 105,
+          "prior": {
+            "p0": 0.4618,
+            "m0": 89.93,
+            "a0": 41.531,
+            "b0": 48.399
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1164,
+              "mad": 0.2754,
+              "n_saham": 105
+            },
+            "shrinkage": {
+              "brier": 0.0894,
+              "mad": 0.2333,
+              "n_saham": 105
+            },
+            "pooled_only": {
+              "brier": 0.0894,
+              "mad": 0.2344,
+              "n_saham": 105
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 105,
+                "mean_pred": 0.4606,
+                "mean_actual": 0.504
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 81,
+          "prior": {
+            "p0": 0.5042,
+            "m0": 22.37,
+            "a0": 11.28,
+            "b0": 11.091
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.093,
+              "mad": 0.2379,
+              "n_saham": 81
+            },
+            "shrinkage": {
+              "brier": 0.0733,
+              "mad": 0.2085,
+              "n_saham": 81
+            },
+            "pooled_only": {
+              "brier": 0.0734,
+              "mad": 0.2119,
+              "n_saham": 81
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 2,
+                "mean_pred": 0.3795,
+                "mean_actual": 0.375
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 77,
+                "mean_pred": 0.5064,
+                "mean_actual": 0.5908
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 2,
+                "mean_pred": 0.6132,
+                "mean_actual": 0.6316
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 102,
+          "prior": {
+            "p0": 0.4371,
+            "m0": 12.27,
+            "a0": 5.362,
+            "b0": 6.906
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1271,
+              "mad": 0.3101,
+              "n_saham": 102
+            },
+            "shrinkage": {
+              "brier": 0.113,
+              "mad": 0.287,
+              "n_saham": 102
+            },
+            "pooled_only": {
+              "brier": 0.0995,
+              "mad": 0.2585,
+              "n_saham": 102
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 25,
+                "mean_pred": 0.3292,
+                "mean_actual": 0.605
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 76,
+                "mean_pred": 0.4733,
+                "mean_actual": 0.5425
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 1,
+                "mean_pred": 0.608,
+                "mean_actual": 0.3333
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 148,
+          "n_stocks_test": 120,
+          "prior": {
+            "p0": 0.42,
+            "m0": 24.07,
+            "a0": 10.11,
+            "b0": 13.962
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0998,
+              "mad": 0.2477,
+              "n_saham": 120
+            },
+            "shrinkage": {
+              "brier": 0.0842,
+              "mad": 0.2331,
+              "n_saham": 120
+            },
+            "pooled_only": {
+              "brier": 0.0817,
+              "mad": 0.2269,
+              "n_saham": 120
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 20,
+                "mean_pred": 0.3763,
+                "mean_actual": 0.6216
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 100,
+                "mean_pred": 0.4346,
+                "mean_actual": 0.4704
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 155,
+          "n_stocks_test": 95,
+          "prior": {
+            "p0": 0.6325,
+            "m0": 3.49,
+            "a0": 2.21,
+            "b0": 1.284
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1346,
+              "mad": 0.3044,
+              "n_saham": 95
+            },
+            "shrinkage": {
+              "brier": 0.1243,
+              "mad": 0.2913,
+              "n_saham": 95
+            },
+            "pooled_only": {
+              "brier": 0.1235,
+              "mad": 0.2931,
+              "n_saham": 95
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "0-20%",
+                "n_saham": 1,
+                "mean_pred": 0.1735,
+                "mean_actual": 0.0
+              },
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 9,
+                "mean_pred": 0.3019,
+                "mean_actual": 0.4783
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 44,
+                "mean_pred": 0.5225,
+                "mean_actual": 0.4818
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 37,
+                "mean_pred": 0.6711,
+                "mean_actual": 0.5243
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 4,
+                "mean_pred": 0.8215,
+                "mean_actual": 0.3333
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.1111,
+          "mad": 0.2692,
+          "n_saham": 614
+        },
+        "shrinkage": {
+          "brier": 0.0932,
+          "mad": 0.2482,
+          "n_saham": 614
+        },
+        "pooled_only": {
+          "brier": 0.0796,
+          "mad": 0.2243,
+          "n_saham": 614
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "0-20%",
+            "n_saham": 1,
+            "mean_pred": 0.1904,
+            "mean_actual": 0.9167
+          },
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 115,
+            "mean_pred": 0.3409,
+            "mean_actual": 0.538
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 454,
+            "mean_pred": 0.4993,
+            "mean_actual": 0.533
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 43,
+            "mean_pred": 0.6477,
+            "mean_actual": 0.5163
+          },
+          {
+            "pred_bucket": "80-100%",
+            "n_saham": 1,
+            "mean_pred": 0.802,
+            "mean_actual": 0.5
+          }
+        ]
+      }
+    },
+    "21": {
+      "n_stocks_train": 805,
+      "n_stocks_test": 610,
+      "total_test_events": 2313,
+      "global_prior": {
+        "p0": 0.589,
+        "m0": 9.39,
+        "a0": 5.529,
+        "b0": 3.857
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 20,
+          "prior": {
+            "p0": 0.5239,
+            "m0": 4.67,
+            "a0": 2.445,
+            "b0": 2.222
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.153,
+              "mad": 0.2964,
+              "n_saham": 20
+            },
+            "shrinkage": {
+              "brier": 0.1175,
+              "mad": 0.2686,
+              "n_saham": 20
+            },
+            "pooled_only": {
+              "brier": 0.0691,
+              "mad": 0.1996,
+              "n_saham": 20
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 4,
+                "mean_pred": 0.2714,
+                "mean_actual": 0.6933
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 12,
+                "mean_pred": 0.5056,
+                "mean_actual": 0.6421
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 4,
+                "mean_pred": 0.6744,
+                "mean_actual": 0.8108
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 40,
+          "prior": {
+            "p0": 0.5672,
+            "m0": 32.24,
+            "a0": 18.287,
+            "b0": 13.953
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0872,
+              "mad": 0.2423,
+              "n_saham": 40
+            },
+            "shrinkage": {
+              "brier": 0.0481,
+              "mad": 0.1768,
+              "n_saham": 40
+            },
+            "pooled_only": {
+              "brier": 0.0462,
+              "mad": 0.1667,
+              "n_saham": 40
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 34,
+                "mean_pred": 0.5503,
+                "mean_actual": 0.6448
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 6,
+                "mean_pred": 0.621,
+                "mean_actual": 0.7059
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 50,
+          "prior": {
+            "p0": 0.5177,
+            "m0": 500.0,
+            "a0": 258.842,
+            "b0": 241.158
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0863,
+              "mad": 0.2171,
+              "n_saham": 50
+            },
+            "shrinkage": {
+              "brier": 0.0777,
+              "mad": 0.2226,
+              "n_saham": 50
+            },
+            "pooled_only": {
+              "brier": 0.0779,
+              "mad": 0.2234,
+              "n_saham": 50
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 50,
+                "mean_pred": 0.5182,
+                "mean_actual": 0.6102
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 105,
+          "prior": {
+            "p0": 0.5832,
+            "m0": 500.0,
+            "a0": 291.592,
+            "b0": 208.408
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1219,
+              "mad": 0.2811,
+              "n_saham": 105
+            },
+            "shrinkage": {
+              "brier": 0.0868,
+              "mad": 0.2372,
+              "n_saham": 105
+            },
+            "pooled_only": {
+              "brier": 0.0867,
+              "mad": 0.2366,
+              "n_saham": 105
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 105,
+                "mean_pred": 0.5829,
+                "mean_actual": 0.61
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 110,
+          "n_stocks_test": 80,
+          "prior": {
+            "p0": 0.5957,
+            "m0": 29.72,
+            "a0": 17.7,
+            "b0": 12.016
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0851,
+              "mad": 0.2291,
+              "n_saham": 80
+            },
+            "shrinkage": {
+              "brier": 0.0712,
+              "mad": 0.2138,
+              "n_saham": 80
+            },
+            "pooled_only": {
+              "brier": 0.0705,
+              "mad": 0.2178,
+              "n_saham": 80
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 39,
+                "mean_pred": 0.5706,
+                "mean_actual": 0.6957
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 41,
+                "mean_pred": 0.6245,
+                "mean_actual": 0.6522
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 101,
+          "prior": {
+            "p0": 0.5432,
+            "m0": 21.51,
+            "a0": 11.682,
+            "b0": 9.823
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.109,
+              "mad": 0.278,
+              "n_saham": 101
+            },
+            "shrinkage": {
+              "brier": 0.0959,
+              "mad": 0.2638,
+              "n_saham": 101
+            },
+            "pooled_only": {
+              "brier": 0.0882,
+              "mad": 0.2487,
+              "n_saham": 101
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 2,
+                "mean_pred": 0.3831,
+                "mean_actual": 0.6667
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 90,
+                "mean_pred": 0.5449,
+                "mean_actual": 0.6355
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 9,
+                "mean_pred": 0.6288,
+                "mean_actual": 0.8261
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 145,
+          "n_stocks_test": 119,
+          "prior": {
+            "p0": 0.5231,
+            "m0": 500.0,
+            "a0": 261.555,
+            "b0": 238.445
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0943,
+              "mad": 0.2447,
+              "n_saham": 119
+            },
+            "shrinkage": {
+              "brier": 0.0801,
+              "mad": 0.2314,
+              "n_saham": 119
+            },
+            "pooled_only": {
+              "brier": 0.0801,
+              "mad": 0.2314,
+              "n_saham": 119
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 119,
+                "mean_pred": 0.5236,
+                "mean_actual": 0.5842
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 154,
+          "n_stocks_test": 95,
+          "prior": {
+            "p0": 0.7038,
+            "m0": 3.34,
+            "a0": 2.35,
+            "b0": 0.989
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1208,
+              "mad": 0.2875,
+              "n_saham": 95
+            },
+            "shrinkage": {
+              "brier": 0.1229,
+              "mad": 0.2874,
+              "n_saham": 95
+            },
+            "pooled_only": {
+              "brier": 0.1137,
+              "mad": 0.2874,
+              "n_saham": 95
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 5,
+                "mean_pred": 0.348,
+                "mean_actual": 0.3636
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 29,
+                "mean_pred": 0.5228,
+                "mean_actual": 0.6757
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 42,
+                "mean_pred": 0.686,
+                "mean_actual": 0.5929
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 19,
+                "mean_pred": 0.8343,
+                "mean_actual": 0.625
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.1041,
+          "mad": 0.2561,
+          "n_saham": 610
+        },
+        "shrinkage": {
+          "brier": 0.0859,
+          "mad": 0.2338,
+          "n_saham": 610
+        },
+        "pooled_only": {
+          "brier": 0.0753,
+          "mad": 0.2194,
+          "n_saham": 610
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 12,
+            "mean_pred": 0.3405,
+            "mean_actual": 0.6937
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 352,
+            "mean_pred": 0.5383,
+            "mean_actual": 0.6256
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 243,
+            "mean_pred": 0.6542,
+            "mean_actual": 0.6339
+          },
+          {
+            "pred_bucket": "80-100%",
+            "n_saham": 3,
+            "mean_pred": 0.8155,
+            "mean_actual": 0.5
+          }
+        ]
+      }
+    },
+    "42": {
+      "n_stocks_train": 794,
+      "n_stocks_test": 589,
+      "total_test_events": 2040,
+      "global_prior": {
+        "p0": 0.6645,
+        "m0": 8.19,
+        "a0": 5.443,
+        "b0": 2.748
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 17,
+          "prior": {
+            "p0": 0.5793,
+            "m0": 4.29,
+            "a0": 2.487,
+            "b0": 1.806
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1329,
+              "mad": 0.2625,
+              "n_saham": 17
+            },
+            "shrinkage": {
+              "brier": 0.1022,
+              "mad": 0.2446,
+              "n_saham": 17
+            },
+            "pooled_only": {
+              "brier": 0.0655,
+              "mad": 0.1919,
+              "n_saham": 17
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 4,
+                "mean_pred": 0.3004,
+                "mean_actual": 0.6667
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 5,
+                "mean_pred": 0.5317,
+                "mean_actual": 0.6852
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 8,
+                "mean_pred": 0.702,
+                "mean_actual": 0.8333
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 38,
+          "prior": {
+            "p0": 0.6554,
+            "m0": 29.7,
+            "a0": 19.465,
+            "b0": 10.234
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1294,
+              "mad": 0.2513,
+              "n_saham": 38
+            },
+            "shrinkage": {
+              "brier": 0.0629,
+              "mad": 0.2067,
+              "n_saham": 38
+            },
+            "pooled_only": {
+              "brier": 0.0583,
+              "mad": 0.2004,
+              "n_saham": 38
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 2,
+                "mean_pred": 0.5623,
+                "mean_actual": 0.8333
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 36,
+                "mean_pred": 0.6628,
+                "mean_actual": 0.731
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 54,
+          "n_stocks_test": 49,
+          "prior": {
+            "p0": 0.6216,
+            "m0": 500.0,
+            "a0": 310.811,
+            "b0": 189.189
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0649,
+              "mad": 0.1905,
+              "n_saham": 49
+            },
+            "shrinkage": {
+              "brier": 0.0641,
+              "mad": 0.184,
+              "n_saham": 49
+            },
+            "pooled_only": {
+              "brier": 0.0644,
+              "mad": 0.1846,
+              "n_saham": 49
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 49,
+                "mean_pred": 0.6217,
+                "mean_actual": 0.665
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 111,
+          "n_stocks_test": 100,
+          "prior": {
+            "p0": 0.6852,
+            "m0": 363.75,
+            "a0": 249.234,
+            "b0": 114.513
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1052,
+              "mad": 0.2587,
+              "n_saham": 100
+            },
+            "shrinkage": {
+              "brier": 0.0692,
+              "mad": 0.2136,
+              "n_saham": 100
+            },
+            "pooled_only": {
+              "brier": 0.0691,
+              "mad": 0.2132,
+              "n_saham": 100
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 100,
+                "mean_pred": 0.6848,
+                "mean_actual": 0.7048
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 105,
+          "n_stocks_test": 76,
+          "prior": {
+            "p0": 0.6566,
+            "m0": 41.99,
+            "a0": 27.569,
+            "b0": 14.418
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0778,
+              "mad": 0.2199,
+              "n_saham": 76
+            },
+            "shrinkage": {
+              "brier": 0.0696,
+              "mad": 0.2226,
+              "n_saham": 76
+            },
+            "pooled_only": {
+              "brier": 0.0697,
+              "mad": 0.2253,
+              "n_saham": 76
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 3,
+                "mean_pred": 0.576,
+                "mean_actual": 0.9
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 73,
+                "mean_pred": 0.6626,
+                "mean_actual": 0.7357
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 150,
+          "n_stocks_test": 99,
+          "prior": {
+            "p0": 0.6035,
+            "m0": 34.0,
+            "a0": 20.518,
+            "b0": 13.481
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0983,
+              "mad": 0.2565,
+              "n_saham": 99
+            },
+            "shrinkage": {
+              "brier": 0.0885,
+              "mad": 0.2528,
+              "n_saham": 99
+            },
+            "pooled_only": {
+              "brier": 0.0865,
+              "mad": 0.2468,
+              "n_saham": 99
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 40,
+                "mean_pred": 0.5658,
+                "mean_actual": 0.7286
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 59,
+                "mean_pred": 0.6226,
+                "mean_actual": 0.7047
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 142,
+          "n_stocks_test": 117,
+          "prior": {
+            "p0": 0.6009,
+            "m0": 23.06,
+            "a0": 13.856,
+            "b0": 9.202
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1027,
+              "mad": 0.277,
+              "n_saham": 117
+            },
+            "shrinkage": {
+              "brier": 0.0941,
+              "mad": 0.264,
+              "n_saham": 117
+            },
+            "pooled_only": {
+              "brier": 0.0944,
+              "mad": 0.2649,
+              "n_saham": 117
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 35,
+                "mean_pred": 0.5743,
+                "mean_actual": 0.7111
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 82,
+                "mean_pred": 0.6187,
+                "mean_actual": 0.7383
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 153,
+          "n_stocks_test": 93,
+          "prior": {
+            "p0": 0.7827,
+            "m0": 2.48,
+            "a0": 1.944,
+            "b0": 0.539
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1273,
+              "mad": 0.2872,
+              "n_saham": 93
+            },
+            "shrinkage": {
+              "brier": 0.1231,
+              "mad": 0.2843,
+              "n_saham": 93
+            },
+            "pooled_only": {
+              "brier": 0.097,
+              "mad": 0.2471,
+              "n_saham": 93
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 4,
+                "mean_pred": 0.3645,
+                "mean_actual": 1.0
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 18,
+                "mean_pred": 0.5125,
+                "mean_actual": 0.7059
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 33,
+                "mean_pred": 0.7217,
+                "mean_actual": 0.7778
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 38,
+                "mean_pred": 0.887,
+                "mean_actual": 0.7033
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.0999,
+          "mad": 0.2481,
+          "n_saham": 589
+        },
+        "shrinkage": {
+          "brier": 0.0816,
+          "mad": 0.23,
+          "n_saham": 589
+        },
+        "pooled_only": {
+          "brier": 0.0728,
+          "mad": 0.2208,
+          "n_saham": 589
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 3,
+            "mean_pred": 0.3652,
+            "mean_actual": 0.7442
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 134,
+            "mean_pred": 0.5438,
+            "mean_actual": 0.687
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 442,
+            "mean_pred": 0.693,
+            "mean_actual": 0.732
+          },
+          {
+            "pred_bucket": "80-100%",
+            "n_saham": 10,
+            "mean_pred": 0.8297,
+            "mean_actual": 0.6667
+          }
+        ]
+      }
+    },
+    "63": {
+      "n_stocks_train": 779,
+      "n_stocks_test": 442,
+      "total_test_events": 1153,
+      "global_prior": {
+        "p0": 0.7141,
+        "m0": 7.58,
+        "a0": 5.414,
+        "b0": 2.167
+      },
+      "buckets": {
+        "2.0-3.0": {
+          "n_stocks_train": 34,
+          "n_stocks_test": 14,
+          "prior": {
+            "p0": 0.5903,
+            "m0": 3.7,
+            "a0": 2.183,
+            "b0": 1.515
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1672,
+              "mad": 0.3151,
+              "n_saham": 14
+            },
+            "shrinkage": {
+              "brier": 0.1197,
+              "mad": 0.2882,
+              "n_saham": 14
+            },
+            "pooled_only": {
+              "brier": 0.0809,
+              "mad": 0.2397,
+              "n_saham": 14
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "20-40%",
+                "n_saham": 3,
+                "mean_pred": 0.2892,
+                "mean_actual": 0.7143
+              },
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 4,
+                "mean_pred": 0.5239,
+                "mean_actual": 0.4483
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 6,
+                "mean_pred": 0.7197,
+                "mean_actual": 0.9375
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 1,
+                "mean_pred": 0.8583,
+                "mean_actual": 0.5
+              }
+            ]
+          }
+        },
+        "3.0-4.0": {
+          "n_stocks_train": 45,
+          "n_stocks_test": 26,
+          "prior": {
+            "p0": 0.7313,
+            "m0": 21.45,
+            "a0": 15.687,
+            "b0": 5.764
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0888,
+              "mad": 0.1935,
+              "n_saham": 26
+            },
+            "shrinkage": {
+              "brier": 0.0872,
+              "mad": 0.194,
+              "n_saham": 26
+            },
+            "pooled_only": {
+              "brier": 0.0821,
+              "mad": 0.1894,
+              "n_saham": 26
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 24,
+                "mean_pred": 0.7275,
+                "mean_actual": 0.6456
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 2,
+                "mean_pred": 0.8043,
+                "mean_actual": 0.6
+              }
+            ]
+          }
+        },
+        "4.0-5.0": {
+          "n_stocks_train": 53,
+          "n_stocks_test": 37,
+          "prior": {
+            "p0": 0.6853,
+            "m0": 500.0,
+            "a0": 342.657,
+            "b0": 157.343
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.0926,
+              "mad": 0.2161,
+              "n_saham": 37
+            },
+            "shrinkage": {
+              "brier": 0.1002,
+              "mad": 0.225,
+              "n_saham": 37
+            },
+            "pooled_only": {
+              "brier": 0.1005,
+              "mad": 0.2256,
+              "n_saham": 37
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 37,
+                "mean_pred": 0.6853,
+                "mean_actual": 0.6381
+              }
+            ]
+          }
+        },
+        "5.0-6.5": {
+          "n_stocks_train": 110,
+          "n_stocks_test": 75,
+          "prior": {
+            "p0": 0.733,
+            "m0": 155.54,
+            "a0": 114.003,
+            "b0": 41.536
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1503,
+              "mad": 0.3289,
+              "n_saham": 75
+            },
+            "shrinkage": {
+              "brier": 0.1107,
+              "mad": 0.2835,
+              "n_saham": 75
+            },
+            "pooled_only": {
+              "brier": 0.11,
+              "mad": 0.2823,
+              "n_saham": 75
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 75,
+                "mean_pred": 0.7317,
+                "mean_actual": 0.6776
+              }
+            ]
+          }
+        },
+        "6.5-8.0": {
+          "n_stocks_train": 99,
+          "n_stocks_test": 61,
+          "prior": {
+            "p0": 0.7037,
+            "m0": 221.9,
+            "a0": 156.149,
+            "b0": 65.747
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1312,
+              "mad": 0.3055,
+              "n_saham": 61
+            },
+            "shrinkage": {
+              "brier": 0.1094,
+              "mad": 0.2807,
+              "n_saham": 61
+            },
+            "pooled_only": {
+              "brier": 0.1089,
+              "mad": 0.2813,
+              "n_saham": 61
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 61,
+                "mean_pred": 0.7051,
+                "mean_actual": 0.7118
+              }
+            ]
+          }
+        },
+        "8.0-10.0": {
+          "n_stocks_train": 145,
+          "n_stocks_test": 73,
+          "prior": {
+            "p0": 0.6728,
+            "m0": 14.53,
+            "a0": 9.774,
+            "b0": 4.753
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1643,
+              "mad": 0.3302,
+              "n_saham": 73
+            },
+            "shrinkage": {
+              "brier": 0.1342,
+              "mad": 0.314,
+              "n_saham": 73
+            },
+            "pooled_only": {
+              "brier": 0.125,
+              "mad": 0.2963,
+              "n_saham": 73
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 4,
+                "mean_pred": 0.495,
+                "mean_actual": 0.9545
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 68,
+                "mean_pred": 0.6827,
+                "mean_actual": 0.641
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 1,
+                "mean_pred": 0.8208,
+                "mean_actual": 0.6667
+              }
+            ]
+          }
+        },
+        "10.0-13.0": {
+          "n_stocks_train": 141,
+          "n_stocks_test": 93,
+          "prior": {
+            "p0": 0.643,
+            "m0": 19.01,
+            "a0": 12.227,
+            "b0": 6.788
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.1342,
+              "mad": 0.3272,
+              "n_saham": 93
+            },
+            "shrinkage": {
+              "brier": 0.1366,
+              "mad": 0.334,
+              "n_saham": 93
+            },
+            "pooled_only": {
+              "brier": 0.1374,
+              "mad": 0.3338,
+              "n_saham": 93
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 3,
+                "mean_pred": 0.5891,
+                "mean_actual": 0.25
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 90,
+                "mean_pred": 0.6517,
+                "mean_actual": 0.7121
+              }
+            ]
+          }
+        },
+        "13.0-20.0": {
+          "n_stocks_train": 152,
+          "n_stocks_test": 63,
+          "prior": {
+            "p0": 0.827,
+            "m0": 2.74,
+            "a0": 2.265,
+            "b0": 0.474
+          },
+          "eval": {
+            "baseline": {
+              "brier": 0.2062,
+              "mad": 0.3637,
+              "n_saham": 63
+            },
+            "shrinkage": {
+              "brier": 0.1837,
+              "mad": 0.3444,
+              "n_saham": 63
+            },
+            "pooled_only": {
+              "brier": 0.1715,
+              "mad": 0.3223,
+              "n_saham": 63
+            },
+            "calibration_shrinkage": [
+              {
+                "pred_bucket": "40-60%",
+                "n_saham": 10,
+                "mean_pred": 0.5066,
+                "mean_actual": 0.7308
+              },
+              {
+                "pred_bucket": "60-80%",
+                "n_saham": 16,
+                "mean_pred": 0.6858,
+                "mean_actual": 0.5758
+              },
+              {
+                "pred_bucket": "80-100%",
+                "n_saham": 37,
+                "mean_pred": 0.8834,
+                "mean_actual": 0.6567
+              }
+            ]
+          }
+        }
+      },
+      "eval_all": {
+        "baseline": {
+          "brier": 0.1417,
+          "mad": 0.3042,
+          "n_saham": 442
+        },
+        "shrinkage": {
+          "brier": 0.125,
+          "mad": 0.2898,
+          "n_saham": 442
+        },
+        "pooled_only": {
+          "brier": 0.1137,
+          "mad": 0.2806,
+          "n_saham": 442
+        },
+        "calibration_shrinkage": [
+          {
+            "pred_bucket": "20-40%",
+            "n_saham": 2,
+            "mean_pred": 0.3397,
+            "mean_actual": 0.7391
+          },
+          {
+            "pred_bucket": "40-60%",
+            "n_saham": 29,
+            "mean_pred": 0.5299,
+            "mean_actual": 0.6774
+          },
+          {
+            "pred_bucket": "60-80%",
+            "n_saham": 372,
+            "mean_pred": 0.7166,
+            "mean_actual": 0.6809
+          },
+          {
+            "pred_bucket": "80-100%",
+            "n_saham": 39,
+            "mean_pred": 0.8306,
+            "mean_actual": 0.6637
+          }
+        ]
+      }
+    }
+  },
+  "generated": "2026-08-13T06:16:31+00:00"
+}

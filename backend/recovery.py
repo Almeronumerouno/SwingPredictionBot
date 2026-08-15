@@ -34,6 +34,8 @@ from __future__ import annotations
 import math
 import os
 import json
+
+import numpy as np
 from typing import Optional
 
 import numpy as np
@@ -172,9 +174,10 @@ def p_hit_ever(mu: float, sigma: float, a: float) -> float:
 def _load_recovery_model_params() -> Optional[dict]:
     """Load parameter model logistic-drawdown hasil kalibrasi offline.
 
-    File dibuat oleh _calibrate_recovery_model.py dari universe_ohlcv.npz
-    (963 saham IDX, split temporal 70/30, target = prior high). Return None
-    kalau file tidak ada / tidak valid -> pemanggil berjalan tanpa model.
+    File dibuat oleh _phase6_p61_calibrate.py dari universe_ohlcv.npz
+    (963 saham IDX, split global kronologis + purge/embargo, P6.1; target =
+    prior high). Return None kalau file tidak ada / tidak valid -> pemanggil
+    berjalan tanpa model.
     """
     try:
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -219,6 +222,12 @@ def recovery_model_probs(dd: float,
 
     P = 1 / (1 + exp(a_h + b_h * dd_fraction)). Return None kalau parameter
     model tidak tersedia. Nilai dibulatkan 3 desimal (gaya API konsisten).
+    CI (interval 90%):
+      P6.2 (Agu 2026): bila params punya ci_cluster.<h> (cluster bootstrap
+      saham, percentile 90%, precomputed per grid dd) -> interpolasi linear.
+      Legacy: bila a_se/b_se/cov_ab tersedia, delta method pada skala logit
+      (var_logit = se_a^2 + dd^2*se_b^2 + 2*dd*cov_ab, transformasi sigmoid),
+      diskala ci_bootstrap.scale_a/scale_b (F2.3). Nilai None bila tak ada.
     """
     if params is None:
         params = _load_recovery_model_params()
@@ -230,8 +239,31 @@ def recovery_model_probs(dd: float,
         r = params.get("horizons", {}).get(str(h))
         if not r or not r.get("fitted"):
             continue
-        p = 1.0 / (1.0 + math.exp(-(r["a"] + r["b"] * dd)))
-        out.append({"horizon_days": h, "p_hit": round(p, 3)})
+        logit = r["a"] + r["b"] * dd
+        p = 1.0 / (1.0 + math.exp(-logit))
+        ci_low = ci_high = None
+        # P6.2: cluster bootstrap CI (precomputed per grid dd) — diprioritaskan
+        cc = params.get("ci_cluster", {}).get(str(h))
+        if isinstance(cc, dict) and cc.get("fitted") and cc.get("prob_ci_grid"):
+            grid = cc["prob_ci_grid"]
+            ci_low = round(float(np.interp(dd, grid, cc["prob_ci_low"])), 3)
+            ci_high = round(float(np.interp(dd, grid, cc["prob_ci_high"])), 3)
+        # Legacy: delta method + scale (params lama pra-P6)
+        elif r.get("a_se") is not None and r.get("b_se") is not None \
+                and r.get("cov_ab") is not None:
+            cb = params.get("ci_bootstrap") or {}
+            sa = cb.get("scale_a", 1.0) if isinstance(cb, dict) else 1.0
+            sb = cb.get("scale_b", 1.0) if isinstance(cb, dict) else 1.0
+            a_se = r["a_se"] * sa
+            b_se = r["b_se"] * sb
+            cov_ab = r["cov_ab"] * sa * sb
+            var_logit = a_se * a_se + (dd * dd) * b_se * b_se + 2.0 * dd * cov_ab
+            se_logit = math.sqrt(max(var_logit, 0.0))
+            z = 1.645  # 90%
+            ci_low = round(1.0 / (1.0 + math.exp(-(logit - z * se_logit))), 3)
+            ci_high = round(1.0 / (1.0 + math.exp(-(logit + z * se_logit))), 3)
+        out.append({"horizon_days": h, "p_hit": round(p, 3),
+                    "ci_low": ci_low, "ci_high": ci_high})
     return out or None
 
 
@@ -280,8 +312,75 @@ def empirical_base_rates(
             "n_events": n_events,
             "n_recovered": n_recovered,
             "rate": round(n_recovered / n_events, 3) if n_events else None,
+            "target": "previous_close",   # F2.5: eksplisitkan target event
         })
     return out
+
+
+# ---------------------------------------------------------------------------
+# Shrinkage Beta-Binomial (F2.4) - pengganti hard switch n>=5
+# ---------------------------------------------------------------------------
+
+_SHRINKAGE_BUCKETS = [(2.0, 3.0), (3.0, 4.0), (4.0, 5.0), (5.0, 6.5),
+                      (6.5, 8.0), (8.0, 10.0), (10.0, 13.0), (13.0, 20.0)]
+
+
+def _load_shrinkage_params() -> Optional[dict]:
+    """Prior Beta per (bucket drop, horizon) hasil _fase2_shrinkage.py.
+
+    Return None kalau file tidak ada / tidak valid -> pemanggil memakai
+    perilaku lama (hard switch n>=5). Struktur:
+      {"horizons": {h: {"global_prior": {"p0","m0","a0","b0"},
+                        "buckets": {"lo-hi": {"prior": {...}}}}}}
+    """
+    try:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            config.RECOVERY_SHRINKAGE_PARAMS_FILE)
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if data.get("method") != "beta_binomial_shrinkage":
+            return None
+        return data
+    except Exception:
+        return None
+
+
+def _shrinkage_bucket_index(drop_pct: float) -> int:
+    for i, (lo, hi) in enumerate(_SHRINKAGE_BUCKETS):
+        if lo <= drop_pct < hi:
+            return i
+    return 0 if drop_pct < _SHRINKAGE_BUCKETS[0][0] else len(_SHRINKAGE_BUCKETS) - 1
+
+
+def _shrunk_rate(n_recovered: int, n_events: int, drop_pct: float,
+                 horizon_days: int, params: Optional[dict]) -> Optional[float]:
+    """P(recovery) shrinkage utk saham ini: (k + a0) / (n + a0 + b0).
+
+    Prior dipilih per (bucket drop, horizon); bucket tanpa prior (kekurangan
+    sampel saat kalibrasi) memakai global_prior horizon tsb. Return None
+    kalau params tidak tersedia (caller jatuh ke perilaku lama).
+    """
+    if params is None or n_events < 1:
+        return None
+    hs = params.get("horizons", {}).get(str(horizon_days))
+    if not hs:
+        return None
+    prior = None
+    i = _shrinkage_bucket_index(drop_pct)
+    bucket = hs.get("buckets", {}).get(f"{_SHRINKAGE_BUCKETS[i][0]:.1f}-"
+                                       f"{_SHRINKAGE_BUCKETS[i][1]:.1f}")
+    if bucket and bucket.get("prior"):
+        prior = bucket["prior"]
+    else:
+        prior = hs.get("global_prior")
+    if not prior:
+        return None
+    a0 = prior.get("a0")
+    b0 = prior.get("b0")
+    if a0 is None or b0 is None:
+        return None
+    p = (n_recovered + a0) / (n_events + a0 + b0)
+    return max(0.0, min(1.0, p))
 
 
 # ---------------------------------------------------------------------------
@@ -351,24 +450,32 @@ def auto_drop_pct(sigma_daily: float, price: float) -> float:
 
 def detect_accumulation(bars: list) -> dict:
     """
-    Deteksi pola "akumulasi post-ARA": saham yang baru saja distribusi besar
-    (ARA), lalu terkumpul lagi diam-diam sebelum berpotensi naik.
+    Deteksi pola "akumulasi post-large-upmove": saham yang baru saja
+    distribusi besar (lonjakan naik tajam), lalu terkumpul lagi diam-diam
+    sebelum berpotensi naik.
+
+    Catatan terminologi (audit v2 §16): event pemicu adalah "large upmove"
+    (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) dengan threshold HEURISTIC
+    +10% — BUKAN definisi ARA resmi BEI (bertingkat 35/25/20 per tier harga
+    dan berubah sesuai peraturan). Sistem tidak membaca aturan ARA aktual,
+    jadi istilah resminya POST_LARGE_UPMOVE; nama internal "ara" dipertahankan
+    demi kompatibilitas field API/validasi historis.
 
     Logika:
-      - ARA (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) dianggap hari
-        distribusi/dump, bukan hari akumulasi - jadi hari ARA itu sendiri
+      - Event (close >= prev * (1 + ACCUM_ARA_RISE_PCT/100)) dianggap hari
+        distribusi/dump, bukan hari akumulasi - jadi hari event itu sendiri
         tidak ikut dihitung sebagai bagian window.
-      - Window akumulasi = semua hari trading sejak ARA, panjangnya dinamis
-        (bukan jendela tetap). Kalau ARA kedua muncul dalam <= ACCUM_RVOL_PERIOD
-        hari setelah ARA pertama, keduanya dianggap satu gelombang: window
-        di-anchor ke ARA pertama (supaya hari di antara dua ARA tidak
-        terbuang), tapi harga acuannya tetap ARA terbaru/puncak. Hari ARA
+      - Window akumulasi = semua hari trading sejak event, panjangnya dinamis
+        (bukan jendela tetap). Kalau event kedua muncul dalam <= ACCUM_RVOL_PERIOD
+        hari setelah event pertama, keduanya dianggap satu gelombang: window
+        di-anchor ke event pertama (supaya hari di antara dua event tidak
+        terbuang), tapi harga acuannya tetap event terbaru/puncak. Hari event
         kedua sendiri tetap ikut dihitung di window, baseline, dan k - yang
-        dikecualikan hanya ARA pertama (si anchor).
+        dikecualikan hanya event pertama (si anchor).
       - "Heavy" dihitung per hari (point-in-time): untuk bar i di window,
-        baseline-nya adalah rata-rata volume post-ARA sebelum hari i (anti
+        baseline-nya adalah rata-rata volume post-event sebelum hari i (anti
         self-reference, anti look-ahead, konsisten dengan konvensi RVOL di
-        indicators.py; fallback ke rata-rata 20 hari pre-ARA, lalu ke RVOL
+        indicators.py; fallback ke rata-rata 20 hari pre-event, lalu ke RVOL
         biasa kalau masih kosong). Hari i dianggap heavy kalau volumenya
         >= ACCUM_HEAVY_RVOL x baseline itu. Baseline ini sifatnya lagging
         (hari bervolume besar ikut menaikkan baseline berikutnya), jadi
@@ -383,9 +490,10 @@ def detect_accumulation(bars: list) -> dict:
         di atas MA (b10 51.9%) lebih kuat daripada baru saja cross ke atas
         MA dalam <=2 hari (b10 36.4%) - jadi yang dipakai adalah posisi
         harga saat ini, bukan momen crossing-nya.
-      - Syarat wajib lain: harga masih di bawah level ARA (belum recovery).
-        Kalau harga sudah di atas ARA, itu masuk fase recovery/distribusi,
-        bukan akumulasi lagi, jadi sinyalnya tidak bermakna di situasi itu.
+      - Syarat wajib lain: harga masih di bawah level event (belum recovery).
+        Kalau harga sudah di atas level event, itu masuk fase
+        recovery/distribusi, bukan akumulasi lagi, jadi sinyalnya tidak
+        bermakna di situasi itu.
 
     Hasil validasi walk-forward terbaru (_validate_accum4.py, 915 saham IDX,
     panjang data 800 hari, baseline post-ARA + gate density, anti look-ahead):
@@ -440,7 +548,7 @@ def detect_accumulation(bars: list) -> dict:
         return {
             "valid": False,
             "ready_to_fly": False,
-            "reason": "Belum pernah ada ARA (+{}%) dalam history - tidak ada acuan distribusi.".format(
+            "reason": "Belum pernah ada large upmove (+{}%) dalam history - tidak ada acuan distribusi.".format(
                 config.ACCUM_ARA_RISE_PCT),
         }
 
@@ -497,7 +605,7 @@ def detect_accumulation(bars: list) -> dict:
             "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
             "days_since_prev_ara": ara_meta["days_since_prev_ara"],
             "double_ara": ara_meta["double_ara"],
-            "reason": "Hari ini hari ARA belum ada jendela akumulasi.",
+            "reason": "Hari ini hari event; belum ada jendela akumulasi post-event.",
         }
 
     k = int(heavy[anchor_idx + 1: t + 1].sum())
@@ -524,25 +632,90 @@ def detect_accumulation(bars: list) -> dict:
     post_vol_sum = float(post_vol.sum()) if len(post_vol) > 0 else 0.0
     post_val_sum = float((post_vol * post_cls).sum()) if len(post_vol) > 0 else 0.0
 
-    # Net Distribution window post-ARA: (vol hari naik - vol hari turun)/total
+    # Net Distribution window post-event: (vol hari naik - vol hari turun)/total
     # vol, rentang [-1, +1]. Positif = buyer lebih dominan (akumulasi).
-    if len(post_vol) > 1 and post_vol_sum > 0:
-        chg = np.diff(post_cls)
-        up_v = float(post_vol[1:][chg > 0].sum())
-        dn_v = float(post_vol[1:][chg <= 0].sum())
+    # FIX fase 1 (audit v2 §13): arah dihitung EKSPLISIT untuk SEMUA hari
+    # window — hari pertama dibandingkan terhadap harga hari event (close
+    # sebelumnya), bukan di-drop oleh np.diff. Sebelumnya numerator memakai
+    # post_vol[1:] (buang hari pertama) tapi denominator post_vol_sum (semua
+    # hari) → hari pertama masuk denominator tanpa direction (alignment bug).
+    if len(post_vol) > 0 and post_vol_sum > 0:
+        dirs = np.concatenate(([post_cls[0] - close[anchor_idx]],
+                               np.diff(post_cls)))
+        up_v = float(post_vol[dirs > 0].sum())
+        dn_v = float(post_vol[dirs <= 0].sum())
         net_dist = (up_v - dn_v) / post_vol_sum
     else:
         net_dist = None
+    # Net Distribution versi definisi TODO audit (HIGH#2): proporsi heavy-day
+    # yang menutup DI ATAS open-nya.
+    #   NetDist_heavy = (#heavy-day dengan Close > Open) / (#heavy-day)
+    # Berbeda dari net_dist di atas (bobot volume, semua hari): metrik ini
+    # hanya memperhitungkan HARI VOLUME TINGGI dan arah intrabar (close vs
+    # open), bukan diff close antar hari. Rentang [0, 1]; > 0.5 = mayoritas
+    # heavy-day diserap buyer. Kalau belum ada heavy-day, None.
+    post_open = np.array(
+        [float(b.open_price) if getattr(b, "open_price", 0.0) else float(b.close)
+         for b in bars[anchor_idx + 1: t + 1]], dtype=float)
+    heavy_w = heavy[anchor_idx + 1: t + 1]
+    n_heavy = int(heavy_w.sum())
+    if n_heavy > 0:
+        up_heavy = int((heavy_w & (post_cls > post_open)).sum())
+        net_dist_heavy = round(up_heavy / n_heavy, 4)
+    else:
+        net_dist_heavy = None
     # Gap harga vs SMA20 (net distance dari garis MA, dalam %)
     sma_gap_pct = (price - ma_price) / ma_price * 100.0 if ma_price else None
+
+    # AccDensity — definisi TODO audit (HIGH#2/rombak): kepadatan akumulasi
+    # yang DIBOBOTI arah heavy-day:
+    #   AccDensity = (#heavy-days * NetDist) / N  = k * net_dist_heavy / window
+    # Rentang [0, 1]. > 0.3 berarti heavy-day banyak DAN dominan diserap buyer.
+    acc_density = None
+    if n_heavy > 0 and net_dist_heavy is not None and window > 0:
+        acc_density = round(k * net_dist_heavy / window, 4)
+
+    # Penalti "kesegaran" post-ARA (MED#5 + riset decay, Agu 2026):
+    #   w(d) = exp(-d/tau), cutoff keras di d >= ACCUM_DECAY_CUTOFF_DAYS.
+    # Data IDX: efek negatif ARA hanya di d+1, netral sejak d>=2; literatur
+    # reversal IDX half-life 1-2 hari. Dipakai utk RANKING (strength), bukan gate.
+    days_since_ara = window
+    if days_since_ara < config.ACCUM_DECAY_CUTOFF_DAYS:
+        post_ara_decay = round(math.exp(-days_since_ara / config.ACCUM_DECAY_TAU), 4)
+    else:
+        post_ara_decay = 0.0
+
+    # Gate likuiditas (rombak TODO): ADV 20 hari point-in-time (hari ARA di-
+    # buang — volume ARA = antrean beli, bukan likuiditas keluar). Dasar:
+    # tier margin BEI (Rp250jt + 500rb lbr) x4 + partisipasi 1-5% utk
+    # posisi swing 10-50jt (Kissell & Glantz; riset Agu 2026).
+    w0 = max(0, t - config.ACCUM_ADV_WINDOW + 1)
+    seg_v = volume[w0:t + 1]
+    seg_c = close[w0:t + 1]
+    if len(seg_v) >= config.ACCUM_ADV_MIN_BARS:
+        seg_ret = np.zeros(len(seg_v))
+        seg_ret[1:] = seg_c[1:] / seg_c[:-1] - 1.0
+        keep = seg_ret < (config.ACCUM_ARA_RISE_PCT / 100.0)
+        av = seg_v[keep]
+        ac = seg_c[keep]
+        adv_vol = float(av.mean()) if len(av) else 0.0
+        adv_val = float((av * ac).mean()) if len(av) else 0.0
+    else:
+        adv_vol = 0.0
+        adv_val = 0.0
+    liq_ok = (adv_vol >= config.ACCUM_MIN_ADV_VOL
+              and adv_val >= config.ACCUM_MIN_ADV_VAL)
+    liq_prima = (adv_vol >= config.ACCUM_PRIMA_ADV_VOL
+                 and adv_val >= config.ACCUM_PRIMA_ADV_VAL)
+    ready = ready and liq_ok
 
     if not ready:
         parts = []
         if not below:
             if t == ara_idx:
-                parts.append("hari ini = ARA terbaru (belum ada bar setelah puncak)")
+                parts.append("hari ini = event terbaru (belum ada bar setelah puncak)")
             else:
-                parts.append("harga SUDAH di atas level ARA (recovery/distribusi, bukan akumulasi)")
+                parts.append("harga SUDAH di atas level event (recovery/distribusi, bukan akumulasi)")
         if not k_ok:
             parts.append(f"baru {k} dari {window} hari volume >= {config.ACCUM_HEAVY_RVOL}x "
                          f"baseline (butuh min {config.ACCUM_MIN_HEAVY_DAYS} hari)")
@@ -551,6 +724,10 @@ def detect_accumulation(bars: list) -> dict:
                          f"(wajib >= {config.ACCUM_DENSITY_PCT}%)")
         if not above_ma:
             parts.append(f"harga BELUM di atas SMA{config.ACCUM_MA20_DAYS}")
+        if not liq_ok:
+            parts.append(f"likuiditas rendah: ADV20 {adv_vol:,.0f} lbr / "
+                         f"Rp{adv_val:,.0f} (floor {config.ACCUM_MIN_ADV_VOL:,.0f} lbr "
+                         f"& Rp{config.ACCUM_MIN_ADV_VAL:,.0f})")
         return {
             "valid": False,
             "ready_to_fly": False,
@@ -567,13 +744,27 @@ def detect_accumulation(bars: list) -> dict:
             "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
             "days_since_prev_ara": ara_meta["days_since_prev_ara"],
             "double_ara": double_ara,
+            # P6.7 (C14): istilah user-facing benar — "ARA" resmi BEI berbeda;
+            # event ini = large upmove (threshold heuristic). Alias dipertahankan
+            # utk backward compat dgn frontend lama.
+            "large_upmove_date": str(bars[ara_idx].date)[:10],
+            "large_upmove_ref_price": round(float(close[ref_ara_idx]), 2),
+            "prev_large_upmove_date": ara_meta["prev_ara_date"],
+            "prev_large_upmove_ref_price": ara_meta["prev_ara_ref_price"],
         "sma20": round(ma_price, 2) if ma_price is not None else None,
         "state_ma20": "above" if above_ma else "below",
         "distance_pct": round(dist_ara, 2),
         "net_dist": round(net_dist, 4) if net_dist is not None else None,
+        "net_dist_heavy": net_dist_heavy,
         "sma_gap_pct": round(sma_gap_pct, 2) if sma_gap_pct is not None else None,
+        "acc_density": acc_density,
+        "post_ara_decay": post_ara_decay,
+        "adv_vol_20": round(adv_vol, 0),
+        "adv_val_20": round(adv_val, 0),
+        "liquidity_ok": liq_ok,
+        "liquidity_prima": liq_prima,
         "gates": {"below": below, "density": density_ok, "min_heavy": k_ok,
-                  "above_ma": above_ma},
+                  "above_ma": above_ma, "liquidity": liq_ok},
         "reason": "Belum pola akumulasi post-ARA " + "; ".join(parts) + ".",
     }
 
@@ -601,21 +792,37 @@ def detect_accumulation(bars: list) -> dict:
         "prev_ara_ref_price": ara_meta["prev_ara_ref_price"],
         "days_since_prev_ara": ara_meta["days_since_prev_ara"],
         "double_ara": double_ara,
+        # P6.7 (C14): alias user-facing (istilah benar, backward compat)
+        "large_upmove_date": str(bars[ara_idx].date)[:10],
+        "large_upmove_ref_price": round(float(close[ref_ara_idx]), 2),
+        "prev_large_upmove_date": ara_meta["prev_ara_date"],
+        "prev_large_upmove_ref_price": ara_meta["prev_ara_ref_price"],
         "sma20": round(ma_price, 2) if ma_price is not None else None,
         "state_ma20": state_ma,
         "distance_pct": round(dist_ara, 2),
         "net_dist": round(net_dist, 4) if net_dist is not None else None,
+        "net_dist_heavy": net_dist_heavy,
         "sma_gap_pct": round(sma_gap_pct, 2) if sma_gap_pct is not None else None,
-        "gates": {"below": True, "min_heavy": True, "above_ma": True, "density": density_ok},
+        "acc_density": acc_density,
+        "post_ara_decay": post_ara_decay,
+        "strength": round(
+            (density_pct / 100.0) * (net_dist_heavy if net_dist_heavy is not None else 0.5)
+            * post_ara_decay, 4),
+        "adv_vol_20": round(adv_vol, 0),
+        "adv_val_20": round(adv_val, 0),
+        "liquidity_ok": liq_ok,
+        "liquidity_prima": liq_prima,
+        "gates": {"below": True, "min_heavy": True, "above_ma": True,
+                  "density": density_ok, "liquidity": liq_ok},
         "note": (
-            f"{k} dari {window} hari sejak ARA ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
+            f"{k} dari {window} hari sejak large upmove ({config.ACCUM_ARA_RISE_PCT:.0f}% harian "
             f"= {bars[ara_idx].date}) volume di atas {config.ACCUM_HEAVY_RVOL}x baseline "
-            f"post-ARA (kepadatan {density_pct:.1f}% >= {config.ACCUM_DENSITY_PCT:.0f}%) sambil "
-            f"harga masih DI BAWAH level ARA ({dist_ara:+.1f}%) dan di atas "
-            f"SMA{config.ACCUM_MA20_DAYS} = pola akumulasi post-ARA "
+            f"post-event (kepadatan {density_pct:.1f}% >= {config.ACCUM_DENSITY_PCT:.0f}%) sambil "
+            f"harga masih DI BAWAH level event ({dist_ara:+.1f}%) dan di atas "
+            f"SMA{config.ACCUM_MA20_DAYS} = pola akumulasi post-large-upmove "
             f"(validasi walk-forward 915 saham: b10 {18.4:.1f}% vs kontrol {5.4:.1f}%, edge ~3.3x)."
         ),
-        "warning": "Akumulasi post-ARA (harga belum recovery ke level ARA) + konfirmasi SMA20 "
+        "warning": "Akumulasi post-large-upmove (harga belum recovery ke level event) + konfirmasi SMA20 "
                    "probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
     }
 
@@ -741,14 +948,22 @@ def build_recovery_analysis(
             (e for e in base["empirical"] if e["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
             None,
         )
-        # Base rate empiris per-saham lebih representatif kalau sampelnya
-        # cukup; kalau tidak, fallback ke model empiris global (logistic
-        # drawdown, target prior peak). GBM dihapus dari jalur sinyal karena
-        # menyesatkan (over-optimis pada drift tinggi).
-        if emp_signal and emp_signal["n_events"] >= 5 and emp_signal["rate"] is not None:
-            p_signal = emp_signal["rate"]
-            basis = f"empiris {emp_signal['n_events']} event historis"
-        else:
+        # F2.4: shrinkage Beta-Binomial (prior per bucket drop antar-saham)
+        # menggantikan hard switch n>=5. Saham dengan >=1 event historis:
+        # p = (k + a0)/(n + a0 + b0) — kontinu dlm n, tertarik ke pooled
+        # antar-saham utk n kecil. Tanpa event (n=0) -> fallback model
+        # empiris global (target prior peak). GBM dihapus dari jalur sinyal
+        # karena menyesatkan (over-optimis pada drift tinggi).
+        shr_params = _load_shrinkage_params()
+        if emp_signal and emp_signal["n_events"] >= 1:
+            p_shrunk = _shrunk_rate(emp_signal["n_recovered"],
+                                    emp_signal["n_events"], drop_pct,
+                                    config.RECOVERY_SIGNAL_HORIZON_DAYS,
+                                    shr_params)
+            if p_shrunk is not None:
+                p_signal = p_shrunk
+                basis = f"empiris shrinkage ({emp_signal['n_events']} event + prior beta-binomial)"
+        if p_signal is None:
             p_model = next(
                 (p["p_hit"] for p in (probs or [])
                  if p["horizon_days"] == config.RECOVERY_SIGNAL_HORIZON_DAYS),
@@ -757,6 +972,11 @@ def build_recovery_analysis(
             if p_model is not None:
                 p_signal = p_model
                 basis = "model empiris global (logistic drawdown)"
+        # F2.5: target sinyal eksplisit — shrinkage/empiris -> previous close,
+        # model global -> prior high (dua target berbeda, jangan disamakan).
+        base["signal_target"] = ("previous_close"
+                                 if not basis.startswith("model")
+                                 else "prior_high")
         signal, reason = _build_signal(in_setup, distance_pct, drop_pct, p_signal, basis,
                                        p_min=(config.RECOVERY_MODEL_P_MIN if basis.startswith("model")
                                               else config.RECOVERY_SIGNAL_P_MIN))

@@ -95,7 +95,19 @@ SHORT_SELLING_ENFORCE = True
 SHORT_SELLING_DEFAULT_ELIGIBLE = False
 
 # ---- Scoring ----
-SCORE_WEIGHTS = {"trend": 0.25, "momentum": 0.25, "volume": 0.25, "price_action": 0.25}
+# NOTE: bobot komponen TIDAK di sini - single source of truth = regime.py
+# (RegimeProfile.weights, identik 0.15/0.15/0.25/0.45 utk semua regime saat ini).
+# Hasil kalibrasi bobot berbasis data (_calibrate_scoring.py, 150 saham IDX,
+# split temporal, AUC-ROC utk forward return 1d & 5d, Agu 2026):
+#   - Bobot heuristik sekarang: AUC test ~0.48-0.50 = tidak lebih baik dari
+#     koin utk memprediksi arah return 1-5 hari (fitur yang dipakai hampir
+#     tidak informatif sebagai leading signal jangka pendek).
+#   - Logistic fit: AUC test 0.509 (h=5) tapi 0.487 (h=1) - TIDAK stabil
+#     lintas horizon. Koefisien momentum konsisten NEGATIF (rsi/mfi tinggi
+#     terkait return lebih buruk), volume & price_action mendekati nol.
+#   - KEPUTUSAN: bobot produksi DIPERTAHANKAN (delta kecil, tidak robust).
+#     Riset fitur baru lebih bernilai daripada re-weight komponen lama;
+#     target 150-300 trade resolved utk melatih Outcome Score (lihat PLAN).
 ADX_GATE_CEILING = 20
 RVOL_WINDOW = 10
 RVOL_BREAKOUT_CONFIRM = 1.5
@@ -168,38 +180,153 @@ RECOVERY_VS_LABELS = {1: "1D", 5: "1W", 21: "1M", 63: "3M"}
 # P(hit prior high / "par") = 1/(1 + exp(a_t + b_t*dd_fraction)),
 # dd_fraction = 1 - harga/prior_peak, prior_peak = max(close) trailing
 # RECOVERY_PEAK_LOOKBACK_DAYS hari trading. Parameter a_t, b_t per horizon
-# dikalibrasi OFFLINE dari universe_ohlcv.npz (963 saham IDX, split temporal
-# 70/30, _calibrate_recovery_model.py) dan disimpan di RECOVERY_MODEL_PARAMS_FILE.
+# dikalibrasi OFFLINE dari universe_ohlcv.npz (963 saham IDX) dan disimpan
+# di RECOVERY_MODEL_PARAMS_FILE.
+#  - P6.1 (Agu 2026): split GLOBAL KRONOLOGIS (cutoff 70% tanggal) + purge
+#    label-overlap + embargo (bukan split posisi bar lama 70/30 yang bocor;
+#    _phase6_p61_calibrate.py). CI = cluster bootstrap saham (P6.2).
 #  - Basis harga mentah (konsisten jalur produksi).
-#  - AUC test ~0.83 (h=21), kalibrasi OOS deviasi <= 0.03 untuk dd >= 5%.
-#  - Sinyal fallback model dipakai kalau base rate empiris per-saham < 5 event,
-#    dengan threshold RECOVERY_MODEL_P_MIN (target beda = prior peak, jadi
-#    threshold beda dari RECOVERY_SIGNAL_P_MIN yang targetnya previous close).
+#  - KETERBATASAN DATA (VALID#1): dataset ~3.5 tahun (2023-2026, 900 bar per
+#    saham) dari Yahoo = saham yang MASIH AKTIF (survivorship bias; saham
+#    delisted tidak masuk, sehingga P(recover) bisa overestimate). Estimasi
+#    delisting IDX ~3-5% per tahun — dampak kecil tapi jangan diabaikan saat
+#    menerjemahkan probabilitas ke keputusan. Perlu data >10 tahun + saham
+#    delisted untuk menghilangkan bias ini sepenuhnya.
+#  - P6.5 (Agu 2026): backtest & kalibrasi = "survivorship-limited"
+#    (lihat data/phase6_survivorship.json).
 RECOVERY_PEAK_LOOKBACK_DAYS = 252     # prior high = max(close) trailing N hari trading
 RECOVERY_MODEL_P_MIN = 0.5            # sinyal fallback model: P(hit prior peak <= 21d) >= 50%
 RECOVERY_MODEL_DD_CLAMP = 0.85        # clamp dd_fraction ke [0, 0.85]
 RECOVERY_MODEL_PARAMS_FILE = "data/recovery_model_params.json"
 
+# F2.4 (Agu 2026): shrinkage Beta-Binomial pengganti hard switch n>=5.
+# Prior per (bucket drop, horizon) diestimasi offline dari universe_ohlcv.npz
+# (_fase2_shrinkage.py) -> data/recovery_shrinkage_params.json.
+# p_shrunk = (k + a0)/(n + a0 + b0); kalau file tidak ada, perilaku lama
+# (hard switch n>=5) dipertahankan sebagai fallback.
+RECOVERY_SHRINKAGE_PARAMS_FILE = "data/recovery_shrinkage_params.json"
+
+# F3.2 (Agu 2026): kebijakan availability-date fundamental.
+# PERHATIAN: ini ASUMSI KONSERVATIF, BUKAN fakta market.
+# `period_end + lag` BUKAN tanggal publikasi yang teramati. Setiap nilai yang
+# memakai jalur ini WAJIB ditandai availability_source="conservative_lag" dan
+# availability_is_observed=false. Jalur observed (earnings_dates) selalu didahulukan.
+#
+# Lag per bulan period_end mengikuti batas pelaporan OJK/IDX + buffer:
+#   - Q1 (Mar): batas akhir Mei  (~61 hari)  -> 90
+#   - Q2 (Jun): batas akhir Juli (~31 hari)  -> 60
+#   - Q3 (Sep): batas akhir Nov  (~62 hari)  -> 90
+#   - Q4 (Des): batas akhir Apr  (~120 hari) -> 150
+# Buffer sengaja longgar: salah arah yang aman adalah LEBIH TUA (tidak bocor),
+# bukan lebih baru (look-ahead). M1/M2 (observed-only vs observed+assumed) di F3.6
+# akan membandingkan kedua jalur.
+FUNDAMENTAL_LAG_DAYS_BY_MONTH = {3: 90, 6: 60, 9: 90, 12: 150}
+FUNDAMENTAL_LAG_DEFAULT_DAYS = 150       # fallback jika bulan period_end di luar 1-12
+
+# F3.2: aturan accepted/rejected earnings_dates (sanity check sebelum dipakai
+# sebagai availability_source="observed"):
+#   - minimal 1 baris earnings_dates
+#   - available_at harus SETELAH period_end (laporan tidak mungkin diumumkan
+#     sebelum periode berakhir) — menolak earningsTimestampEnd yang tidak sinkron
+#   - available_at harus <= hari ini + toleransi (jangan jadwalkan masa depan)
+#   - lag (available_at - period_end) harus >= 1 hari (bukan tanggal yang sama)
+FUNDAMENTAL_EARNINGS_MIN_ROWS = 1
+FUNDAMENTAL_AVAILABLE_FUTURE_TOLERANCE_DAYS = 2
+
+# F3.4 (Agu 2026): threshold risk flags fundamental — **HEURISTIC, bukan
+# research-backed, BUKAN hasil tuning backtest**. Fungsinya hanya risk GUARD,
+# bukan predictive threshold. Dilarang tuning dengan backtest (data-snooping,
+# masalah yang sama seperti Fase 2). Threshold baru bisa diuji OOS HANYA bila
+# suatu hari historical PIT fundamental tersedia (F3.6).
+#
+# HIGH_LEVERAGE: DER > hard extreme. F3.1 menemukan DAYA DER=209.7 (kebutuhan
+# extreme guard), TAPI DER=2/3 BUKAN universal danger (industri/bank berbeda) —
+# jadi guard sengaja ekstrem. BBCA (bank) debtToEquity=None di Yahoo -> unknown,
+# bukan flag.
+FUNDAMENTAL_FLAG_DER_HARD_EXTREME = 150.0
+# EXTREME_VALUATION: PER/PBV > threshold SANGAT ekstrem (valuation tidak
+# comparable lintas sektor; ekstrem bisa = overvaluation ATAU growth pricing
+# ATAU earnings/book sementara terdistorsi). Bukan penentu fair value.
+# F3.1: ROCK PER=106, BLTA PBV=11333, BBRM PBV=19167.
+FUNDAMENTAL_FLAG_PER_EXTREME = 100.0
+FUNDAMENTAL_FLAG_PBV_EXTREME = 20.0
+# Coverage (data-quality, bukan probability): observed=1.0, assumed=0.5,
+# unknown=0.0 atas REPORT_FIELDS (5 field).
+#   ratio < COVERAGE_UNKNOWN  -> UNKNOWN (data tidak cukup utk klasifikasi apa pun)
+#   ratio < COVERAGE_LOW      -> flag LOW_COVERAGE + data_quality LOW
+#   ratio >= COVERAGE_HEALTHY -> memenuhi syarat HEALTHY (bila tanpa material flag)
+FUNDAMENTAL_COVERAGE_UNKNOWN = 0.25
+FUNDAMENTAL_COVERAGE_LOW = 0.40
+FUNDAMENTAL_COVERAGE_HEALTHY = 0.80
+
 # Accumulation ("siap terbang": ARA = puncak distribusi/dump, lalu volume besar
 # sambil harga masih stagnant + konfirmasi SMA20).
-# PERUBAHAN: baseline volume = mean SELURUH hari post-ARA sebelum hari berjalan
-# (jendela akumulasi itu sendiri, tanpa hari ARA & tanpa hari ini — anti-self-
-# referencing), bukan 20 hari pre-ARA. Sinyal = minimal
-# ACCUM_MIN_HEAVY_DAYS hari heavy; ACCUM_DENSITY_PCT hanya info (bukan gate).
+# Baseline volume = mean SELURUH hari post-ARA sebelum hari berjalan (jendela
+# akumulasi itu sendiri, tanpa hari ARA & tanpa hari ini — anti-self-referencing,
+# anti-look-ahead), bukan 20 hari pre-ARA. ACCUM_DENSITY_PCT = GATE WAJIB
+# (tanpa gate density, edge hilang total — lihat validasi _validate_accum4.py).
 # ACCUM_HEAVY_RVOL = knob sensitivitas (2.0x; turunkan ~1.5-1.8x bila lonjakan
 # banyak yang kelewat).
-# Validasi HISTORIS (baseline pre-ARA + density>=40%, _validate_accum3.py,
-# 963 saham IDX, 2026, sub-arm yang masih di bawah ARA):
-#   pola: rec5=48.7% b5=26.8% b10=16.8% up1=34.0% (n=2958)
-#   kontrol: rec5=18.4% b5=9.6% b10=5.9% up1=26.5% (n=228459)
-#   => edge ~3x pada boom +10%/5d. Angka ini untuk logika LAMA; baseline
-#   post-ARA perlu re-validasi (menunggu logika final).
-ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)
+# Validasi FINAL (_validate_accum4.py, 915 saham IDX, 800 hari, anti look-ahead,
+# baseline post-ARA + gate density): density >= 30% → b10 = 18.4% (n=8092) vs
+# kontrol (di bawah ARA tanpa sinyal) 5.4% (n=217521) → edge ~3.4x, p < 1e-16;
+# density >= 40% → b10 18.6%; TANPA gate density → b10 8.7% (= kontrol, p~1).
+# Versi lama (baseline pre-ARA, density>=40%): b10 16.8% vs 5.9% (n=2958).
+## ---- Ready To Fly: event pemicu akumulasi ----
+
+# Event pemicu: "large upmove" (close >= prev * (1 + pct/100)) pada harga RIIL
+# (raw_close). Threshold +10% ini HEURISTIC — BUKAN definisi ARA resmi BEI
+# (yang bertingkat 35/25/20 per tier harga dan berubah sesuai peraturan, mis.
+# SK BEI Apr 2025 menyeragamkan ARB 15%). Karena sistem tidak membaca aturan
+# ARA aktual per harga, event ini disebut POST_LARGE_UPMOVE; istilah internal
+# "ara" (nama variabel/field API) dipertahankan demi kompatibilitas (audit v2 §16).
+ACCUM_ARA_RISE_PCT = 10.0       # ambang large upmove: close >= prev * (1 + pct/100)
 ACCUM_RVOL_PERIOD = 20          # jendela fallback pre-ARA & ambang double-ARA; periode display RVOL
 ACCUM_DENSITY_PCT = 30.0        # GATE kepadatan hari heavy dlm jendela post-ARA (%) — WAJIB (validasi: 30-50%
                                 #   punya edge sama ~+13pp b10; 30% = sinyal paling banyak utk edge yg sama)
 ACCUM_MIN_HEAVY_DAYS = 2        # minimal jumlah hari heavy di jendela
+ACCUM_HEAVY_RVOL = 2.0          # ambang volume "heavy" = x lipat baseline post-ARA (knob sensitivitas)
 ACCUM_MA20_DAYS = 20            # konfirmasi: close harus >= SMA(N) (di atas, bukan fresh cross)
+
+# Gate likuiditas (rombak TODO, riset Agu 2026): ADV 20 hari point-in-time,
+# hari ARA di-buang (volume ARA = antrean beli, bukan likuiditas keluar).
+# Uji base rate B10 (universe 963, 12-Agu-2026): prima 0.3176 (n=825) vs
+# floor-BEI 0.3040 (n=375) vs terfilter 0.3063 (n=493) -> z<0.6 semua, jadi
+# likuiditas TIDAK prediktif; gate = floor eksekusi, bukan filter kualitas.
+#   - gate wajib: tier (b) margin BEI (Rp250jt + 500rb lbr/hari) - floor
+#     operasional: dapat dieksekusi tanpa impact harga utk swing 10-50jt.
+#   - "prima" (1jt lbr + Rp1M/hari) hanya jadi flag display, BUKAN gate
+#     (memfilter 50% sinyal tanpa manfaat prediktif).
+ACCUM_ADV_WINDOW = 20           # jendela ADV (hari trading)
+ACCUM_ADV_MIN_BARS = 5          # minimal bar valid utk menghitung ADV
+ACCUM_MIN_ADV_VOL = 500_000     # floor: min rata-rata volume harian (lembar)
+ACCUM_MIN_ADV_VAL = 250_000_000  # floor: min rata-rata nilai harian (Rp)
+ACCUM_PRIMA_ADV_VOL = 1_000_000     # flag display "likuiditas prima" (lembar)
+ACCUM_PRIMA_ADV_VAL = 1_000_000_000  # flag display "likuiditas prima" (Rp)
+
+# Penalti kesegaran post-ARA (MED#5 + riset decay): w(d) = exp(-d/tau),
+# cutoff keras d >= ACCUM_DECAY_CUTOFF_DAYS. Dipakai utk RANKING strength,
+# bukan gate. Dasar: efek negatif ARA hanya di d+1 (netral sejak d>=2);
+# literatur reversal IDX half-life 1-2 hari (tau ~2.0).
+ACCUM_DECAY_TAU = 2.0
+ACCUM_DECAY_CUTOFF_DAYS = 5
+
+# DEFINISI FORMULA (MED#7 — referensi tunggal, konsisten antar modul):
+#   - dd_fraction = 1 - close/prior_peak, prior_peak = max(close) trailing
+#     RECOVERY_PEAK_LOOKBACK_DAYS, clamp [0, RECOVERY_MODEL_DD_CLAMP].
+#     Target recovery = "menyentuh prior peak dalam h hari trading".
+#   - net_dist (volume-weighted, recovery.py) = (sum_vol_up - sum_vol_dn) /
+#     total_vol seluruh bar post-ARA, range [-1, 1].
+#   - net_dist_heavy (definisi TODO audit) = (#heavy-day dgn Close > Open) /
+#     (#heavy-day), range [0, 1]. Heavy = volume >= ACCUM_HEAVY_RVOL x
+#     baseline post-ARA point-in-time. Dua-duanya dikirim API (komplementer).
+#   - sma_gap_pct (RTF) = (close - SMA20)/SMA20 kontinu; SMA20 = simple mean
+#     rolling 20 bar point-in-time (bukan exponential).
+#   - momentum (audit) = close[i]/close[i-N] - 1.
+# Hasil verifikasi data IDX 2026 (_validate_squeeze/_validate_post_ara/
+# _baseline_compare): squeeze volatilitas BUKAN leading signal (OR<1);
+# efek buruk post-ARA hanya di d+1 lalu netral d>=5; momentum murni tetap
+# baseline terkuat; deep-drawdown tanpa model hampir tanpa edge.
 
 # Auto-drop: threshold dihitung dari volatilitas saham biar setup bermakna per saham
 RECOVERY_AUTO_SIGMA_MULT = 2.5     # threshold auto = mult x sigma_daily

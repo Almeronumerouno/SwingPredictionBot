@@ -1,1 +1,0 @@
-[(175, 'ACCUM_ARA_RISE_PCT = 10.0       # hari ARA: close >= prev * (1 + pct/100)')]

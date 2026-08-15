@@ -15,6 +15,8 @@ import json
 
 import numpy as np
 
+from sklearn.metrics import roc_auc_score
+
 import config as CFG
 from backtest import BacktestConfig, run_backtest
 
@@ -103,6 +105,10 @@ class WFResult:
     oos_max_dd: float
     train_sharpe: float = 0.0      # metrik train dari pemenang (transparansi)
     train_trades: int = 0
+    # metrik evaluasi KLASIFIKASI (MED#2): seberapa baik entry_score
+    # membedakan trade menang vs kalah di OOS. None kalau sampel < 2 kelas.
+    oos_precision: float | None = None   # = win rate (@ threshold default)
+    oos_auc_win: float | None = None     # AUC-ROC(entry_score, return_pct>0)
 
 
 def run_walk_forward(
@@ -110,7 +116,14 @@ def run_walk_forward(
     capital: float = 10_000_000,
     candidates: list[dict] | None = None,
     length: int = 365,
-) -> list[WFResult]:
+    bars: list | None = None,
+    train_days: int | None = None,
+    test_days: int | None = None,
+    purge_days: int | None = None,
+    embargo_days: int | None = None,
+    min_trades: int | None = None,
+    return_meta: bool = False,
+) -> list[WFResult] | tuple[list[WFResult], dict]:
     """
     Run walk-forward validation untuk satu kode saham.
 
@@ -122,20 +135,44 @@ def run_walk_forward(
        3. HANYA pemenang yang di-backtest di data TEST (OOS)
       hasil OOS tiap window dikumpulkan -> gabungan equity curve OOS.
 
+    P6.6 (Agu 2026): transparansi skip window (audit C8). Bila return_meta=True,
+    return (results, meta) dengan meta = {
+      windows_total, windows_evaluated, windows_skipped,
+      skip_reasons: {no_train_fit, under_min_trades, oos_error},
+      skip_log: [{window_id, reason, n_trials}] }
+
+    bars: bar lokal (data_source.local_dataset.load_local_bars) — bila
+          diberikan, fetch Yahoo di-skip. Saat bars dipakai, beri
+          train_days/test_days lebih panjang (mis. 252/63) krn sinyal swing
+          jarang (~3 trade per 63 hari) — window pendek meleset di bawah
+          min_trades sehingga semua window ter-skip.
     Default length=365 agar cukup untuk beberapa window.
     """
     if candidates is None:
         candidates = DEFAULT_CANDIDATES
 
-    from data_source.yahoo_client import fetch_trading_info
-    bars = fetch_trading_info(code, length=length)
+    if bars is None:
+        from data_source.yahoo_client import fetch_trading_info
+        bars = fetch_trading_info(code, length=length)
+    else:
+        # length hanya dipakai fetch; saat bars lokal, samakan dgn data
+        length = len(bars)
     if len(bars) < CFG.MIN_TRADING_DAYS:
         raise ValueError(f"Data {code} tidak cukup: {len(bars)} hari")
 
+    train_days = train_days if train_days is not None else CFG.WF_TRAIN_DAYS
+    test_days = test_days if test_days is not None else CFG.WF_TEST_DAYS
+    purge_days = purge_days if purge_days is not None else CFG.WF_PURGE_DAYS
+    embargo_days = embargo_days if embargo_days is not None else CFG.WF_EMBARGO_DAYS
+    min_trades = min_trades if min_trades is not None else CFG.WF_OPT_MIN_TRADES
+
     n_bars = len(bars)
-    windows = build_windows(n_bars)
+    windows = build_windows(n_bars, train_days, test_days, purge_days, embargo_days)
 
     results: list[WFResult] = []
+    # P6.6: transparansi skip (audit C8)
+    skip_reasons = {"no_train_fit": 0, "under_min_trades": 0, "oos_error": 0}
+    skip_log: list[dict] = []
 
     for win in windows:
         # ── 1) Optimasi di TRAIN ──
@@ -150,21 +187,28 @@ def run_walk_forward(
                     length=length,
                     sim_start_idx=win.train_start,
                     sim_end_idx=win.train_end,
+                    bars=bars,
                 )
             except Exception:
                 continue
             train_metrics.append((params, metrics))
 
         if not train_metrics:
+            skip_reasons["no_train_fit"] += 1
+            skip_log.append({"window_id": win.id, "reason": "no_train_fit",
+                             "n_trials": 0})
             continue
 
         # Filter jumlah trade minimal di train → metrik pemenang
         qualified = [
             (p, m) for p, m in train_metrics
-            if m.total_trades >= CFG.WF_OPT_MIN_TRADES
+            if m.total_trades >= min_trades
         ]
         pool = qualified if qualified else []  # kalau semuanya gugur → window skip
         if not pool:
+            skip_reasons["under_min_trades"] += 1
+            skip_log.append({"window_id": win.id, "reason": "under_min_trades",
+                             "n_trials": len(train_metrics)})
             continue
 
         best_params, best_train = max(
@@ -185,11 +229,29 @@ def run_walk_forward(
                 length=length,
                 sim_start_idx=win.test_start,
                 sim_end_idx=win.test_end,
+                bars=bars,
             )
         except Exception:
+            skip_reasons["oos_error"] += 1
+            skip_log.append({"window_id": win.id, "reason": "oos_error",
+                             "n_trials": len(train_metrics)})
             continue
 
         oos_trades = [asdict(t) for t in oos.trades]
+        # MED#2 — metrik klasifikasi: entry_score vs outcome win/loss
+        prec = None
+        auc = None
+        if oos.trades:
+            prec = round(
+                oos.winning_trades / oos.total_trades, 4
+            ) if oos.total_trades else None
+            ys = [1.0 if t.return_pct > 0 else 0.0 for t in oos.trades]
+            scores = [t.entry_score for t in oos.trades]
+            if len(set(ys)) == 2 and len(scores) >= 4:
+                try:
+                    auc = round(roc_auc_score(ys, scores), 4)
+                except ValueError:
+                    auc = None
         results.append(WFResult(
             code=code,
             window_id=win.id,
@@ -201,8 +263,20 @@ def run_walk_forward(
             oos_max_dd=oos.max_drawdown_pct,
             train_sharpe=getattr(best_train, CFG.WF_OPT_METRIC, 0.0),
             train_trades=best_train.total_trades,
+            oos_precision=prec,
+            oos_auc_win=auc,
         ))
 
+    if return_meta:
+        meta = {
+            "windows_total": len(windows),
+            "windows_evaluated": len(results),
+            "windows_skipped": len(windows) - len(results),
+            "skip_reasons": skip_reasons,
+            "skip_log": skip_log,
+            "n_trials_per_window": len(candidates),
+        }
+        return results, meta
     return results
 
 
@@ -212,21 +286,68 @@ def run_walk_forward(
 
 def main() -> None:
     import argparse
+    from data_source import local_dataset
+
     parser = argparse.ArgumentParser(description="Walk-Forward Validation")
     parser.add_argument("codes", nargs="+", help="Kode saham IDX")
     parser.add_argument("--capital", type=float, default=10_000_000)
     parser.add_argument("--json", action="store_true", help="Output JSON")
+    parser.add_argument(
+        "--local", action="store_true",
+        help="pakai dataset lokal universe_ohlcv.npz (tanpa fetch Yahoo)",
+    )
+    parser.add_argument("--npz", default=None, help="path universe_ohlcv.npz")
+    parser.add_argument(
+        "--train-days", type=int, default=None,
+        help="panjang train window (default config WF_TRAIN_DAYS; "
+             "saat --local disarankan 252 krn sinyal swing jarang)",
+    )
+    parser.add_argument(
+        "--test-days", type=int, default=None,
+        help="panjang test/OOS window (default config WF_TEST_DAYS; "
+             "saat --local disarankan 63)",
+    )
+    parser.add_argument(
+        "--min-trades", type=int, default=None,
+        help="minimal trade di train window utk kandidat (default config)",
+    )
     args = parser.parse_args()
+
+    # Saat --local, default window yang masuk akal utk ~900 bar dataset
+    train_days = args.train_days if args.train_days is not None else (
+        252 if args.local else CFG.WF_TRAIN_DAYS)
+    test_days = args.test_days if args.test_days is not None else (
+        63 if args.local else CFG.WF_TEST_DAYS)
 
     all_oos_trades = []
     all_results = []
+    # P6.6: agregasi meta skip lintas saham (audit C8)
+    meta_total = {"windows_total": 0, "windows_evaluated": 0,
+                  "windows_skipped": 0, "skip_reasons": {},
+                  "skip_log": []}
 
     for code in args.codes:
         try:
-            results = run_walk_forward(code, capital=args.capital)
+            bars = None
+            if args.local:
+                bars = local_dataset.load_local_bars(code, args.npz)
+            results, meta = run_walk_forward(
+                code,
+                capital=args.capital,
+                bars=bars,
+                train_days=train_days,
+                test_days=test_days,
+                min_trades=args.min_trades,
+                return_meta=True,
+            )
             all_results.extend(results)
             for r in results:
                 all_oos_trades.extend(r.oos_trades)
+            for k in ("windows_total", "windows_evaluated", "windows_skipped"):
+                meta_total[k] += meta[k]
+            for k, v in meta["skip_reasons"].items():
+                meta_total["skip_reasons"][k] = meta_total["skip_reasons"].get(k, 0) + v
+            meta_total["skip_log"].extend(meta["skip_log"])
         except Exception as e:
             print(f"[ERROR] {code}: {e}", file=sys.stderr)
 
@@ -248,6 +369,9 @@ def main() -> None:
         if dd > max_dd:
             max_dd = dd
 
+    # MED#2 — metrik klasifikasi agregat: precision & AUC(score→win) OOS
+    precs = [r.oos_precision for r in all_results if r.oos_precision is not None]
+    aucs = [r.oos_auc_win for r in all_results if r.oos_auc_win is not None]
     report = {
         "codes": args.codes,
         "windows": len(set(r.window_id for r in all_results)),
@@ -257,6 +381,16 @@ def main() -> None:
         "oos_total_return": round(total_ret, 2),
         "oos_sharpe": round(sharpe, 2),
         "oos_max_dd": round(max_dd, 2),
+        "oos_precision": round(float(np.mean(precs)), 4) if precs else None,
+        "oos_auc_win": round(float(np.mean(aucs)), 4) if aucs else None,
+        # P6.6: transparansi skip window lintas saham (audit C8)
+        "wf_meta": {
+            "windows_total": meta_total["windows_total"],
+            "windows_evaluated": meta_total["windows_evaluated"],
+            "windows_skipped": meta_total["windows_skipped"],
+            "skip_reasons": meta_total["skip_reasons"],
+            "n_skip_log_entries": len(meta_total["skip_log"]),
+        },
         "results": [asdict(r) for r in all_results],
     }
 
@@ -275,6 +409,13 @@ def main() -> None:
         print(f"  OOS Return:   {report['oos_total_return']}%")
         print(f"  OOS Sharpe:   {report['oos_sharpe']}")
         print(f"  OOS Max DD:   {report['oos_max_dd']}%")
+        print(f"  OOS Prec:     {report['oos_precision']}")
+        print(f"  OOS AUC(win): {report['oos_auc_win']}")
+        wm = report["wf_meta"]
+        print(f"  WF windows:   {wm['windows_evaluated']} evaluated / "
+              f"{wm['windows_total']} total ({wm['windows_skipped']} skipped)")
+        if wm["skip_reasons"]:
+            print(f"    skip: {wm['skip_reasons']}")
         print()
 
 

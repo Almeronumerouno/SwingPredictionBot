@@ -1,0 +1,4578 @@
+{
+  "generated": "2026-08-13T08:43:08.822978+00:00",
+  "policy": {
+    "lag_days_by_month": {
+      "3": 90,
+      "6": 60,
+      "9": 90,
+      "12": 150
+    },
+    "lag_default_days": 150,
+    "note": "ASUMSI konservatif, bukan fakta market; is_observed=false"
+  },
+  "summary": {
+    "seed": 42,
+    "n_sample": 50,
+    "n_codes_universe": 963,
+    "sample": [
+      "OMED",
+      "BEBS",
+      "AKRA",
+      "ROCK",
+      "DUCK",
+      "DAYA",
+      "COAL",
+      "BLTA",
+      "RIMO",
+      "BBRM",
+      "PNBS",
+      "RMKO",
+      "UNIT",
+      "MDKA",
+      "BALI",
+      "MSIE",
+      "IPAC",
+      "AMAG",
+      "ALMI",
+      "BAUT",
+      "CMPP",
+      "CSIS",
+      "LION",
+      "MTSM",
+      "ALDO",
+      "MGRO",
+      "CBPE",
+      "PURE",
+      "PART",
+      "PSKT",
+      "INTD",
+      "CNKO",
+      "JPFA",
+      "MREI",
+      "DWGL",
+      "SQMI",
+      "TRAM",
+      "ACRO",
+      "SCNP",
+      "SPMA",
+      "BPII",
+      "PSAB",
+      "GOLL",
+      "BOLA",
+      "CLPI",
+      "SDRA",
+      "GMFI",
+      "BATR",
+      "HUMI",
+      "BBKP"
+    ],
+    "elapsed_sec": 128.4,
+    "per_field": {
+      "EPS": {
+        "observed": 3,
+        "assumed": 41,
+        "unknown": 6,
+        "quote": 0
+      },
+      "Net Income": {
+        "observed": 3,
+        "assumed": 41,
+        "unknown": 6,
+        "quote": 0
+      },
+      "Revenue": {
+        "observed": 3,
+        "assumed": 41,
+        "unknown": 6,
+        "quote": 0
+      },
+      "ROE": {
+        "observed": 3,
+        "assumed": 41,
+        "unknown": 6,
+        "quote": 0
+      },
+      "Debt/Equity": {
+        "observed": 3,
+        "assumed": 41,
+        "unknown": 6,
+        "quote": 0
+      },
+      "PER": {
+        "observed": 0,
+        "assumed": 0,
+        "unknown": 0,
+        "quote": 50
+      },
+      "PBV": {
+        "observed": 0,
+        "assumed": 0,
+        "unknown": 0,
+        "quote": 50
+      },
+      "Market Cap": {
+        "observed": 0,
+        "assumed": 0,
+        "unknown": 0,
+        "quote": 50
+      }
+    },
+    "earnings_dates_accepted_codes": 3,
+    "earnings_timestamp_mismatch": {
+      "n_compared": 3,
+      "n_mismatch": 3,
+      "codes": [
+        {
+          "code": "AKRA",
+          "earnings_dates_max": "2026-07-23",
+          "earningsTimestampEnd": "2025-07-28"
+        },
+        {
+          "code": "MDKA",
+          "earnings_dates_max": "2026-09-24",
+          "earningsTimestampEnd": "2026-09-24"
+        },
+        {
+          "code": "JPFA",
+          "earnings_dates_max": "2026-08-14",
+          "earningsTimestampEnd": "2026-08-14"
+        }
+      ]
+    }
+  },
+  "tickers": [
+    {
+      "code": "OMED",
+      "ticker": "OMED.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:05.361780+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:05.361780+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:05.361780+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BEBS",
+      "ticker": "BEBS.JK",
+      "ok": true,
+      "period_end": "2024-09-30T00:00:00+00:00",
+      "period_end_date": "2024-09-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2024-09-30T00:00:00+00:00",
+          "available_at": "2024-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2024-09-30T00:00:00+00:00",
+          "available_at": "2024-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2024-09-30T00:00:00+00:00",
+          "available_at": "2024-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2024-09-30T00:00:00+00:00",
+          "available_at": "2024-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2024-09-30T00:00:00+00:00",
+          "available_at": "2024-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:08.313235+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:08.313235+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:08.313235+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "AKRA",
+      "ticker": "AKRA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": "2025-07-28T12:00:00+00:00",
+      "earnings_timestamp_end_date": "2025-07-28",
+      "earnings_dates": {
+        "n_rows": 25,
+        "rows": [
+          "2026-07-23T02:00:00-04:00",
+          "2026-04-24T01:00:00-04:00",
+          "2025-10-22T23:00:00-04:00",
+          "2025-07-27T22:00:00-04:00",
+          "2025-04-24T23:00:00-04:00",
+          "2025-03-18T14:00:00-04:00"
+        ]
+      },
+      "earnings_dates_accepted": true,
+      "earnings_dates_reason": "ok (lag=23d)",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-07-23T06:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-07-23T06:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-07-23T06:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-07-23T06:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-07-23T06:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:11.099628+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:11.099628+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:11.099628+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "ROCK",
+      "ticker": "ROCK.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:14.398533+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:14.398533+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:14.398533+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "DUCK",
+      "ticker": "DUCK.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:17.122046+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:17.122046+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:17.122046+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "DAYA",
+      "ticker": "DAYA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:20.057867+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:20.057867+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:20.057867+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "COAL",
+      "ticker": "COAL.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:22.816578+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:22.816578+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:22.816578+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BLTA",
+      "ticker": "BLTA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 10,
+        "rows": [
+          "2010-04-15T20:00:00-04:00",
+          "2008-08-13T10:00:00-04:00",
+          "2008-03-07T10:00:00-05:00",
+          "2007-11-13T15:00:00-05:00",
+          "2007-08-13T13:00:00-04:00",
+          "2007-05-14T10:00:00-04:00"
+        ]
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "available_at=2010-04-16 <= period_end=2026-06-30 (tidak sinkron)",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:25.581434+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:25.581434+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:25.581434+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "RIMO",
+      "ticker": "RIMO.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:28.466474+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:28.466474+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:28.466474+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BBRM",
+      "ticker": "BBRM.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:30.744545+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:30.744545+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:30.744545+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "PNBS",
+      "ticker": "PNBS.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:33.038809+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:33.038809+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:33.038809+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "RMKO",
+      "ticker": "RMKO.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:35.681725+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:35.681725+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:35.681725+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "UNIT",
+      "ticker": "UNIT.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:38.038365+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:38.038365+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:38.038365+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "MDKA",
+      "ticker": "MDKA.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": "2026-09-24T09:15:00+00:00",
+      "earnings_timestamp_end_date": "2026-09-24",
+      "earnings_dates": {
+        "n_rows": 7,
+        "rows": [
+          "2026-09-24T05:00:00-04:00",
+          "2026-06-28T22:00:00-04:00",
+          "2025-12-17T03:00:00-05:00",
+          "2025-09-25T06:00:00-04:00",
+          "2025-06-30T11:00:00-04:00",
+          "2025-04-07T06:00:00-04:00"
+        ]
+      },
+      "earnings_dates_accepted": true,
+      "earnings_dates_reason": "ok (lag=90d)",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29T02:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29T02:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29T02:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29T02:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29T02:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:40.434690+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:40.434690+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:40.434690+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BALI",
+      "ticker": "BALI.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:42.765572+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:42.765572+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:42.765572+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "MSIE",
+      "ticker": "MSIE.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:45.054529+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:45.054529+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:45.054529+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "IPAC",
+      "ticker": "IPAC.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:47.454807+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:47.454807+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:47.454807+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "AMAG",
+      "ticker": "AMAG.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:49.832762+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:49.832762+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:49.832762+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "ALMI",
+      "ticker": "ALMI.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:52.194082+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:52.194082+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:52.194082+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BAUT",
+      "ticker": "BAUT.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:55.094264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:55.094264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:55.094264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "CMPP",
+      "ticker": "CMPP.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:57.713797+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:57.713797+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:41:57.713797+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "CSIS",
+      "ticker": "CSIS.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:00.029728+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:00.029728+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:00.029728+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "LION",
+      "ticker": "LION.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:02.517508+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:02.517508+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:02.517508+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "MTSM",
+      "ticker": "MTSM.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:04.928211+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:04.928211+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:04.928211+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "ALDO",
+      "ticker": "ALDO.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:07.251337+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:07.251337+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:07.251337+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "MGRO",
+      "ticker": "MGRO.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:09.861431+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:09.861431+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:09.861431+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "CBPE",
+      "ticker": "CBPE.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:12.127739+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:12.127739+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:12.127739+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "PURE",
+      "ticker": "PURE.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:14.503008+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:14.503008+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:14.503008+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "PART",
+      "ticker": "PART.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:17.288932+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:17.288932+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:17.288932+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "PSKT",
+      "ticker": "PSKT.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:19.601838+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:19.601838+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:19.601838+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "INTD",
+      "ticker": "INTD.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:22.148773+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:22.148773+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:22.148773+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "CNKO",
+      "ticker": "CNKO.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:24.433043+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:24.433043+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:24.433043+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "JPFA",
+      "ticker": "JPFA.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": "2026-08-14T09:15:00+00:00",
+      "earnings_timestamp_end_date": "2026-08-14",
+      "earnings_dates": {
+        "n_rows": 9,
+        "rows": [
+          "2026-08-14T05:00:00-04:00",
+          "2014-08-28T04:00:00-04:00",
+          "2014-03-27T08:00:00-04:00",
+          "2013-11-08T04:00:00-05:00",
+          "2013-07-31T04:00:00-04:00",
+          "2013-05-31T19:00:00-04:00"
+        ]
+      },
+      "earnings_dates_accepted": true,
+      "earnings_dates_reason": "ok (lag=136d)",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-08-14T09:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-08-14T09:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-08-14T09:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-08-14T09:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-08-14T09:00:00+00:00",
+          "availability_source": "earnings_dates",
+          "availability_is_observed": true,
+          "confidence": "high",
+          "pit_safe": true
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:26.866166+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:26.866166+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:26.866166+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "MREI",
+      "ticker": "MREI.JK",
+      "ok": true,
+      "period_end": "2025-09-30T00:00:00+00:00",
+      "period_end_date": "2025-09-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2025-09-30T00:00:00+00:00",
+          "available_at": "2025-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2025-09-30T00:00:00+00:00",
+          "available_at": "2025-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2025-09-30T00:00:00+00:00",
+          "available_at": "2025-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2025-09-30T00:00:00+00:00",
+          "available_at": "2025-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2025-09-30T00:00:00+00:00",
+          "available_at": "2025-12-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:29.148264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:29.148264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:29.148264+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "DWGL",
+      "ticker": "DWGL.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:31.809926+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:31.809926+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:31.809926+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "SQMI",
+      "ticker": "SQMI.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:34.094099+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:34.094099+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:34.094099+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "TRAM",
+      "ticker": "TRAM.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": "2022-11-15T10:59:00+00:00",
+      "earnings_timestamp_end_date": "2022-11-15",
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:36.708512+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:36.708512+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:36.708512+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "ACRO",
+      "ticker": "ACRO.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:39.220192+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:39.220192+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:39.220192+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "SCNP",
+      "ticker": "SCNP.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:41.525626+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:41.525626+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:41.525626+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "SPMA",
+      "ticker": "SPMA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:43.966769+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:43.966769+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:43.966769+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BPII",
+      "ticker": "BPII.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:46.247793+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:46.247793+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:46.247793+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "PSAB",
+      "ticker": "PSAB.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:48.522312+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:48.522312+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:48.522312+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "GOLL",
+      "ticker": "GOLL.JK",
+      "ok": true,
+      "period_end": null,
+      "period_end_date": null,
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Net Income": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Revenue": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "ROE": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "Debt/Equity": {
+          "period_end": null,
+          "available_at": null,
+          "availability_source": "unknown",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:50.864938+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:50.864938+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:50.864938+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BOLA",
+      "ticker": "BOLA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:53.195812+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:53.195812+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:53.195812+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "CLPI",
+      "ticker": "CLPI.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:55.492113+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:55.492113+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:55.492113+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "SDRA",
+      "ticker": "SDRA.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:57.770219+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:57.770219+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:42:57.770219+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "GMFI",
+      "ticker": "GMFI.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": "2025-09-15T12:00:00+00:00",
+      "earnings_timestamp_end_date": "2025-09-15",
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:00.253467+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:00.253467+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:00.253467+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BATR",
+      "ticker": "BATR.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:02.921102+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:02.921102+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:02.921102+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "HUMI",
+      "ticker": "HUMI.JK",
+      "ok": true,
+      "period_end": "2026-06-30T00:00:00+00:00",
+      "period_end_date": "2026-06-30",
+      "earnings_timestamp_end": null,
+      "earnings_timestamp_end_date": null,
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Net Income": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Revenue": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "ROE": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "Debt/Equity": {
+          "period_end": "2026-06-30T00:00:00+00:00",
+          "available_at": "2026-08-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 60
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:05.293030+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:05.293030+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:05.293030+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    },
+    {
+      "code": "BBKP",
+      "ticker": "BBKP.JK",
+      "ok": true,
+      "period_end": "2026-03-31T00:00:00+00:00",
+      "period_end_date": "2026-03-31",
+      "earnings_timestamp_end": "2025-05-01T10:59:00+00:00",
+      "earnings_timestamp_end_date": "2025-05-01",
+      "earnings_dates": {
+        "n_rows": 0,
+        "rows": []
+      },
+      "earnings_dates_accepted": false,
+      "earnings_dates_reason": "no rows",
+      "fields": {
+        "EPS": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Net Income": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Revenue": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "ROE": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "Debt/Equity": {
+          "period_end": "2026-03-31T00:00:00+00:00",
+          "available_at": "2026-06-29",
+          "availability_source": "conservative_lag",
+          "availability_is_observed": false,
+          "confidence": "low",
+          "pit_safe": false,
+          "lag_days": 90
+        },
+        "PER": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:07.621875+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "PBV": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:07.621875+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        },
+        "Market Cap": {
+          "period_end": null,
+          "available_at": "2026-08-13T08:43:07.621875+00:00",
+          "availability_source": "quote",
+          "availability_is_observed": true,
+          "confidence": "low",
+          "pit_safe": false,
+          "note": "snapshot current value; no historical PIT"
+        }
+      }
+    }
+  ]
+}

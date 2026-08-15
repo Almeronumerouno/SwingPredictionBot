@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 
 import numpy as np
@@ -75,6 +75,35 @@ def _to_yahoo_ticker(code: str) -> str:
     return code + config.YAHOO_TICKER_SUFFIX
 
 
+# WIB = UTC+7 (sesi IDX 09:00-15:50 WIB; buffer settle 16:00)
+_WIB_OFFSET = timedelta(hours=7)
+_SESSION_END_HOUR_WIB = 16
+
+
+def last_completed_idxs_session(now_utc: Optional[datetime] = None) -> date:
+    """Tanggal sesi IDX terakhir yang SUDAH SELESAI (completed bar), P6.3.
+
+    Heuristik tanpa kalender libur resmi IDX (keterbatasan sumber data):
+      - sekarang >= 16:00 WIB  -> sesi HARI INI dianggap selesai
+      - sekarang <  16:00 WIB  -> sesi terakhir = hari kerja SEBELUMNYA
+      - Sabtu/Minggu           -> mundur ke Jumat (atau hari kerja sebelumnya)
+    Sesi IDX 09:00-15:50 WIB; buffer 10 menit + toleransi settle -> 16:00.
+
+    Baris dengan tanggal > hasil fungsi ini TIDAK boleh dipakai sebagai
+    bar lengkap (bar parsial hari berjalan). Caller WAJIB drop bar tersebut.
+    """
+    now = now_utc if now_utc is not None else datetime.now(timezone.utc)
+    wib = now.astimezone(timezone(timedelta(hours=7)))
+    d = wib.date()
+    if wib.hour < _SESSION_END_HOUR_WIB:
+        # sesi hari ini belum selesai -> mundur 1 hari kalender
+        d -= timedelta(days=1)
+    # mundur sampai dapat hari kerja (Senin-Jumat)
+    while d.weekday() >= 5:  # 5=Sabtu, 6=Minggu
+        d -= timedelta(days=1)
+    return d
+
+
 def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] = None) -> list[DailyBar]:
     """
     Ambil data trading harian untuk satu kode saham dari Yahoo Finance.
@@ -98,7 +127,9 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
     if target_date:
         end_d = date.fromisoformat(target_date)
     else:
-        end_d = date.today()
+        # P6.3: default = sesi IDX terakhir yang SUDAH SELESAI (bukan
+        # date.today()) — mencegah bar parsial hari berjalan terpakai.
+        end_d = last_completed_idxs_session()
         
     end = end_d + timedelta(days=1)
     start = end_d - timedelta(days=length)
@@ -138,8 +169,14 @@ def fetch_trading_info(code: str, length: int = 60, target_date: Optional[str] =
         adj_close = float(row["Adj Close"]) if "Adj Close" in row and np.isfinite(float(row["Adj Close"])) else close_raw
         if not (math.isfinite(close_raw) and math.isfinite(close) and math.isfinite(volume)):
             continue
+        bar_date = (str(row[date_col].date()) if hasattr(row[date_col], "date")
+                    else str(row[date_col]))
+        # P6.3 hard guard: buang bar dengan tanggal > end_d (partial/bar
+        # masa depan yang kadang dikembalikan Yahoo saat data delayed).
+        if bar_date > end_d.isoformat():
+            continue
         bar = DailyBar(
-            date=str(row[date_col].date()) if hasattr(row[date_col], "date") else str(row[date_col]),
+            date=bar_date,
             previous=prev_close if prev_close is not None else close,
             open_price=float(row["Open"]),
             high=float(row["High"]),

@@ -1,0 +1,581 @@
+{
+  "phase": "P5.2 Global Split + Purge/Embargo",
+  "checked_at": "2026-08-15",
+  "cutoff_date": "2026-01-23",
+  "purge_horizon_days": 21,
+  "purge_note": "label_end_h21 (bar t+21 dalam kode yg sama) <= cutoff; Phase 5 max horizon = 21 (BUKAN 63 F2 — target Phase 5 hanya b10_h10/b10_h21/up1_h21)",
+  "embargo_days": 90,
+  "oos_start": "2026-04-23",
+  "oos_inclusive": true,
+  "partition": {
+    "train_rows": 384862,
+    "purged_rows": 19215,
+    "purged_overlap_rows": 19215,
+    "purged_censored_rows": 0,
+    "embargo_rows": 50334,
+    "oos_rows": 71718
+  },
+  "train": {
+    "n_rows": 384862,
+    "n_codes": 915,
+    "date_min": "2024-02-26",
+    "date_max": "2025-12-18",
+    "n_events_h10": 118265,
+    "n_events_h21": 172376
+  },
+  "oos": {
+    "n_rows": 71718,
+    "n_codes": 923,
+    "date_min": "2026-04-23",
+    "date_max": "2026-08-13",
+    "n_events_h10": 20593,
+    "n_events_h21": 23096
+  },
+  "purged": {
+    "n_rows": 19215,
+    "n_codes": 915,
+    "date_min": "2025-12-19",
+    "date_max": "2026-01-23",
+    "n_events_h10": 7940,
+    "n_events_h21": 9602
+  },
+  "embargo": {
+    "n_rows": 50334,
+    "n_codes": 916,
+    "date_min": "2026-01-26",
+    "date_max": "2026-04-22",
+    "n_events_h10": 17927,
+    "n_events_h21": 23738
+  },
+  "n_signal_dates_train": 427,
+  "n_signal_dates_oos": 81,
+  "holdout": {
+    "status": "NOT_PRESENT_IN_SNAPSHOT",
+    "note": "Phase 4 locked holdout = genuinely unseen future data setelah methodology freeze; snapshot P5 berakhir 2026-08-13; holdout boundary BELUM direpresentasikan sbg date range eksplisit -> status jujur NOT_PRESENT_IN_SNAPSHOT, bukan SAFE",
+    "overlap_rows": 0
+  },
+  "label_availability_oos": {
+    "n_oos_h10_valid": 62488,
+    "n_oos_h21_valid": 52345,
+    "n_censored_h10": 9230,
+    "n_censored_h21": 19373,
+    "policy": "censored rows TIDAK masuk metric apa pun"
+  },
+  "per_date_oos": {
+    "n_dates": 81,
+    "n_dates_insufficient_k10": 3,
+    "n_dates_insufficient_k5": 0,
+    "n_dates_no_rtf_candidate": 0,
+    "guard": "n_eligible < K -> insufficient_k, jangan memaksa top-K",
+    "dates": {
+      "2026-04-23": {
+        "n_eligible": 542,
+        "n_m5_valid": 916,
+        "n_m10_valid": 915,
+        "n_rtf_valid": 821
+      },
+      "2026-04-24": {
+        "n_eligible": 550,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 824
+      },
+      "2026-04-27": {
+        "n_eligible": 554,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-04-28": {
+        "n_eligible": 555,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 817
+      },
+      "2026-04-29": {
+        "n_eligible": 560,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 818
+      },
+      "2026-04-30": {
+        "n_eligible": 564,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-05-04": {
+        "n_eligible": 567,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 822
+      },
+      "2026-05-05": {
+        "n_eligible": 571,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-05-06": {
+        "n_eligible": 571,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 824
+      },
+      "2026-05-07": {
+        "n_eligible": 573,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-05-08": {
+        "n_eligible": 576,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-05-11": {
+        "n_eligible": 582,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 820
+      },
+      "2026-05-12": {
+        "n_eligible": 583,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 824
+      },
+      "2026-05-13": {
+        "n_eligible": 581,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 825
+      },
+      "2026-05-14": {
+        "n_eligible": 570,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 829
+      },
+      "2026-05-15": {
+        "n_eligible": 557,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 829
+      },
+      "2026-05-18": {
+        "n_eligible": 557,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 825
+      },
+      "2026-05-19": {
+        "n_eligible": 555,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 828
+      },
+      "2026-05-20": {
+        "n_eligible": 554,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 821
+      },
+      "2026-05-21": {
+        "n_eligible": 552,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 824
+      },
+      "2026-05-22": {
+        "n_eligible": 545,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 803
+      },
+      "2026-05-25": {
+        "n_eligible": 540,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 813
+      },
+      "2026-05-26": {
+        "n_eligible": 538,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 820
+      },
+      "2026-05-27": {
+        "n_eligible": 526,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 829
+      },
+      "2026-05-28": {
+        "n_eligible": 514,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 829
+      },
+      "2026-05-29": {
+        "n_eligible": 512,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 821
+      },
+      "2026-06-02": {
+        "n_eligible": 502,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 819
+      },
+      "2026-06-03": {
+        "n_eligible": 504,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 826
+      },
+      "2026-06-04": {
+        "n_eligible": 506,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 828
+      },
+      "2026-06-05": {
+        "n_eligible": 501,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 830
+      },
+      "2026-06-08": {
+        "n_eligible": 497,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 828
+      },
+      "2026-06-09": {
+        "n_eligible": 486,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 729
+      },
+      "2026-06-10": {
+        "n_eligible": 483,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 805
+      },
+      "2026-06-11": {
+        "n_eligible": 479,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 824
+      },
+      "2026-06-12": {
+        "n_eligible": 489,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 813
+      },
+      "2026-06-15": {
+        "n_eligible": 499,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 823
+      },
+      "2026-06-17": {
+        "n_eligible": 492,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 830
+      },
+      "2026-06-18": {
+        "n_eligible": 488,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 833
+      },
+      "2026-06-19": {
+        "n_eligible": 476,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 831
+      },
+      "2026-06-22": {
+        "n_eligible": 467,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 832
+      },
+      "2026-06-23": {
+        "n_eligible": 468,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-06-24": {
+        "n_eligible": 465,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 839
+      },
+      "2026-06-25": {
+        "n_eligible": 466,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 835
+      },
+      "2026-06-26": {
+        "n_eligible": 471,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 837
+      },
+      "2026-06-29": {
+        "n_eligible": 476,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-06-30": {
+        "n_eligible": 475,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-01": {
+        "n_eligible": 477,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 834
+      },
+      "2026-07-02": {
+        "n_eligible": 467,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-03": {
+        "n_eligible": 464,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 837
+      },
+      "2026-07-06": {
+        "n_eligible": 462,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 837
+      },
+      "2026-07-07": {
+        "n_eligible": 461,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 827
+      },
+      "2026-07-08": {
+        "n_eligible": 464,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-09": {
+        "n_eligible": 460,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-10": {
+        "n_eligible": 455,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-13": {
+        "n_eligible": 458,
+        "n_m5_valid": 916,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 836
+      },
+      "2026-07-14": {
+        "n_eligible": 458,
+        "n_m5_valid": 918,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 832
+      },
+      "2026-07-15": {
+        "n_eligible": 456,
+        "n_m5_valid": 920,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 833
+      },
+      "2026-07-16": {
+        "n_eligible": 458,
+        "n_m5_valid": 921,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 828
+      },
+      "2026-07-17": {
+        "n_eligible": 464,
+        "n_m5_valid": 922,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 834
+      },
+      "2026-07-20": {
+        "n_eligible": 466,
+        "n_m5_valid": 922,
+        "n_m10_valid": 916,
+        "n_rtf_valid": 834
+      },
+      "2026-07-21": {
+        "n_eligible": 470,
+        "n_m5_valid": 922,
+        "n_m10_valid": 918,
+        "n_rtf_valid": 830
+      },
+      "2026-07-22": {
+        "n_eligible": 474,
+        "n_m5_valid": 922,
+        "n_m10_valid": 920,
+        "n_rtf_valid": 831
+      },
+      "2026-07-23": {
+        "n_eligible": 479,
+        "n_m5_valid": 922,
+        "n_m10_valid": 921,
+        "n_rtf_valid": 835
+      },
+      "2026-07-24": {
+        "n_eligible": 483,
+        "n_m5_valid": 923,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 838
+      },
+      "2026-07-27": {
+        "n_eligible": 483,
+        "n_m5_valid": 923,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 829
+      },
+      "2026-07-28": {
+        "n_eligible": 486,
+        "n_m5_valid": 923,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 835
+      },
+      "2026-07-29": {
+        "n_eligible": 491,
+        "n_m5_valid": 923,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 837
+      },
+      "2026-07-30": {
+        "n_eligible": 492,
+        "n_m5_valid": 923,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 831
+      },
+      "2026-07-31": {
+        "n_eligible": 497,
+        "n_m5_valid": 923,
+        "n_m10_valid": 923,
+        "n_rtf_valid": 822
+      },
+      "2026-08-03": {
+        "n_eligible": 501,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 830
+      },
+      "2026-08-04": {
+        "n_eligible": 504,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 833
+      },
+      "2026-08-05": {
+        "n_eligible": 507,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 835
+      },
+      "2026-08-06": {
+        "n_eligible": 511,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 837
+      },
+      "2026-08-07": {
+        "n_eligible": 516,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 836
+      },
+      "2026-08-10": {
+        "n_eligible": 521,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 836
+      },
+      "2026-08-11": {
+        "n_eligible": 524,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 840
+      },
+      "2026-08-12": {
+        "n_eligible": 527,
+        "n_m5_valid": 922,
+        "n_m10_valid": 922,
+        "n_rtf_valid": 838
+      },
+      "2026-08-13": {
+        "n_eligible": 521,
+        "n_m5_valid": 828,
+        "n_m10_valid": 828,
+        "n_rtf_valid": 760
+      },
+      "2026-06-16": {
+        "n_eligible": 5,
+        "n_m5_valid": 61,
+        "n_m10_valid": 61,
+        "n_rtf_valid": 50
+      },
+      "2026-05-01": {
+        "n_eligible": 9,
+        "n_m5_valid": 67,
+        "n_m10_valid": 67,
+        "n_rtf_valid": 55
+      },
+      "2026-06-01": {
+        "n_eligible": 6,
+        "n_m5_valid": 64,
+        "n_m10_valid": 64,
+        "n_rtf_valid": 51
+      }
+    }
+  },
+  "checks": {
+    "A_max_train_date_le_cutoff": true,
+    "B_all_train_label_end_le_cutoff": true,
+    "C_min_oos_date_ge_oos_start": true,
+    "D_partitions_disjoint": true,
+    "D_overlaps": {
+      "train_n_purged": 0,
+      "train_n_gap": 0,
+      "train_n_oos": 0,
+      "purged_n_gap": 0,
+      "purged_n_oos": 0,
+      "gap_n_oos": 0
+    },
+    "E_holdout_overlap_zero": true,
+    "F_no_duplicate_code_date": true,
+    "n_duplicate_code_date": 0,
+    "future_feature_violations": 0,
+    "future_label_violations": 0,
+    "dataset_hash_matches_protocol": true
+  },
+  "dataset_hash": "F8FC56CF91662FC2F9E6CD32204534EA574A32B2685622B0C64765CFF5EB8518",
+  "verdict": "PASS"
+}

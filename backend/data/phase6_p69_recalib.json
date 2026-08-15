@@ -1,0 +1,863 @@
+{
+  "phase": "P6.9 - re-freeze probability quality candidate (pasca-switch params P6)",
+  "params_source": "recovery_model_params.json = params P6 (hash baru, lihat holdout config)",
+  "split": {
+    "cutoff": "2025-11-24",
+    "dev_rule": "date_s + ceil(h*1.5) + 5 hari kalender <= cutoff (rule P6.1, konservatif)",
+    "val": "date_s >= cutoff (test bersih P6 - evaluation set, BUKAN holdout)",
+    "cal_window": "126 hari trading terakhir DEV (purged)"
+  },
+  "bss_ref": "frozen_base_rate_reference (phase4_holdout_config.json) - bukan prevalence VAL",
+  "case_def": {
+    "A": "slope_val~1 & intercept_val~0 -> M0 raw acceptable",
+    "B": "intercept_val != 0 -> uji M1 intercept-only",
+    "C": "recalibration jenuhkan p_min 0.68 -> jangan promote"
+  },
+  "targets": {
+    "previous_close": {
+      "1": {
+        "n_dev": 20338,
+        "n_cal": 6255,
+        "n_val": 12938,
+        "cal_window_start": "2025-05-15",
+        "p_ref_frozen": 0.2544,
+        "models": {
+          "M0_raw": {
+            "n": 12938,
+            "O_over_E": 2.0346,
+            "brier": 0.19014,
+            "bss": -0.0695,
+            "logloss": 0.59132,
+            "ece10": 0.117,
+            "mean_p": 0.11313,
+            "rate": 0.23017,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 12938,
+            "O_over_E": 0.958,
+            "brier": 0.17629,
+            "bss": 0.0084,
+            "logloss": 0.53689,
+            "ece10": 0.0249,
+            "mean_p": 0.24026,
+            "rate": 0.23017,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.9112
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 12938,
+            "O_over_E": 0.9623,
+            "brier": 0.17649,
+            "bss": 0.0073,
+            "logloss": 0.53706,
+            "ece10": 0.0249,
+            "mean_p": 0.23919,
+            "rate": 0.23017,
+            "sat68": 0.0,
+            "params": {
+              "a0": 2.0123,
+              "a1": 1.5388
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 1.2141,
+          "a1": 1.1748
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": true,
+        "recommendation": "M1 (intercept-only, c baru)"
+      },
+      "3": {
+        "n_dev": 19934,
+        "n_cal": 6226,
+        "n_val": 12880,
+        "cal_window_start": "2025-05-14",
+        "p_ref_frozen": 0.4394,
+        "models": {
+          "M0_raw": {
+            "n": 12880,
+            "O_over_E": 1.5163,
+            "brier": 0.26482,
+            "bss": -0.0814,
+            "logloss": 0.72946,
+            "ece10": 0.1456,
+            "mean_p": 0.28193,
+            "rate": 0.42748,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 12880,
+            "O_over_E": 0.9529,
+            "brier": 0.24422,
+            "bss": 0.0027,
+            "logloss": 0.6815,
+            "ece10": 0.0265,
+            "mean_p": 0.4486,
+            "rate": 0.42748,
+            "sat68": 0.00171,
+            "params": {
+              "c": 0.7382
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 12880,
+            "O_over_E": 0.9539,
+            "brier": 0.24389,
+            "bss": 0.0041,
+            "logloss": 0.68082,
+            "ece10": 0.0256,
+            "mean_p": 0.44816,
+            "rate": 0.42748,
+            "sat68": 0.0,
+            "params": {
+              "a0": 0.5669,
+              "a1": 0.8203
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 0.3183,
+          "a1": 0.6465
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": true,
+        "recommendation": "M1 (intercept-only, c baru)"
+      },
+      "5": {
+        "n_dev": 19525,
+        "n_cal": 6218,
+        "n_val": 12774,
+        "cal_window_start": "2025-05-07",
+        "p_ref_frozen": 0.5355,
+        "models": {
+          "M0_raw": {
+            "n": 12774,
+            "O_over_E": 1.402,
+            "brier": 0.27081,
+            "bss": -0.0823,
+            "logloss": 0.73624,
+            "ece10": 0.1475,
+            "mean_p": 0.36702,
+            "rate": 0.51456,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 12774,
+            "O_over_E": 0.9388,
+            "brier": 0.25013,
+            "bss": 0.0004,
+            "logloss": 0.69342,
+            "ece10": 0.0335,
+            "mean_p": 0.5481,
+            "rate": 0.51456,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.7387
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 12774,
+            "O_over_E": 0.9329,
+            "brier": 0.25034,
+            "bss": -0.0004,
+            "logloss": 0.69411,
+            "ece10": 0.037,
+            "mean_p": 0.55157,
+            "rate": 0.51456,
+            "sat68": 0.02897,
+            "params": {
+              "a0": 2.0475,
+              "a1": 3.3676
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 1.2068,
+          "a1": 2.1044
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": true,
+        "recommendation": "M1 (intercept-only, c baru)"
+      },
+      "10": {
+        "n_dev": 18685,
+        "n_cal": 6209,
+        "n_val": 12669,
+        "cal_window_start": "2025-04-29",
+        "p_ref_frozen": 0.6542,
+        "models": {
+          "M0_raw": {
+            "n": 12669,
+            "O_over_E": 1.2345,
+            "brier": 0.24651,
+            "bss": -0.0556,
+            "logloss": 0.68613,
+            "ece10": 0.1198,
+            "mean_p": 0.51076,
+            "rate": 0.63052,
+            "sat68": 0.00166
+          },
+          "M1_intercept": {
+            "n": 12669,
+            "O_over_E": 0.9498,
+            "brier": 0.2331,
+            "bss": 0.0018,
+            "logloss": 0.65928,
+            "ece10": 0.0333,
+            "mean_p": 0.66381,
+            "rate": 0.63052,
+            "sat68": 0.30523,
+            "params": {
+              "c": 0.6421
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 12669,
+            "O_over_E": 0.9499,
+            "brier": 0.2331,
+            "bss": 0.0018,
+            "logloss": 0.65927,
+            "ece10": 0.0333,
+            "mean_p": 0.66379,
+            "rate": 0.63052,
+            "sat68": 0.30515,
+            "params": {
+              "a0": 0.6421,
+              "a1": 0.9971
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 0.5041,
+          "a1": 0.7508
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": true,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "21": {
+        "n_dev": 16874,
+        "n_cal": 5910,
+        "n_val": 12323,
+        "cal_window_start": "2025-04-10",
+        "p_ref_frozen": 0.7575,
+        "models": {
+          "M0_raw": {
+            "n": 12323,
+            "O_over_E": 1.2116,
+            "brier": 0.21757,
+            "bss": -0.069,
+            "logloss": 0.62758,
+            "ece10": 0.1256,
+            "mean_p": 0.59342,
+            "rate": 0.71898,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 12323,
+            "O_over_E": 0.9535,
+            "brier": 0.20306,
+            "bss": 0.0023,
+            "logloss": 0.59658,
+            "ece10": 0.0355,
+            "mean_p": 0.75401,
+            "rate": 0.71898,
+            "sat68": 1.0,
+            "params": {
+              "c": 0.7423
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 12323,
+            "O_over_E": 0.9507,
+            "brier": 0.20315,
+            "bss": 0.0019,
+            "logloss": 0.59689,
+            "ece10": 0.0373,
+            "mean_p": 0.75626,
+            "rate": 0.71898,
+            "sat68": 1.0,
+            "params": {
+              "a0": 0.3437,
+              "a1": 2.0904
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 0.239,
+          "a1": 1.8554
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": true,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "42": {
+        "n_dev": 13741,
+        "n_cal": 6070,
+        "n_val": 11177,
+        "cal_window_start": "2025-02-28",
+        "p_ref_frozen": 0.8334,
+        "models": {
+          "M0_raw": {
+            "n": 11177,
+            "O_over_E": 1.112,
+            "brier": 0.18136,
+            "bss": -0.0119,
+            "logloss": 0.55028,
+            "ece10": 0.0778,
+            "mean_p": 0.695,
+            "rate": 0.77284,
+            "sat68": 0.94838
+          },
+          "M1_intercept": {
+            "n": 11177,
+            "O_over_E": 0.8888,
+            "brier": 0.18473,
+            "bss": -0.0307,
+            "logloss": 0.57001,
+            "ece10": 0.0967,
+            "mean_p": 0.8695,
+            "rate": 0.77284,
+            "sat68": 1.0,
+            "params": {
+              "c": 1.0735
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 11177,
+            "O_over_E": 0.8811,
+            "brier": 0.18618,
+            "bss": -0.0388,
+            "logloss": 0.57837,
+            "ece10": 0.1043,
+            "mean_p": 0.87711,
+            "rate": 0.77284,
+            "sat68": 1.0,
+            "params": {
+              "a0": -1.2316,
+              "a1": 3.9007
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.1544,
+          "a1": 1.6758
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": true,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "63": {
+        "n_dev": 11788,
+        "n_cal": 6284,
+        "n_val": 8351,
+        "cal_window_start": "2025-01-30",
+        "p_ref_frozen": 0.8701,
+        "models": {
+          "M0_raw": {
+            "n": 8351,
+            "O_over_E": 1.0327,
+            "brier": 0.17492,
+            "bss": 0.0473,
+            "logloss": 0.53453,
+            "ece10": 0.0246,
+            "mean_p": 0.75021,
+            "rate": 0.77476,
+            "sat68": 0.99641
+          },
+          "M1_intercept": {
+            "n": 8351,
+            "O_over_E": 0.8599,
+            "brier": 0.19025,
+            "bss": -0.0362,
+            "logloss": 0.60122,
+            "ece10": 0.1263,
+            "mean_p": 0.90103,
+            "rate": 0.77476,
+            "sat68": 1.0,
+            "params": {
+              "c": 1.1109
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 8351,
+            "O_over_E": 0.8599,
+            "brier": 0.19023,
+            "bss": -0.0361,
+            "logloss": 0.60113,
+            "ece10": 0.1262,
+            "mean_p": 0.90097,
+            "rate": 0.77476,
+            "sat68": 1.0,
+            "params": {
+              "a0": 1.1228,
+              "a1": 0.9886
+            }
+          }
+        },
+        "diag_val": {
+          "a0": 0.404,
+          "a1": 0.7556
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "n_dev": 127213,
+        "n_cal": 102101,
+        "n_val": 144725,
+        "cal_window_start": "2025-05-15",
+        "p_ref_frozen": 0.0411,
+        "models": {
+          "M0_raw": {
+            "n": 144725,
+            "O_over_E": 0.926,
+            "brier": 0.01601,
+            "bss": 0.2481,
+            "logloss": 0.05834,
+            "ece10": 0.0028,
+            "mean_p": 0.02306,
+            "rate": 0.02136,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 144725,
+            "O_over_E": 0.8932,
+            "brier": 0.01604,
+            "bss": 0.2468,
+            "logloss": 0.05845,
+            "ece10": 0.0036,
+            "mean_p": 0.02391,
+            "rate": 0.02136,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.0481
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 144725,
+            "O_over_E": 0.8923,
+            "brier": 0.01604,
+            "bss": 0.2466,
+            "logloss": 0.05844,
+            "ece10": 0.0036,
+            "mean_p": 0.02393,
+            "rate": 0.02136,
+            "sat68": 0.0,
+            "params": {
+              "a0": 0.0307,
+              "a1": 0.989
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.1548,
+          "a1": 0.9676
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "3": {
+        "n_dev": 126394,
+        "n_cal": 102104,
+        "n_val": 143012,
+        "cal_window_start": "2025-05-14",
+        "p_ref_frozen": 0.0816,
+        "models": {
+          "M0_raw": {
+            "n": 143012,
+            "O_over_E": 0.8863,
+            "brier": 0.03109,
+            "bss": 0.2676,
+            "logloss": 0.11146,
+            "ece10": 0.0069,
+            "mean_p": 0.04826,
+            "rate": 0.04277,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 143012,
+            "O_over_E": 0.8518,
+            "brier": 0.0312,
+            "bss": 0.2651,
+            "logloss": 0.11181,
+            "ece10": 0.0087,
+            "mean_p": 0.05021,
+            "rate": 0.04277,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.055
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 143012,
+            "O_over_E": 0.8499,
+            "brier": 0.03121,
+            "bss": 0.2649,
+            "logloss": 0.11182,
+            "ece10": 0.0086,
+            "mean_p": 0.05033,
+            "rate": 0.04277,
+            "sat68": 0.0,
+            "params": {
+              "a0": 0.0284,
+              "a1": 0.9809
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.1914,
+          "a1": 0.9813
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "5": {
+        "n_dev": 123909,
+        "n_cal": 102101,
+        "n_val": 141306,
+        "cal_window_start": "2025-05-07",
+        "p_ref_frozen": 0.1112,
+        "models": {
+          "M0_raw": {
+            "n": 141306,
+            "O_over_E": 0.8625,
+            "brier": 0.04213,
+            "bss": 0.2751,
+            "logloss": 0.14857,
+            "ece10": 0.011,
+            "mean_p": 0.06823,
+            "rate": 0.05884,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 141306,
+            "O_over_E": 0.8304,
+            "brier": 0.04231,
+            "bss": 0.272,
+            "logloss": 0.14914,
+            "ece10": 0.0134,
+            "mean_p": 0.07086,
+            "rate": 0.05884,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.0537
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 141306,
+            "O_over_E": 0.828,
+            "brier": 0.04233,
+            "bss": 0.2717,
+            "logloss": 0.1492,
+            "ece10": 0.0133,
+            "mean_p": 0.07106,
+            "rate": 0.05884,
+            "sat68": 0.0,
+            "params": {
+              "a0": 0.0267,
+              "a1": 0.9788
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.2007,
+          "a1": 1.0025
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "10": {
+        "n_dev": 119773,
+        "n_cal": 102095,
+        "n_val": 137041,
+        "cal_window_start": "2025-04-29",
+        "p_ref_frozen": 0.169,
+        "models": {
+          "M0_raw": {
+            "n": 137041,
+            "O_over_E": 0.8132,
+            "brier": 0.06269,
+            "bss": 0.2866,
+            "logloss": 0.21418,
+            "ece10": 0.0211,
+            "mean_p": 0.11019,
+            "rate": 0.08961,
+            "sat68": 0.0
+          },
+          "M1_intercept": {
+            "n": 137041,
+            "O_over_E": 0.7866,
+            "brier": 0.06307,
+            "bss": 0.2823,
+            "logloss": 0.21529,
+            "ece10": 0.0246,
+            "mean_p": 0.11392,
+            "rate": 0.08961,
+            "sat68": 0.0,
+            "params": {
+              "c": 0.0494
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 137041,
+            "O_over_E": 0.7846,
+            "brier": 0.06309,
+            "bss": 0.2821,
+            "logloss": 0.21544,
+            "ece10": 0.0247,
+            "mean_p": 0.11421,
+            "rate": 0.08961,
+            "sat68": 0.0,
+            "params": {
+              "a0": 0.0309,
+              "a1": 0.9824
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.2463,
+          "a1": 1.0438
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "21": {
+        "n_dev": 109901,
+        "n_cal": 102292,
+        "n_val": 127588,
+        "cal_window_start": "2025-04-10",
+        "p_ref_frozen": 0.258,
+        "models": {
+          "M0_raw": {
+            "n": 127588,
+            "O_over_E": 0.7381,
+            "brier": 0.09501,
+            "bss": 0.2881,
+            "logloss": 0.3097,
+            "ece10": 0.049,
+            "mean_p": 0.18728,
+            "rate": 0.13823,
+            "sat68": 0.0037
+          },
+          "M1_intercept": {
+            "n": 127588,
+            "O_over_E": 0.7276,
+            "brier": 0.09544,
+            "bss": 0.2849,
+            "logloss": 0.31086,
+            "ece10": 0.0517,
+            "mean_p": 0.18998,
+            "rate": 0.13823,
+            "sat68": 0.00603,
+            "params": {
+              "c": 0.0229
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 127588,
+            "O_over_E": 0.7263,
+            "brier": 0.09546,
+            "bss": 0.2848,
+            "logloss": 0.31114,
+            "ece10": 0.0521,
+            "mean_p": 0.19033,
+            "rate": 0.13823,
+            "sat68": 0.00411,
+            "params": {
+              "a0": 0.0127,
+              "a1": 0.9865
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.3567,
+          "a1": 1.1321
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": false,
+        "recommendation": "M0 raw (P6)"
+      },
+      "42": {
+        "n_dev": 92579,
+        "n_cal": 92579,
+        "n_val": 109508,
+        "cal_window_start": "2025-03-19",
+        "p_ref_frozen": 0.3747,
+        "models": {
+          "M0_raw": {
+            "n": 109508,
+            "O_over_E": 0.6368,
+            "brier": 0.1406,
+            "bss": 0.2637,
+            "logloss": 0.43536,
+            "ece10": 0.1157,
+            "mean_p": 0.31684,
+            "rate": 0.20178,
+            "sat68": 0.04142
+          },
+          "M1_intercept": {
+            "n": 109508,
+            "O_over_E": 0.637,
+            "brier": 0.14058,
+            "bss": 0.2638,
+            "logloss": 0.43531,
+            "ece10": 0.1156,
+            "mean_p": 0.31676,
+            "rate": 0.20178,
+            "sat68": 0.04134,
+            "params": {
+              "c": -0.0004
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 109508,
+            "O_over_E": 0.6369,
+            "brier": 0.14059,
+            "bss": 0.2638,
+            "logloss": 0.43539,
+            "ece10": 0.1158,
+            "mean_p": 0.31682,
+            "rate": 0.20178,
+            "sat68": 0.0407,
+            "params": {
+              "a0": -0.0015,
+              "a1": 0.9974
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.6343,
+          "a1": 1.365
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": true,
+        "recommendation": "M1 (intercept-only, c baru)"
+      },
+      "63": {
+        "n_dev": 76238,
+        "n_cal": 76238,
+        "n_val": 91395,
+        "cal_window_start": "2025-03-19",
+        "p_ref_frozen": 0.4604,
+        "models": {
+          "M0_raw": {
+            "n": 91395,
+            "O_over_E": 0.5879,
+            "brier": 0.18192,
+            "bss": 0.2156,
+            "logloss": 0.53801,
+            "ece10": 0.1766,
+            "mean_p": 0.42855,
+            "rate": 0.25194,
+            "sat68": 0.11814
+          },
+          "M1_intercept": {
+            "n": 91395,
+            "O_over_E": 0.5896,
+            "brier": 0.18145,
+            "bss": 0.2176,
+            "logloss": 0.53696,
+            "ece10": 0.1754,
+            "mean_p": 0.42732,
+            "rate": 0.25194,
+            "sat68": 0.11567,
+            "params": {
+              "c": -0.006
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 91395,
+            "O_over_E": 0.5896,
+            "brier": 0.18145,
+            "bss": 0.2176,
+            "logloss": 0.53701,
+            "ece10": 0.1754,
+            "mean_p": 0.42732,
+            "rate": 0.25194,
+            "sat68": 0.11482,
+            "params": {
+              "a0": -0.0065,
+              "a1": 0.9974
+            }
+          }
+        },
+        "diag_val": {
+          "a0": -0.9966,
+          "a1": 1.5516
+        },
+        "cases": [
+          "B",
+          "C-check"
+        ],
+        "case_C_saturation_flagged": false,
+        "m1_justified": true,
+        "recommendation": "M1 (intercept-only, c baru)"
+      }
+    }
+  },
+  "generated": "2026-08-15T14:19:18+00:00"
+}

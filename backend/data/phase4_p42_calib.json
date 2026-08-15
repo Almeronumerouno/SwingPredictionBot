@@ -1,0 +1,501 @@
+{
+  "phase": "P4.2 — Global calibration (intercept & slope)",
+  "method": "fit logit(y)=a0+a1*logit(p_hat); CI asymptotic (Hessian); CI bootstrap stock-cluster di P4.5",
+  "targets": {
+    "previous_close": {
+      "1": {
+        "dev": {
+          "n": 22486,
+          "intercept": 4.1888,
+          "slope": 2.5078,
+          "ci_intercept": [
+            3.7612,
+            4.6164
+          ],
+          "ci_slope": [
+            2.3039,
+            2.7117
+          ],
+          "mean_p": 0.109,
+          "observed_rate": 0.2544,
+          "O_over_E": 2.335
+        },
+        "validation": {
+          "n": 5476,
+          "intercept": 1.8448,
+          "slope": 1.475,
+          "ci_intercept": [
+            1.0495,
+            2.64
+          ],
+          "ci_slope": [
+            1.0872,
+            1.8628
+          ],
+          "mean_p": 0.1139,
+          "observed_rate": 0.2347,
+          "O_over_E": 2.06
+        },
+        "n_gap": 5442
+      },
+      "3": {
+        "dev": {
+          "n": 21940,
+          "intercept": 1.1909,
+          "slope": 1.3607,
+          "ci_intercept": [
+            1.065,
+            1.3168
+          ],
+          "ci_slope": [
+            1.2441,
+            1.4772
+          ],
+          "mean_p": 0.2605,
+          "observed_rate": 0.4394,
+          "O_over_E": 1.687
+        },
+        "validation": {
+          "n": 5368,
+          "intercept": 0.4821,
+          "slope": 0.7945,
+          "ci_intercept": [
+            0.2629,
+            0.7012
+          ],
+          "ci_slope": [
+            0.5653,
+            1.0237
+          ],
+          "mean_p": 0.2851,
+          "observed_rate": 0.4365,
+          "O_over_E": 1.531
+        },
+        "n_gap": 5640
+      },
+      "5": {
+        "dev": {
+          "n": 21513,
+          "intercept": 2.9773,
+          "slope": 4.9282,
+          "ci_intercept": [
+            2.6743,
+            3.2804
+          ],
+          "ci_slope": [
+            4.4048,
+            5.4516
+          ],
+          "mean_p": 0.3604,
+          "observed_rate": 0.5355,
+          "O_over_E": 1.486
+        },
+        "validation": {
+          "n": 5333,
+          "intercept": 1.4661,
+          "slope": 2.4673,
+          "ci_intercept": [
+            1.0034,
+            1.9289
+          ],
+          "ci_slope": [
+            1.62,
+            3.3147
+          ],
+          "mean_p": 0.368,
+          "observed_rate": 0.5323,
+          "O_over_E": 1.446
+        },
+        "n_gap": 5775
+      },
+      "10": {
+        "dev": {
+          "n": 20789,
+          "intercept": 0.7077,
+          "slope": 1.2229,
+          "ci_intercept": [
+            0.6771,
+            0.7384
+          ],
+          "ci_slope": [
+            1.059,
+            1.3868
+          ],
+          "mean_p": 0.4873,
+          "observed_rate": 0.6542,
+          "O_over_E": 1.342
+        },
+        "validation": {
+          "n": 5226,
+          "intercept": 0.607,
+          "slope": 1.0425,
+          "ci_intercept": [
+            0.548,
+            0.666
+          ],
+          "ci_slope": [
+            0.717,
+            1.3679
+          ],
+          "mean_p": 0.5131,
+          "observed_rate": 0.6584,
+          "O_over_E": 1.283
+        },
+        "n_gap": 5844
+      },
+      "21": {
+        "dev": {
+          "n": 19285,
+          "intercept": 0.1218,
+          "slope": 2.8846,
+          "ci_intercept": [
+            -0.1651,
+            0.4087
+          ],
+          "ci_slope": [
+            2.0733,
+            3.6959
+          ],
+          "mean_p": 0.5875,
+          "observed_rate": 0.7575,
+          "O_over_E": 1.289
+        },
+        "validation": {
+          "n": 4892,
+          "intercept": -0.0571,
+          "slope": 2.745,
+          "ci_intercept": [
+            -0.5929,
+            0.4787
+          ],
+          "ci_slope": [
+            1.34,
+            4.1501
+          ],
+          "mean_p": 0.5942,
+          "observed_rate": 0.7283,
+          "O_over_E": 1.226
+        },
+        "n_gap": 6193
+      },
+      "42": {
+        "dev": {
+          "n": 17314,
+          "intercept": 0.5964,
+          "slope": 1.2798,
+          "ci_intercept": [
+            0.0347,
+            1.1582
+          ],
+          "ci_slope": [
+            0.5709,
+            1.9888
+          ],
+          "mean_p": 0.6884,
+          "observed_rate": 0.8334,
+          "O_over_E": 1.211
+        },
+        "validation": {
+          "n": 3726,
+          "intercept": -0.4519,
+          "slope": 2.0304,
+          "ci_intercept": [
+            -1.5562,
+            0.6525
+          ],
+          "ci_slope": [
+            0.6909,
+            3.3698
+          ],
+          "mean_p": 0.6954,
+          "observed_rate": 0.7724,
+          "O_over_E": 1.111
+        },
+        "n_gap": 6769
+      },
+      "63": {
+        "dev": {
+          "n": 15576,
+          "intercept": 1.2927,
+          "slope": 0.5884,
+          "ci_intercept": [
+            0.8846,
+            1.7008
+          ],
+          "ci_slope": [
+            0.1954,
+            0.9813
+          ],
+          "mean_p": 0.7378,
+          "observed_rate": 0.8701,
+          "O_over_E": 1.179
+        },
+        "validation": {
+          "n": 968,
+          "intercept": -0.4956,
+          "slope": 0.9634,
+          "ci_intercept": [
+            -1.6982,
+            0.7069
+          ],
+          "ci_slope": [
+            -0.1208,
+            2.0476
+          ],
+          "mean_p": 0.7508,
+          "observed_rate": 0.6384,
+          "O_over_E": 0.85
+        },
+        "n_gap": 7378
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "dev": {
+          "n": 162273,
+          "intercept": -0.0114,
+          "slope": 0.9564,
+          "ci_intercept": [
+            -0.0559,
+            0.0331
+          ],
+          "ci_slope": [
+            0.935,
+            0.9778
+          ],
+          "mean_p": 0.0394,
+          "observed_rate": 0.0411,
+          "O_over_E": 1.044
+        },
+        "validation": {
+          "n": 64502,
+          "intercept": -0.4501,
+          "slope": 0.9723,
+          "ci_intercept": [
+            -0.5965,
+            -0.3037
+          ],
+          "ci_slope": [
+            0.9063,
+            1.0382
+          ],
+          "mean_p": 0.0113,
+          "observed_rate": 0.0082,
+          "O_over_E": 0.728
+        },
+        "n_gap": 48392
+      },
+      "3": {
+        "dev": {
+          "n": 160694,
+          "intercept": 0.0269,
+          "slope": 0.9378,
+          "ci_intercept": [
+            -0.0045,
+            0.0583
+          ],
+          "ci_slope": [
+            0.9216,
+            0.9539
+          ],
+          "mean_p": 0.0752,
+          "observed_rate": 0.0816,
+          "O_over_E": 1.085
+        },
+        "validation": {
+          "n": 62793,
+          "intercept": -0.4217,
+          "slope": 1.0247,
+          "ci_intercept": [
+            -0.5233,
+            -0.3201
+          ],
+          "ci_slope": [
+            0.9757,
+            1.0736
+          ],
+          "mean_p": 0.0243,
+          "observed_rate": 0.017,
+          "O_over_E": 0.699
+        },
+        "n_gap": 49971
+      },
+      "5": {
+        "dev": {
+          "n": 159143,
+          "intercept": 0.061,
+          "slope": 0.9312,
+          "ci_intercept": [
+            0.034,
+            0.088
+          ],
+          "ci_slope": [
+            0.9166,
+            0.9458
+          ],
+          "mean_p": 0.1001,
+          "observed_rate": 0.1112,
+          "O_over_E": 1.111
+        },
+        "validation": {
+          "n": 61087,
+          "intercept": -0.4495,
+          "slope": 1.0549,
+          "ci_intercept": [
+            -0.537,
+            -0.362
+          ],
+          "ci_slope": [
+            1.0106,
+            1.0993
+          ],
+          "mean_p": 0.0349,
+          "observed_rate": 0.0231,
+          "O_over_E": 0.662
+        },
+        "n_gap": 51522
+      },
+      "10": {
+        "dev": {
+          "n": 157618,
+          "intercept": 0.1271,
+          "slope": 0.9279,
+          "ci_intercept": [
+            0.1052,
+            0.1489
+          ],
+          "ci_slope": [
+            0.9149,
+            0.941
+          ],
+          "mean_p": 0.1474,
+          "observed_rate": 0.169,
+          "O_over_E": 1.147
+        },
+        "validation": {
+          "n": 56820,
+          "intercept": -0.5608,
+          "slope": 1.0947,
+          "ci_intercept": [
+            -0.633,
+            -0.4886
+          ],
+          "ci_slope": [
+            1.0541,
+            1.1353
+          ],
+          "mean_p": 0.0584,
+          "observed_rate": 0.0343,
+          "O_over_E": 0.587
+        },
+        "n_gap": 53047
+      },
+      "21": {
+        "dev": {
+          "n": 152163,
+          "intercept": 0.206,
+          "slope": 0.9225,
+          "ci_intercept": [
+            0.1884,
+            0.2237
+          ],
+          "ci_slope": [
+            0.9102,
+            0.9348
+          ],
+          "mean_p": 0.2187,
+          "observed_rate": 0.258,
+          "O_over_E": 1.18
+        },
+        "validation": {
+          "n": 47356,
+          "intercept": -0.7426,
+          "slope": 1.1754,
+          "ci_intercept": [
+            -0.8033,
+            -0.682
+          ],
+          "ci_slope": [
+            1.1336,
+            1.2172
+          ],
+          "mean_p": 0.1038,
+          "observed_rate": 0.051,
+          "O_over_E": 0.492
+        },
+        "n_gap": 58502
+      },
+      "42": {
+        "dev": {
+          "n": 143300,
+          "intercept": 0.2828,
+          "slope": 0.9011,
+          "ci_intercept": [
+            0.2683,
+            0.2973
+          ],
+          "ci_slope": [
+            0.889,
+            0.9133
+          ],
+          "mean_p": 0.3128,
+          "observed_rate": 0.3747,
+          "O_over_E": 1.198
+        },
+        "validation": {
+          "n": 29279,
+          "intercept": -1.0043,
+          "slope": 1.3086,
+          "ci_intercept": [
+            -1.0581,
+            -0.9505
+          ],
+          "ci_slope": [
+            1.2564,
+            1.3609
+          ],
+          "mean_p": 0.1909,
+          "observed_rate": 0.0795,
+          "O_over_E": 0.417
+        },
+        "n_gap": 67365
+      },
+      "63": {
+        "dev": {
+          "n": 131354,
+          "intercept": 0.3518,
+          "slope": 0.9076,
+          "ci_intercept": [
+            0.3385,
+            0.3652
+          ],
+          "ci_slope": [
+            0.8947,
+            0.9204
+          ],
+          "mean_p": 0.3837,
+          "observed_rate": 0.4604,
+          "O_over_E": 1.2
+        },
+        "validation": {
+          "n": 11161,
+          "intercept": -1.3651,
+          "slope": 1.6461,
+          "ci_intercept": [
+            -1.4311,
+            -1.2992
+          ],
+          "ci_slope": [
+            1.551,
+            1.7413
+          ],
+          "mean_p": 0.3031,
+          "observed_rate": 0.1113,
+          "O_over_E": 0.367
+        },
+        "n_gap": 79311
+      }
+    }
+  },
+  "generated": "2026-08-14T17:53:26+00:00"
+}

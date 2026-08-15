@@ -1,0 +1,1006 @@
+{
+  "phase": "P4.6 — Regime-conditional calibration (PIT-safe)",
+  "regime": "regime_series(ADX14<20 sideways; close>SMA200 bull; else bear)",
+  "insufficient": "n<500 atau n_events<30 -> INSUFFICIENT",
+  "targets": {
+    "previous_close": {
+      "1": {
+        "p_ref_dev_climatology": 0.2544,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 4211,
+              "n_events": 1178,
+              "mean_p": 0.1102,
+              "observed_rate": 0.2797,
+              "O_over_E": 2.538,
+              "ece10": 0.1695,
+              "bss_vs_global_dev_clim": -0.1248,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1582,
+              "n_events": 370,
+              "mean_p": 0.1159,
+              "observed_rate": 0.2339,
+              "O_over_E": 2.019,
+              "ece10": 0.118,
+              "bss_vs_global_dev_clim": -0.0682,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 10068,
+              "n_events": 2404,
+              "mean_p": 0.1123,
+              "observed_rate": 0.2388,
+              "O_over_E": 2.127,
+              "ece10": 0.1265,
+              "bss_vs_global_dev_clim": -0.0804,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 964,
+              "n_events": 192,
+              "mean_p": 0.112,
+              "observed_rate": 0.1992,
+              "O_over_E": 1.779,
+              "ece10": 0.0947,
+              "bss_vs_global_dev_clim": -0.0247,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 8207,
+              "n_events": 2139,
+              "mean_p": 0.1043,
+              "observed_rate": 0.2606,
+              "O_over_E": 2.498,
+              "ece10": 0.1563,
+              "bss_vs_global_dev_clim": -0.1138,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2930,
+              "n_events": 723,
+              "mean_p": 0.1135,
+              "observed_rate": 0.2468,
+              "O_over_E": 2.175,
+              "ece10": 0.1333,
+              "bss_vs_global_dev_clim": -0.089,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "3": {
+        "p_ref_dev_climatology": 0.4394,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 4010,
+              "n_events": 1862,
+              "mean_p": 0.2662,
+              "observed_rate": 0.4643,
+              "O_over_E": 1.745,
+              "ece10": 0.1982,
+              "bss_vs_global_dev_clim": -0.1242,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1559,
+              "n_events": 661,
+              "mean_p": 0.2938,
+              "observed_rate": 0.424,
+              "O_over_E": 1.443,
+              "ece10": 0.1302,
+              "bss_vs_global_dev_clim": -0.0553,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 9873,
+              "n_events": 4299,
+              "mean_p": 0.2741,
+              "observed_rate": 0.4354,
+              "O_over_E": 1.588,
+              "ece10": 0.1613,
+              "bss_vs_global_dev_clim": -0.0998,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 925,
+              "n_events": 359,
+              "mean_p": 0.2811,
+              "observed_rate": 0.3881,
+              "O_over_E": 1.381,
+              "ece10": 0.107,
+              "bss_vs_global_dev_clim": -0.0285,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 8057,
+              "n_events": 3480,
+              "mean_p": 0.2409,
+              "observed_rate": 0.4319,
+              "O_over_E": 1.793,
+              "ece10": 0.191,
+              "bss_vs_global_dev_clim": -0.1142,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2884,
+              "n_events": 1323,
+              "mean_p": 0.2818,
+              "observed_rate": 0.4587,
+              "O_over_E": 1.628,
+              "ece10": 0.177,
+              "bss_vs_global_dev_clim": -0.1186,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "5": {
+        "p_ref_dev_climatology": 0.5355,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 3914,
+              "n_events": 2207,
+              "mean_p": 0.362,
+              "observed_rate": 0.5639,
+              "O_over_E": 1.558,
+              "ece10": 0.2019,
+              "bss_vs_global_dev_clim": -0.1533,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1553,
+              "n_events": 792,
+              "mean_p": 0.3708,
+              "observed_rate": 0.51,
+              "O_over_E": 1.375,
+              "ece10": 0.1392,
+              "bss_vs_global_dev_clim": -0.069,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 9737,
+              "n_events": 5170,
+              "mean_p": 0.3641,
+              "observed_rate": 0.531,
+              "O_over_E": 1.458,
+              "ece10": 0.1668,
+              "bss_vs_global_dev_clim": -0.108,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 906,
+              "n_events": 425,
+              "mean_p": 0.3664,
+              "observed_rate": 0.4691,
+              "O_over_E": 1.28,
+              "ece10": 0.1027,
+              "bss_vs_global_dev_clim": -0.0204,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 7862,
+              "n_events": 4144,
+              "mean_p": 0.3549,
+              "observed_rate": 0.5271,
+              "O_over_E": 1.485,
+              "ece10": 0.1722,
+              "bss_vs_global_dev_clim": -0.1115,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2874,
+              "n_events": 1622,
+              "mean_p": 0.3671,
+              "observed_rate": 0.5644,
+              "O_over_E": 1.538,
+              "ece10": 0.1973,
+              "bss_vs_global_dev_clim": -0.1514,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "10": {
+        "p_ref_dev_climatology": 0.6542,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 3737,
+              "n_events": 2541,
+              "mean_p": 0.4932,
+              "observed_rate": 0.68,
+              "O_over_E": 1.379,
+              "ece10": 0.1868,
+              "bss_vs_global_dev_clim": -0.1351,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1528,
+              "n_events": 971,
+              "mean_p": 0.5229,
+              "observed_rate": 0.6355,
+              "O_over_E": 1.215,
+              "ece10": 0.1126,
+              "bss_vs_global_dev_clim": -0.0366,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 9637,
+              "n_events": 6229,
+              "mean_p": 0.5022,
+              "observed_rate": 0.6464,
+              "O_over_E": 1.287,
+              "ece10": 0.1442,
+              "bss_vs_global_dev_clim": -0.0843,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 874,
+              "n_events": 504,
+              "mean_p": 0.513,
+              "observed_rate": 0.5767,
+              "O_over_E": 1.124,
+              "ece10": 0.0674,
+              "bss_vs_global_dev_clim": 0.0208,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 7415,
+              "n_events": 4830,
+              "mean_p": 0.4651,
+              "observed_rate": 0.6514,
+              "O_over_E": 1.4,
+              "ece10": 0.1863,
+              "bss_vs_global_dev_clim": -0.1385,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2824,
+              "n_events": 1966,
+              "mean_p": 0.5078,
+              "observed_rate": 0.6962,
+              "O_over_E": 1.371,
+              "ece10": 0.1884,
+              "bss_vs_global_dev_clim": -0.1542,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "21": {
+        "p_ref_dev_climatology": 0.7575,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 3443,
+              "n_events": 2726,
+              "mean_p": 0.5887,
+              "observed_rate": 0.7918,
+              "O_over_E": 1.345,
+              "ece10": 0.2031,
+              "bss_vs_global_dev_clim": -0.2361,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1423,
+              "n_events": 1001,
+              "mean_p": 0.5962,
+              "observed_rate": 0.7034,
+              "O_over_E": 1.18,
+              "ece10": 0.1153,
+              "bss_vs_global_dev_clim": -0.0376,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 9246,
+              "n_events": 6828,
+              "mean_p": 0.5905,
+              "observed_rate": 0.7385,
+              "O_over_E": 1.251,
+              "ece10": 0.148,
+              "bss_vs_global_dev_clim": -0.1093,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 827,
+              "n_events": 516,
+              "mean_p": 0.5944,
+              "observed_rate": 0.6239,
+              "O_over_E": 1.05,
+              "ece10": 0.0669,
+              "bss_vs_global_dev_clim": 0.0719,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 6596,
+              "n_events": 5054,
+              "mean_p": 0.5828,
+              "observed_rate": 0.7662,
+              "O_over_E": 1.315,
+              "ece10": 0.1834,
+              "bss_vs_global_dev_clim": -0.1862,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2642,
+              "n_events": 2046,
+              "mean_p": 0.593,
+              "observed_rate": 0.7744,
+              "O_over_E": 1.306,
+              "ece10": 0.1814,
+              "bss_vs_global_dev_clim": -0.185,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "42": {
+        "p_ref_dev_climatology": 0.8334,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 3099,
+              "n_events": 2690,
+              "mean_p": 0.6892,
+              "observed_rate": 0.868,
+              "O_over_E": 1.26,
+              "ece10": 0.1789,
+              "bss_vs_global_dev_clim": -0.2623,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 1031,
+              "n_events": 749,
+              "mean_p": 0.6974,
+              "observed_rate": 0.7265,
+              "O_over_E": 1.042,
+              "ece10": 0.0526,
+              "bss_vs_global_dev_clim": 0.0519,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 8612,
+              "n_events": 6967,
+              "mean_p": 0.6914,
+              "observed_rate": 0.809,
+              "O_over_E": 1.17,
+              "ece10": 0.1176,
+              "bss_vs_global_dev_clim": -0.0825,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 686,
+              "n_events": 460,
+              "mean_p": 0.6963,
+              "observed_rate": 0.6706,
+              "O_over_E": 0.963,
+              "ece10": 0.0647,
+              "bss_vs_global_dev_clim": 0.1092,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 5603,
+              "n_events": 4772,
+              "mean_p": 0.6832,
+              "observed_rate": 0.8517,
+              "O_over_E": 1.247,
+              "ece10": 0.1685,
+              "bss_vs_global_dev_clim": -0.2228,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2009,
+              "n_events": 1669,
+              "mean_p": 0.6941,
+              "observed_rate": 0.8308,
+              "O_over_E": 1.197,
+              "ece10": 0.1366,
+              "bss_vs_global_dev_clim": -0.1298,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "63": {
+        "p_ref_dev_climatology": 0.8701,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 2771,
+              "n_events": 2490,
+              "mean_p": 0.7382,
+              "observed_rate": 0.8986,
+              "O_over_E": 1.217,
+              "ece10": 0.1604,
+              "bss_vs_global_dev_clim": -0.2692,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 280,
+              "n_events": 161,
+              "mean_p": 0.7555,
+              "observed_rate": 0.575,
+              "O_over_E": 0.761,
+              "ece10": 0.1805,
+              "bss_vs_global_dev_clim": 0.1649,
+              "insufficient": true
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 7933,
+              "n_events": 6767,
+              "mean_p": 0.7429,
+              "observed_rate": 0.853,
+              "O_over_E": 1.148,
+              "ece10": 0.1101,
+              "bss_vs_global_dev_clim": -0.0907,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 346,
+              "n_events": 230,
+              "mean_p": 0.7497,
+              "observed_rate": 0.6647,
+              "O_over_E": 0.887,
+              "ece10": 0.0979,
+              "bss_vs_global_dev_clim": 0.1368,
+              "insufficient": true
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 4872,
+              "n_events": 4295,
+              "mean_p": 0.7292,
+              "observed_rate": 0.8816,
+              "O_over_E": 1.209,
+              "ece10": 0.1524,
+              "bss_vs_global_dev_clim": -0.2286,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 342,
+              "n_events": 227,
+              "mean_p": 0.7481,
+              "observed_rate": 0.6637,
+              "O_over_E": 0.887,
+              "ece10": 0.0874,
+              "bss_vs_global_dev_clim": 0.1378,
+              "insufficient": true
+            }
+          }
+        }
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "p_ref_dev_climatology": 0.0411,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 46154,
+              "n_events": 535,
+              "mean_p": 0.0218,
+              "observed_rate": 0.0116,
+              "O_over_E": 0.532,
+              "ece10": 0.0102,
+              "bss_vs_global_dev_clim": 0.1734,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 22121,
+              "n_events": 61,
+              "mean_p": 0.0081,
+              "observed_rate": 0.0028,
+              "O_over_E": 0.341,
+              "ece10": 0.0053,
+              "bss_vs_global_dev_clim": 0.2928,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 69733,
+              "n_events": 6042,
+              "mean_p": 0.072,
+              "observed_rate": 0.0866,
+              "O_over_E": 1.204,
+              "ece10": 0.0148,
+              "bss_vs_global_dev_clim": 0.2658,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 9766,
+              "n_events": 459,
+              "mean_p": 0.0517,
+              "observed_rate": 0.047,
+              "O_over_E": 0.909,
+              "ece10": 0.0104,
+              "bss_vs_global_dev_clim": 0.2046,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 46386,
+              "n_events": 90,
+              "mean_p": 0.0079,
+              "observed_rate": 0.0019,
+              "O_over_E": 0.245,
+              "ece10": 0.0061,
+              "bss_vs_global_dev_clim": 0.0354,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 32615,
+              "n_events": 10,
+              "mean_p": 0.0014,
+              "observed_rate": 0.0003,
+              "O_over_E": 0.224,
+              "ece10": 0.0011,
+              "bss_vs_global_dev_clim": 0.811,
+              "insufficient": true
+            }
+          }
+        }
+      },
+      "3": {
+        "p_ref_dev_climatology": 0.0816,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 45768,
+              "n_events": 1388,
+              "mean_p": 0.0491,
+              "observed_rate": 0.0303,
+              "O_over_E": 0.618,
+              "ece10": 0.0196,
+              "bss_vs_global_dev_clim": 0.1881,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 21627,
+              "n_events": 145,
+              "mean_p": 0.0194,
+              "observed_rate": 0.0067,
+              "O_over_E": 0.345,
+              "ece10": 0.013,
+              "bss_vs_global_dev_clim": 0.3914,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 68753,
+              "n_events": 11377,
+              "mean_p": 0.1292,
+              "observed_rate": 0.1655,
+              "O_over_E": 1.281,
+              "ece10": 0.0363,
+              "bss_vs_global_dev_clim": 0.2689,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 9430,
+              "n_events": 878,
+              "mean_p": 0.0949,
+              "observed_rate": 0.0931,
+              "O_over_E": 0.982,
+              "ece10": 0.0153,
+              "bss_vs_global_dev_clim": 0.23,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 46173,
+              "n_events": 341,
+              "mean_p": 0.0206,
+              "observed_rate": 0.0074,
+              "O_over_E": 0.359,
+              "ece10": 0.0136,
+              "bss_vs_global_dev_clim": 0.2451,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 31736,
+              "n_events": 43,
+              "mean_p": 0.0066,
+              "observed_rate": 0.0014,
+              "O_over_E": 0.205,
+              "ece10": 0.0053,
+              "bss_vs_global_dev_clim": 0.7726,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "5": {
+        "p_ref_dev_climatology": 0.1112,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 45383,
+              "n_events": 2218,
+              "mean_p": 0.0705,
+              "observed_rate": 0.0489,
+              "O_over_E": 0.693,
+              "ece10": 0.0251,
+              "bss_vs_global_dev_clim": 0.1847,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 21113,
+              "n_events": 218,
+              "mean_p": 0.0292,
+              "observed_rate": 0.0103,
+              "O_over_E": 0.354,
+              "ece10": 0.0194,
+              "bss_vs_global_dev_clim": 0.4348,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 67792,
+              "n_events": 14846,
+              "mean_p": 0.1656,
+              "observed_rate": 0.219,
+              "O_over_E": 1.322,
+              "ece10": 0.0534,
+              "bss_vs_global_dev_clim": 0.264,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 9095,
+              "n_events": 1118,
+              "mean_p": 0.1233,
+              "observed_rate": 0.1229,
+              "O_over_E": 0.997,
+              "ece10": 0.0237,
+              "bss_vs_global_dev_clim": 0.2265,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 45968,
+              "n_events": 633,
+              "mean_p": 0.0327,
+              "observed_rate": 0.0138,
+              "O_over_E": 0.421,
+              "ece10": 0.0201,
+              "bss_vs_global_dev_clim": 0.2844,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 30879,
+              "n_events": 76,
+              "mean_p": 0.0128,
+              "observed_rate": 0.0025,
+              "O_over_E": 0.192,
+              "ece10": 0.0106,
+              "bss_vs_global_dev_clim": 0.7575,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "10": {
+        "p_ref_dev_climatology": 0.169,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 44983,
+              "n_events": 4099,
+              "mean_p": 0.1138,
+              "observed_rate": 0.0911,
+              "O_over_E": 0.801,
+              "ece10": 0.0349,
+              "bss_vs_global_dev_clim": 0.1686,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 19612,
+              "n_events": 367,
+              "mean_p": 0.0509,
+              "observed_rate": 0.0187,
+              "O_over_E": 0.368,
+              "ece10": 0.0328,
+              "bss_vs_global_dev_clim": 0.4744,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 66893,
+              "n_events": 21022,
+              "mean_p": 0.2292,
+              "observed_rate": 0.3143,
+              "O_over_E": 1.371,
+              "ece10": 0.0851,
+              "bss_vs_global_dev_clim": 0.2584,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 8427,
+              "n_events": 1405,
+              "mean_p": 0.1744,
+              "observed_rate": 0.1667,
+              "O_over_E": 0.956,
+              "ece10": 0.0377,
+              "bss_vs_global_dev_clim": 0.2241,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 45742,
+              "n_events": 1520,
+              "mean_p": 0.0609,
+              "observed_rate": 0.0332,
+              "O_over_E": 0.546,
+              "ece10": 0.0314,
+              "bss_vs_global_dev_clim": 0.2968,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 28781,
+              "n_events": 177,
+              "mean_p": 0.0295,
+              "observed_rate": 0.0061,
+              "O_over_E": 0.208,
+              "ece10": 0.0237,
+              "bss_vs_global_dev_clim": 0.7251,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "21": {
+        "p_ref_dev_climatology": 0.258,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 43435,
+              "n_events": 7616,
+              "mean_p": 0.184,
+              "observed_rate": 0.1753,
+              "O_over_E": 0.953,
+              "ece10": 0.0394,
+              "bss_vs_global_dev_clim": 0.1556,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 15999,
+              "n_events": 555,
+              "mean_p": 0.0926,
+              "observed_rate": 0.0347,
+              "O_over_E": 0.375,
+              "ece10": 0.0579,
+              "bss_vs_global_dev_clim": 0.5251,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 63852,
+              "n_events": 27811,
+              "mean_p": 0.3159,
+              "observed_rate": 0.4356,
+              "O_over_E": 1.379,
+              "ece10": 0.1196,
+              "bss_vs_global_dev_clim": 0.2393,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 7264,
+              "n_events": 1532,
+              "mean_p": 0.2498,
+              "observed_rate": 0.2109,
+              "O_over_E": 0.844,
+              "ece10": 0.0541,
+              "bss_vs_global_dev_clim": 0.233,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 44876,
+              "n_events": 3836,
+              "mean_p": 0.1139,
+              "observed_rate": 0.0855,
+              "O_over_E": 0.75,
+              "ece10": 0.0427,
+              "bss_vs_global_dev_clim": 0.2668,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 24093,
+              "n_events": 329,
+              "mean_p": 0.0671,
+              "observed_rate": 0.0137,
+              "O_over_E": 0.203,
+              "ece10": 0.0539,
+              "bss_vs_global_dev_clim": 0.6952,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "42": {
+        "p_ref_dev_climatology": 0.3747,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 40867,
+              "n_events": 12429,
+              "mean_p": 0.2805,
+              "observed_rate": 0.3041,
+              "O_over_E": 1.084,
+              "ece10": 0.0507,
+              "bss_vs_global_dev_clim": 0.1257,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 9600,
+              "n_events": 465,
+              "mean_p": 0.1819,
+              "observed_rate": 0.0484,
+              "O_over_E": 0.266,
+              "ece10": 0.1335,
+              "bss_vs_global_dev_clim": 0.5419,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 59184,
+              "n_events": 33371,
+              "mean_p": 0.4204,
+              "observed_rate": 0.5639,
+              "O_over_E": 1.341,
+              "ece10": 0.1435,
+              "bss_vs_global_dev_clim": 0.2018,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 5547,
+              "n_events": 1444,
+              "mean_p": 0.3425,
+              "observed_rate": 0.2603,
+              "O_over_E": 0.76,
+              "ece10": 0.1055,
+              "bss_vs_global_dev_clim": 0.2392,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 43249,
+              "n_events": 7889,
+              "mean_p": 0.196,
+              "observed_rate": 0.1824,
+              "O_over_E": 0.931,
+              "ece10": 0.0519,
+              "bss_vs_global_dev_clim": 0.2342,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 14132,
+              "n_events": 419,
+              "mean_p": 0.1374,
+              "observed_rate": 0.0296,
+              "O_over_E": 0.216,
+              "ece10": 0.1078,
+              "bss_vs_global_dev_clim": 0.6461,
+              "insufficient": false
+            }
+          }
+        }
+      },
+      "63": {
+        "p_ref_dev_climatology": 0.4604,
+        "regimes": {
+          "sideways": {
+            "dev": {
+              "n": 37070,
+              "n_events": 14711,
+              "mean_p": 0.3563,
+              "observed_rate": 0.3968,
+              "O_over_E": 1.114,
+              "ece10": 0.0525,
+              "bss_vs_global_dev_clim": 0.1209,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 4380,
+              "n_events": 261,
+              "mean_p": 0.282,
+              "observed_rate": 0.0596,
+              "O_over_E": 0.211,
+              "ece10": 0.2224,
+              "bss_vs_global_dev_clim": 0.471,
+              "insufficient": false
+            }
+          },
+          "bull": {
+            "dev": {
+              "n": 53094,
+              "n_events": 34558,
+              "mean_p": 0.4939,
+              "observed_rate": 0.6509,
+              "O_over_E": 1.318,
+              "ece10": 0.157,
+              "bss_vs_global_dev_clim": 0.1621,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 2835,
+              "n_events": 811,
+              "mean_p": 0.4311,
+              "observed_rate": 0.2861,
+              "O_over_E": 0.664,
+              "ece10": 0.1647,
+              "bss_vs_global_dev_clim": 0.2346,
+              "insufficient": false
+            }
+          },
+          "bear": {
+            "dev": {
+              "n": 41190,
+              "n_events": 11205,
+              "mean_p": 0.2662,
+              "observed_rate": 0.272,
+              "O_over_E": 1.022,
+              "ece10": 0.0563,
+              "bss_vs_global_dev_clim": 0.207,
+              "insufficient": false
+            },
+            "validation": {
+              "n": 3946,
+              "n_events": 170,
+              "mean_p": 0.2345,
+              "observed_rate": 0.0431,
+              "O_over_E": 0.184,
+              "ece10": 0.1914,
+              "bss_vs_global_dev_clim": 0.5699,
+              "insufficient": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "generated": "2026-08-14T18:31:31+00:00"
+}

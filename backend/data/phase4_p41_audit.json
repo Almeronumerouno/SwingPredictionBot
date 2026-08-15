@@ -1,0 +1,417 @@
+{
+  "phase": "P4.1 — Audit frozen production probabilities (PIT)",
+  "protocol": "data/phase4_protocol.json",
+  "drop_pct": 5.0,
+  "cutoff_date": "2026-01-23",
+  "validation_start": "2026-04-23",
+  "targets": {
+    "prior_peak": {
+      "horizons": {
+        "1": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.3139,
+          "dev": {
+            "split": "dev",
+            "n_events": 162273,
+            "n_obs": 162273,
+            "n_non_events": 155606,
+            "n_stocks": 884,
+            "n_episodes": 3921,
+            "mean_p": 0.0394,
+            "observed_rate": 0.0411,
+            "O_minus_E": 0.0017,
+            "O_over_E": 1.044
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 64502,
+            "n_obs": 64502,
+            "n_non_events": 63972,
+            "n_stocks": 872,
+            "n_episodes": 1098,
+            "mean_p": 0.0113,
+            "observed_rate": 0.0082,
+            "O_minus_E": -0.0031,
+            "O_over_E": 0.728
+          },
+          "n_gap": 48392,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "3": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.3134,
+          "dev": {
+            "split": "dev",
+            "n_events": 160694,
+            "n_obs": 160694,
+            "n_non_events": 147588,
+            "n_stocks": 884,
+            "n_episodes": 3866,
+            "mean_p": 0.0752,
+            "observed_rate": 0.0816,
+            "O_minus_E": 0.0064,
+            "O_over_E": 1.085
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 62793,
+            "n_obs": 62793,
+            "n_non_events": 61727,
+            "n_stocks": 872,
+            "n_episodes": 1086,
+            "mean_p": 0.0243,
+            "observed_rate": 0.017,
+            "O_minus_E": -0.0073,
+            "O_over_E": 0.699
+          },
+          "n_gap": 49971,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "5": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.3129,
+          "dev": {
+            "split": "dev",
+            "n_events": 159143,
+            "n_obs": 159143,
+            "n_non_events": 141446,
+            "n_stocks": 884,
+            "n_episodes": 3799,
+            "mean_p": 0.1001,
+            "observed_rate": 0.1112,
+            "O_minus_E": 0.0111,
+            "O_over_E": 1.111
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 61087,
+            "n_obs": 61087,
+            "n_non_events": 59675,
+            "n_stocks": 871,
+            "n_episodes": 1075,
+            "mean_p": 0.0349,
+            "observed_rate": 0.0231,
+            "O_minus_E": -0.0118,
+            "O_over_E": 0.662
+          },
+          "n_gap": 51522,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "10": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.3113,
+          "dev": {
+            "split": "dev",
+            "n_events": 157618,
+            "n_obs": 157618,
+            "n_non_events": 130977,
+            "n_stocks": 883,
+            "n_episodes": 3738,
+            "mean_p": 0.1474,
+            "observed_rate": 0.169,
+            "O_minus_E": 0.0216,
+            "O_over_E": 1.147
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 56820,
+            "n_obs": 56820,
+            "n_non_events": 54871,
+            "n_stocks": 871,
+            "n_episodes": 1057,
+            "mean_p": 0.0584,
+            "observed_rate": 0.0343,
+            "O_minus_E": -0.0241,
+            "O_over_E": 0.587
+          },
+          "n_gap": 53047,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "21": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.3073,
+          "dev": {
+            "split": "dev",
+            "n_events": 152163,
+            "n_obs": 152163,
+            "n_non_events": 112900,
+            "n_stocks": 883,
+            "n_episodes": 3567,
+            "mean_p": 0.2187,
+            "observed_rate": 0.258,
+            "O_minus_E": 0.0393,
+            "O_over_E": 1.18
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 47356,
+            "n_obs": 47356,
+            "n_non_events": 44940,
+            "n_stocks": 871,
+            "n_episodes": 1035,
+            "mean_p": 0.1038,
+            "observed_rate": 0.051,
+            "O_minus_E": -0.0527,
+            "O_over_E": 0.492
+          },
+          "n_gap": 58502,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "42": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.2973,
+          "dev": {
+            "split": "dev",
+            "n_events": 143300,
+            "n_obs": 143300,
+            "n_non_events": 89611,
+            "n_stocks": 882,
+            "n_episodes": 3381,
+            "mean_p": 0.3128,
+            "observed_rate": 0.3747,
+            "O_minus_E": 0.0619,
+            "O_over_E": 1.198
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 29279,
+            "n_obs": 29279,
+            "n_non_events": 26951,
+            "n_stocks": 871,
+            "n_episodes": 981,
+            "mean_p": 0.1909,
+            "observed_rate": 0.0795,
+            "O_minus_E": -0.1114,
+            "O_over_E": 0.417
+          },
+          "n_gap": 67365,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        },
+        "63": {
+          "n_stocks_all": 897,
+          "mean_dd": 0.2872,
+          "dev": {
+            "split": "dev",
+            "n_events": 131354,
+            "n_obs": 131354,
+            "n_non_events": 70880,
+            "n_stocks": 879,
+            "n_episodes": 3101,
+            "mean_p": 0.3837,
+            "observed_rate": 0.4604,
+            "O_minus_E": 0.0767,
+            "O_over_E": 1.2
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 11161,
+            "n_obs": 11161,
+            "n_non_events": 9919,
+            "n_stocks": 871,
+            "n_episodes": 937,
+            "mean_p": 0.3031,
+            "observed_rate": 0.1113,
+            "O_minus_E": -0.1918,
+            "O_over_E": 0.367
+          },
+          "n_gap": 79311,
+          "params_note": "params model di-fit pada 70% awal data (split kalibrator temporal, BUKAN cutoff P4) — dev sebagian in-sample utk param"
+        }
+      }
+    },
+    "previous_close": {
+      "horizons": {
+        "1": {
+          "dev": {
+            "split": "dev",
+            "n_events": 22486,
+            "n_obs": 22486,
+            "n_non_events": 16765,
+            "n_stocks": 886,
+            "n_episodes": 16810,
+            "mean_p": 0.109,
+            "observed_rate": 0.2544,
+            "O_minus_E": 0.1454,
+            "O_over_E": 2.335
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 5476,
+            "n_obs": 5476,
+            "n_non_events": 4191,
+            "n_stocks": 809,
+            "n_episodes": 4241,
+            "mean_p": 0.1139,
+            "observed_rate": 0.2347,
+            "O_minus_E": 0.1208,
+            "O_over_E": 2.06
+          },
+          "n_gap": 5442
+        },
+        "3": {
+          "dev": {
+            "split": "dev",
+            "n_events": 21940,
+            "n_obs": 21940,
+            "n_non_events": 12299,
+            "n_stocks": 884,
+            "n_episodes": 16539,
+            "mean_p": 0.2605,
+            "observed_rate": 0.4394,
+            "O_minus_E": 0.1789,
+            "O_over_E": 1.687
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 5368,
+            "n_obs": 5368,
+            "n_non_events": 3025,
+            "n_stocks": 807,
+            "n_episodes": 4145,
+            "mean_p": 0.2851,
+            "observed_rate": 0.4365,
+            "O_minus_E": 0.1513,
+            "O_over_E": 1.531
+          },
+          "n_gap": 5640
+        },
+        "5": {
+          "dev": {
+            "split": "dev",
+            "n_events": 21513,
+            "n_obs": 21513,
+            "n_non_events": 9992,
+            "n_stocks": 880,
+            "n_episodes": 16335,
+            "mean_p": 0.3604,
+            "observed_rate": 0.5355,
+            "O_minus_E": 0.1752,
+            "O_over_E": 1.486
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 5333,
+            "n_obs": 5333,
+            "n_non_events": 2494,
+            "n_stocks": 806,
+            "n_episodes": 4115,
+            "mean_p": 0.368,
+            "observed_rate": 0.5323,
+            "O_minus_E": 0.1643,
+            "O_over_E": 1.446
+          },
+          "n_gap": 5775
+        },
+        "10": {
+          "dev": {
+            "split": "dev",
+            "n_events": 20789,
+            "n_obs": 20789,
+            "n_non_events": 7189,
+            "n_stocks": 877,
+            "n_episodes": 16014,
+            "mean_p": 0.4873,
+            "observed_rate": 0.6542,
+            "O_minus_E": 0.1669,
+            "O_over_E": 1.342
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 5226,
+            "n_obs": 5226,
+            "n_non_events": 1785,
+            "n_stocks": 803,
+            "n_episodes": 4021,
+            "mean_p": 0.5131,
+            "observed_rate": 0.6584,
+            "O_minus_E": 0.1454,
+            "O_over_E": 1.283
+          },
+          "n_gap": 5844
+        },
+        "21": {
+          "dev": {
+            "split": "dev",
+            "n_events": 19285,
+            "n_obs": 19285,
+            "n_non_events": 4677,
+            "n_stocks": 872,
+            "n_episodes": 15164,
+            "mean_p": 0.5875,
+            "observed_rate": 0.7575,
+            "O_minus_E": 0.1699,
+            "O_over_E": 1.289
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 4892,
+            "n_obs": 4892,
+            "n_non_events": 1329,
+            "n_stocks": 799,
+            "n_episodes": 3729,
+            "mean_p": 0.5942,
+            "observed_rate": 0.7283,
+            "O_minus_E": 0.1342,
+            "O_over_E": 1.226
+          },
+          "n_gap": 6193
+        },
+        "42": {
+          "dev": {
+            "split": "dev",
+            "n_events": 17314,
+            "n_obs": 17314,
+            "n_non_events": 2885,
+            "n_stocks": 858,
+            "n_episodes": 13642,
+            "mean_p": 0.6884,
+            "observed_rate": 0.8334,
+            "O_minus_E": 0.145,
+            "O_over_E": 1.211
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 3726,
+            "n_obs": 3726,
+            "n_non_events": 848,
+            "n_stocks": 776,
+            "n_episodes": 2716,
+            "mean_p": 0.6954,
+            "observed_rate": 0.7724,
+            "O_minus_E": 0.077,
+            "O_over_E": 1.111
+          },
+          "n_gap": 6769
+        },
+        "63": {
+          "dev": {
+            "split": "dev",
+            "n_events": 15576,
+            "n_obs": 15576,
+            "n_non_events": 2024,
+            "n_stocks": 832,
+            "n_episodes": 12226,
+            "mean_p": 0.7378,
+            "observed_rate": 0.8701,
+            "O_minus_E": 0.1323,
+            "O_over_E": 1.179
+          },
+          "validation": {
+            "split": "validation",
+            "n_events": 968,
+            "n_obs": 968,
+            "n_non_events": 350,
+            "n_stocks": 501,
+            "n_episodes": 858,
+            "mean_p": 0.7508,
+            "observed_rate": 0.6384,
+            "O_minus_E": -0.1124,
+            "O_over_E": 0.85
+          },
+          "n_gap": 7378
+        }
+      }
+    }
+  },
+  "generated": "2026-08-14T17:47:32+00:00"
+}

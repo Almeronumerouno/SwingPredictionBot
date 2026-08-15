@@ -1,0 +1,318 @@
+{
+  "phase": "Phase 3 (RTF validation) — true walk-forward threshold tuning",
+  "method": "global chronological split (cutoff quantile 0.70, absolut) + purge(horizon max 63) + embargo(90d); sequential freeze; pemilihan parameter HANYA di TRAIN",
+  "selection_metadata": {
+    "cutoff_date": "2026-01-23",
+    "embargo_date": "2026-04-23",
+    "purge_horizon": 63,
+    "embargo_days": 90,
+    "train_signal_count": 1673,
+    "oos_signal_count": 366,
+    "parameter_selection_order": [
+      "density",
+      "heavy_rvol",
+      "min_heavy",
+      "decay_tau",
+      "decay_cutoff"
+    ],
+    "default_config": {
+      "ACCUM_ARA_RISE_PCT": 10.0,
+      "ACCUM_RVOL_PERIOD": 20,
+      "ACCUM_DENSITY_PCT": 30.0,
+      "ACCUM_MIN_HEAVY_DAYS": 2,
+      "ACCUM_HEAVY_RVOL": 2.0,
+      "ACCUM_MA20_DAYS": 20,
+      "ACCUM_DECAY_TAU": 2.0,
+      "ACCUM_DECAY_CUTOFF_DAYS": 5,
+      "ACCUM_MIN_ADV_VOL": 500000,
+      "ACCUM_MIN_ADV_VAL": 250000000
+    },
+    "selected_config": {
+      "ACCUM_ARA_RISE_PCT": 10.0,
+      "ACCUM_RVOL_PERIOD": 20,
+      "ACCUM_DENSITY_PCT": 50.0,
+      "ACCUM_MIN_HEAVY_DAYS": 2,
+      "ACCUM_HEAVY_RVOL": 2.0,
+      "ACCUM_MA20_DAYS": 20,
+      "ACCUM_DECAY_TAU": 2.0,
+      "ACCUM_DECAY_CUTOFF_DAYS": null,
+      "ACCUM_MIN_ADV_VOL": 500000,
+      "ACCUM_MIN_ADV_VAL": 250000000
+    }
+  },
+  "n_min_signals": 300,
+  "near_tie_rule": {
+    "lift_tol": 0.05,
+    "auc_tol": 0.01,
+    "rule": "jika best - default <= tol -> prefer default (stabil/sederhana)"
+  },
+  "steps": [
+    {
+      "parameter": "density",
+      "grid": [
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        50.0
+      ],
+      "candidates": [
+        {
+          "value": 20.0,
+          "train_metrics": {
+            "b10": 0.2876,
+            "lift_b10": 2.461,
+            "n_signals": 6541
+          }
+        },
+        {
+          "value": 25.0,
+          "train_metrics": {
+            "b10": 0.2972,
+            "lift_b10": 2.543,
+            "n_signals": 4912
+          }
+        },
+        {
+          "value": 30.0,
+          "train_metrics": {
+            "b10": 0.3075,
+            "lift_b10": 2.631,
+            "n_signals": 3476
+          }
+        },
+        {
+          "value": 35.0,
+          "train_metrics": {
+            "b10": 0.3118,
+            "lift_b10": 2.668,
+            "n_signals": 2572
+          }
+        },
+        {
+          "value": 40.0,
+          "train_metrics": {
+            "b10": 0.3102,
+            "lift_b10": 2.654,
+            "n_signals": 2366
+          }
+        },
+        {
+          "value": 50.0,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673
+          }
+        }
+      ],
+      "winner": 50.0,
+      "near_tie": false,
+      "rationale": "best density=2.772 (> default 2.631) dgn n_signals=1673"
+    },
+    {
+      "parameter": "heavy_rvol",
+      "grid": [
+        1.5,
+        1.75,
+        2.0,
+        2.5,
+        3.0
+      ],
+      "candidates": [
+        {
+          "value": 1.5,
+          "train_metrics": {
+            "b10": 0.3223,
+            "lift_b10": 2.758,
+            "n_signals": 2203
+          }
+        },
+        {
+          "value": 1.75,
+          "train_metrics": {
+            "b10": 0.3216,
+            "lift_b10": 2.751,
+            "n_signals": 1897
+          }
+        },
+        {
+          "value": 2.0,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673
+          }
+        },
+        {
+          "value": 2.5,
+          "train_metrics": {
+            "b10": 0.3213,
+            "lift_b10": 2.749,
+            "n_signals": 1354
+          }
+        },
+        {
+          "value": 3.0,
+          "train_metrics": {
+            "b10": 0.3287,
+            "lift_b10": 2.812,
+            "n_signals": 1141
+          }
+        }
+      ],
+      "winner": 2.0,
+      "near_tie": true,
+      "rationale": "near-tie: best heavy_rvol=2.812 vs default=2.772 (delta 0.040 <= tol 0.05) -> prefer default (stabil/sederhana)",
+      "best_candidate": 3.0
+    },
+    {
+      "parameter": "min_heavy",
+      "grid": [
+        1,
+        2,
+        3
+      ],
+      "candidates": [
+        {
+          "value": 1,
+          "train_metrics": {
+            "b10": 0.3198,
+            "lift_b10": 2.736,
+            "n_signals": 2333
+          }
+        },
+        {
+          "value": 2,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673
+          }
+        },
+        {
+          "value": 3,
+          "train_metrics": {
+            "b10": 0.4088,
+            "lift_b10": 3.497,
+            "n_signals": 274
+          }
+        }
+      ],
+      "winner": 2,
+      "near_tie": false,
+      "rationale": "best min_heavy=2.772 (> default 2.772) dgn n_signals=1673"
+    },
+    {
+      "parameter": "decay_tau",
+      "grid": [
+        1.0,
+        1.5,
+        2.0,
+        3.0
+      ],
+      "candidates": [
+        {
+          "value": 1.0,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.514,
+            "auc_b10_21": 0.5498
+          }
+        },
+        {
+          "value": 1.5,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.514,
+            "auc_b10_21": 0.5498
+          }
+        },
+        {
+          "value": 2.0,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.514,
+            "auc_b10_21": 0.5498
+          }
+        },
+        {
+          "value": 3.0,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.5155,
+            "auc_b10_21": 0.5509
+          }
+        }
+      ],
+      "winner": 2.0,
+      "near_tie": true,
+      "rationale": "near-tie: best decay_tau=0.5155 vs default=0.514 (delta 0.001 <= tol 0.01) -> prefer default (stabil/sederhana)",
+      "best_candidate": 3.0
+    },
+    {
+      "parameter": "decay_cutoff",
+      "grid": [
+        null,
+        5,
+        7,
+        10
+      ],
+      "candidates": [
+        {
+          "value": null,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.5247,
+            "auc_b10_21": 0.5667
+          }
+        },
+        {
+          "value": 5,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.514,
+            "auc_b10_21": 0.5498
+          }
+        },
+        {
+          "value": 7,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.5181,
+            "auc_b10_21": 0.5582
+          }
+        },
+        {
+          "value": 10,
+          "train_metrics": {
+            "b10": 0.324,
+            "lift_b10": 2.772,
+            "n_signals": 1673,
+            "auc_up1_21": 0.5219,
+            "auc_b10_21": 0.5631
+          }
+        }
+      ],
+      "winner": null,
+      "near_tie": false,
+      "rationale": "best decay_cutoff=0.5247 (> default 0.514) dgn n_signals=1673"
+    }
+  ],
+  "generated": "2026-08-14T17:21:13+00:00"
+}

@@ -1,0 +1,135 @@
+{
+  "phase": "Phase 5 — RTF × Short-Horizon Return Incremental Value (P5.0 protocol FROZEN)",
+  "frozen_date": "2026-08-15",
+  "research_question": "Apakah RTF memberikan informasi tambahan SETELAH kita sudah mengetahui short-horizon return M5/M10?",
+  "not": "Bukan 'bagaimana membuat score baru yang lebih bagus'. TIDAK ada perubahan production, TIDAK ada tuning parameter, Phase 4 locked holdout TIDAK boleh disentuh.",
+  "terminology_note": "M5/M10 = short-horizon return BASELINE, BUKAN classic momentum anomaly: literatur classic momentum memakai horizon jauh lebih panjang; short-horizon return dapat menunjukkan momentum MAUPUN reversal tergantung horizon/liquidity.",
+  "models": {
+    "M0": "Momentum5 (short-horizon return baseline)",
+    "M1": "RTF-only (production definition frozen)",
+    "M2": "RankAvg(M5, RTF) — equal rank average",
+    "M3": "Momentum10 (short-horizon return baseline)",
+    "M4": "RankAvg(M10, RTF) — equal rank average",
+    "random_baseline": {
+    "seed": 42,
+    "per_date": true,
+    "note": "S_t ~ Uniform(U_t, K) per tanggal; deterministic (seed 42 frozen); sanity check saja, TIDAK utk tuning"
+  },
+    "density_only": "DIAGNOSTIC saja (Phase 3: density-only > full strength di beberapa ranking test), BUKAN M6 production candidate"
+  },
+  "production_unchanged": {
+    "policy": "config.py TIDAK akan ditulis oleh Phase 5 (read-only)",
+    "p_min_0.68": "FROZEN — tidak disentuh (Phase 5 tidak memakai signal gate recovery sama sekali)",
+    "m1_recalibration_candidate": "TIDAK dipakai (Phase 5 memakai RTF production score ranking; M1 = probability layer recovery, di luar scope)",
+    "rtf_production_config_frozen": {
+      "density_pct": 30.0,
+      "config_key": "ACCUM_DENSITY_PCT",
+      "heavy_rvol": 2.0,
+      "config_key_2": "ACCUM_HEAVY_RVOL",
+      "min_heavy_days": 2,
+      "config_key_3": "ACCUM_MIN_HEAVY_DAYS",
+      "decay_tau": 2.0,
+      "config_key_4": "ACCUM_DECAY_TAU",
+      "decay_cutoff_days": 5,
+      "config_key_5": "ACCUM_DECAY_CUTOFF_DAYS",
+      "note": "Nilai production dari config.py saat freeze — TIDAK ada tuning Phase 5"
+    }
+  },
+  "dataset": {
+    "source": "data/universe_ohlcv.npz",
+    "snapshot": "data/phase5_snapshot_universe_ohlcv.npz",
+    "snapshot_sha256": "284B40C7B92B7C26B823A7C50C477FC6AE553DF250B76423C4C7DD21D0CB8FB2",
+    "config_py_sha256": "85351777724228CB50C15FA6C8B33AB3F4757D4A3C52CADB45B19053211BC0A2",
+    "n_codes": 963,
+    "n_ok": 963,
+    "n_rows_total": 526169,
+    "date_range": "2024-02-26 .. 2026-08-13",
+    "columns": ["open", "high", "low", "close", "adj", "vol"],
+    "price_policy": "seri RAW (close col 3) konsisten dgn produksi & Phase 4; adjusted (col 4) hanya utk konteks",
+    "freeze_policy": "Bila universe_ohlcv.npz diperbarui (mis. utk Phase 4 holdout), Phase 5 TETAP memakai snapshot ini — hash diverifikasi tiap run",
+    "dataset_file": "data/phase5_dataset.npz",
+    "dataset_sha256": "F8FC56CF91662FC2F9E6CD32204534EA574A32B2685622B0C64765CFF5EB8518",
+    "dataset_frozen_at": "2026-08-15 (P5.1 PASS)"
+  },
+  "split": {
+    "policy": "GLOBAL chronological split konsisten F2/F3 (BUKAN split baru demi Phase 5)",
+    "cutoff_absolut": "2026-01-23",
+    "purge": "21",
+    "purge_note": "max label horizon (label b10_h10/b10_h21/up1_h21 -> max h = 21)",
+    "embargo_days": 90,
+    "oos_start": "2026-04-23",
+    "note": "OOS = validation window yang sama dgn Phase 3 OOS (sudah dibuka Phase 3/4 — bukan holdout). Phase 4 locked holdout = data genuinely unseen MASA DEPAN, saat ini tidak ada."
+  },
+  "phase4_holdout_boundary": {
+    "excluded": true,
+    "reason": "Holdout Phase 4 = data setelah tanggal terakhir snapshot (2026-08-13) yang saat ini BELUM ADA; snapshot difreeze sehingga kontaminasi mustahil",
+    "guard": "_phase5_* script memakai phase5_snapshot_universe_ohlcv.npz, BUKAN universe_ohlcv.npz"
+  },
+  "features_formulas": {
+    "M5": "M5_t = Close_t / Close_{t-5} - 1",
+    "M10": "M10_t = Close_t / Close_{t-10} - 1",
+    "feature_info": "Semua feature hanya memakai info sampai t (F_t); label memakai t+1..t+h"
+  },
+  "labels": {
+    "b10_h10": "PRIMARY — max(high) t+1..t+10 >= close_t * 1.10 (level = close_t, konsisten _baseline_compare Phase 3)",
+    "b10_h21": "SECONDARY — max(high) t+1..t+21 >= close_t * 1.10",
+    "up1_h21": "DIAGNOSTIC — max(close) t+1..t+21 >= close_t * 1.05 (definisi Phase 3 _validate_accum4: MAX close forward, BUKAN close_{t+21})",
+    "max_horizon": 21
+  },
+  "K": [5, 10],
+  "rank_normalization": {
+    "formula": "r_i = (N_t - Rank_i) / (N_t - 1)",
+    "range": "top = 1, bottom = 0",
+    "n1_handling": "N_t == 1 -> r = 1.0 (satu-satunya = top); n_dates dgn N<2 dicatat utk safety"
+  },
+  "combination": {
+    "M2_i": "(r_M5_i + r_RTF_i) / 2",
+    "M4_i": "(r_M10_i + r_RTF_i) / 2",
+    "forbidden": ["60/40", "70/30", "80/20", "semua weight tuning"]
+  },
+  "bootstrap": {
+    "method": "stock-cluster (resample STOCK, semua observasi milik stock), BUKAN row IID",
+    "B": 1000,
+    "seed": 42,
+    "ci_required": ["Precision@5", "Precision@10", "Lift", "AUC", "DeltaPrecision", "DeltaLift"],
+    "focus": "CI(DeltaPrecision) dan CI(DeltaLift) — menguji INCREMENTAL value"
+  },
+  "regime": {
+    "definition": "regime.regime_series (sudah ada: ADX14 < 20 -> sideways; close > SMA200 -> bull; else bear)",
+    "policy": "pakai definition yang SUDAH ADA, jangan define ulang setelah melihat result",
+    "groups": ["bull", "bear", "sideways"]
+  },
+  "liquidity": {
+    "definition": "ADV20 point-in-time dari _phase3_rtf_common (window 20, min 5 bars, hari ARA >= 10% dibuang)",
+    "liquid": "adv_vol >= 500000 DAN adv_val >= 250000000 (ACCUM_MIN_ADV_VOL / ACCUM_MIN_ADV_VAL — threshold produksi existing)",
+    "less_liquid": "eligible universe yang tidak memenuhi floor ADV20",
+    "policy": "gunakan classification yang SUDAH ADA; JANGAN buat threshold liquidity baru"
+  },
+  "dependency_audit": {
+    "spearman": "rho_t = Spearman(RTF, M5) dan Spearman(RTF, M10) per tanggal -> report mean, median, std, IQR, min, max",
+    "overlap": "Overlap@K = |TopK_RTF n TopK_M| / K untuk K=5 dan K=10",
+    "extra": "distribusi per tanggal + regime breakdown",
+    "status": "DIAGNOSTIC — jangan memilih combination berdasarkan dependency metric"
+  },
+  "interpretation_keys": {
+    "A_incremental": "M2 > M0 dan M4 > M3 dgn CI incremental mendukung -> RTF complementary",
+    "B_redundant": "M2 ~= M0 dan M4 ~= M3, CI overlap -> RTF tidak memberi incremental value",
+    "C_harmful": "M2 < M0 dan M4 < M3 secara robust -> RTF mengganggu",
+    "D_regime_specific": "mis. Bull helpful / Bear harmful -> jangan paksa satu global conclusion",
+    "E_inconclusive": "sample/CI terlalu lemah -> tidak ada config change"
+  },
+  "two_strategy_diagnostic": {
+    "strategy_A": "Pre-breakout / accumulation (below ON)",
+    "strategy_B": "Breakout continuation (below OFF)",
+    "policy": "diagnostic saja; TIDAK ada perubahan production; kalau menarik -> phase khusus baru"
+  },
+  "ablation": {
+    "minimum": ["Momentum5", "RTF full", "RTF density", "Momentum5 + RTF full", "Momentum5 + RTF density", "Momentum10", "RTF full", "Momentum10 + RTF full"],
+    "note": "TIDAK mengulang gate ablation Phase 3 (sudah pernah dilakukan)"
+  },
+  "p50_acceptance": {
+    "pass": "semua frozen state cocok (snapshot hash, config hash, nilai RTF config, cutoff, purge, embargo, exclusion)",
+    "stop": "bila ada mismatch -> STOP, jangan lanjut ke P5.1"
+  },
+  "execution_order": "P5.0 -> P5.1 -> ... -> P5.14 PERSIS; jangan lompat ke combination sebelum P5.2 (split) dan P5.4 (dependency) selesai"
+}

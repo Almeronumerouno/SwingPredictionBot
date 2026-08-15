@@ -174,6 +174,30 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
                           {data.accumulation.ara_ref_price != null ? fmtIdr(data.accumulation.ara_ref_price) : "-"}
                         </p>
                       </div>
+                      <div title="AccDensity = (#heavy-day x NetDist heavy) / N. > 0.3: heavy-day banyak DAN dominan diserap buyer">
+                        <p className="text-[10px] text-[var(--color-text-muted)] mb-0.5">AccDensity</p>
+                        <p className="text-sm font-bold tabular-nums text-[var(--color-text-primary)]">
+                          {data.accumulation.acc_density != null ? data.accumulation.acc_density.toFixed(3) : "-"}
+                        </p>
+                      </div>
+                      <div title={`Kesegaran pola: w(d) = exp(-d/2), cutoff hari ke-5 (data IDX: efek ARA netral sejak d>=2). ${data.accumulation.post_ara_decay != null ? `d=${data.accumulation.window_days} -> w=${data.accumulation.post_ara_decay.toFixed(2)}` : ""}`}>
+                        <p className="text-[10px] text-[var(--color-text-muted)] mb-0.5">Kesegaran</p>
+                        <p className="text-sm font-bold tabular-nums text-[var(--color-text-primary)]">
+                          {data.accumulation.post_ara_decay != null
+                            ? `${(data.accumulation.post_ara_decay * 100).toFixed(0)}%`
+                            : "-"}
+                        </p>
+                      </div>
+                      <div title={`ADV20 point-in-time tanpa hari ARA: ${data.accumulation.adv_vol_20 != null ? Number(data.accumulation.adv_vol_20).toLocaleString("id-ID") : "-"} lbr / Rp${data.accumulation.adv_val_20 != null ? Number(data.accumulation.adv_val_20).toLocaleString("id-ID") : "-"}. Floor BEI 500rb lbr/Rp250jt; prima = 1jt lbr/Rp1M (base rate B10 setara di semua tier, likuiditas bukan filter kualitas)`}>
+                        <p className="text-[10px] text-[var(--color-text-muted)] mb-0.5">Likuiditas ADV20</p>
+                        <p className="text-sm font-bold tabular-nums text-[var(--color-text-primary)]">
+                          {data.accumulation.liquidity_ok
+                            ? (data.accumulation.liquidity_prima
+                                ? <span className="text-[var(--color-up)]">Prima</span>
+                                : <span className="text-[var(--color-text-secondary)]">Floor</span>)
+                            : <span className="text-[var(--color-down)]">Gagal</span>}
+                        </p>
+                      </div>
                     </div>
                     {data.accumulation.warning && (
                       <p className="text-[11px] text-[var(--color-text-muted)] mt-2.5 leading-relaxed">{data.accumulation.warning}</p>
@@ -209,35 +233,49 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
               </div>
             )}
 
-            {/* GBM probabilities */}
-            {data.gbm && (
+            {/* Model recovery empiris global (logistic drawdown) */}
+            {data.model && (
               <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <p className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-                    Probabilitas Model GBM
+                    Probabilitas Recovery (Model Global)
                   </p>
                   <p className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
-                    P(hit kapan pun): <span className="font-bold text-[var(--color-text-primary)]">{Math.round((data.gbm.p_hit_ever ?? 0) * 100)}%</span>
+                    Drawdown dari prior high: <span className="font-bold text-[var(--color-text-primary)]">
+                      {data.model.dd_fraction != null ? `${(data.model.dd_fraction * 100).toFixed(1)}%` : "-"}
+                    </span>
                   </p>
                 </div>
                 <div className="space-y-2">
-                  {data.gbm.probabilities.map((p) => {
+                  {(data.model.probabilities ?? []).map((p) => {
                     const c = pctBar(p.p_hit);
                     const pctVal = Math.round(p.p_hit * 100);
+                    const ci =
+                      p.ci_low != null && p.ci_high != null
+                        ? ` (${Math.round(p.ci_low * 100)}-${Math.round(p.ci_high * 100)}%)`
+                        : "";
                     return (
                       <div key={p.horizon_days} className="flex items-center gap-3">
                         <span className="w-14 shrink-0 text-xs text-[var(--color-text-secondary)]">{HORIZON_LABELS[p.horizon_days] || `${p.horizon_days} Hari`}</span>
                         <div className="flex-1 h-1.5 rounded-full bg-[var(--color-muted-bg)] overflow-hidden">
                           <div className={`h-full rounded-full transition-all duration-700 ease-out ${c.bar}`} style={{ width: `${pctVal}%` }} />
                         </div>
-                        <span className={`w-10 shrink-0 text-right text-xs font-bold tabular-nums ${c.text}`}>{pctVal}%</span>
+                        <span
+                          className="w-24 shrink-0 text-right text-xs font-bold tabular-nums whitespace-nowrap"
+                          title={ci ? "Interval kepercayaan 90% (delta method)" : undefined}
+                        >
+                          {pctVal}%
+                          <span className="font-normal text-[10px] text-[var(--color-text-muted)]">{ci}</span>
+                        </span>
                       </div>
                     );
                   })}
                 </div>
-                <p className="text-[11px] text-[var(--color-text-muted)] mt-2.5 tabular-nums">
-                  Drift μ {((data.gbm.mu_annual ?? 0) * 100).toFixed(1)}% per tahun · Vol σ {(data.gbm.sigma_annual ?? 0) * 100 >= 100 ? ((data.gbm.sigma_annual ?? 0) * 100).toFixed(0) : ((data.gbm.sigma_annual ?? 0) * 100).toFixed(1)}% per tahun
-                </p>
+                {data.signal_basis && (
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-2.5">
+                    Basis sinyal: {data.signal_basis}. Target: {data.model.target_desc || data.model.target}.
+                  </p>
+                )}
               </div>
             )}
 
@@ -285,7 +323,7 @@ export default function RecoveryCard({ data }: { data: RecoveryResponse }) {
 
             {/* Disclaimer */}
             <p className="text-[11px] text-[var(--color-text-muted)] border-t border-[var(--color-border)] pt-3">
-              Estimasi probabilistik berbasis model GBM dan data historis, bukan jaminan. Bukan rekomendasi beli/jual.
+              Probabilitas dari model empiris global (963 saham IDX) & base rate historis saham ini, bukan jaminan. Bukan rekomendasi beli/jual.
             </p>
           </>
         )}

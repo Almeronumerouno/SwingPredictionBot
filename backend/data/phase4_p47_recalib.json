@@ -1,0 +1,951 @@
+{
+  "phase": "P4.7 — Conditional recalibration",
+  "cal_window": "126 trading days terakhir DEV (purged)",
+  "order": "M0 frozen -> M1 intercept-only -> M2 intercept+slope -> M3 regime-conditional intercept (slope=1) | M4 isotonic (sensitivity)",
+  "eval": "VALIDATION (holdout final TIDAK dipakai untuk seleksi)",
+  "targets": {
+    "previous_close": {
+      "1": {
+        "n_cal": 6519,
+        "n_val": 5476,
+        "cal_window_start": "2025-07-22",
+        "p_ref_dev_climatology": 0.2544,
+        "models": {
+          "M0_frozen": {
+            "n": 5476,
+            "O_over_E": 2.06,
+            "brier": 0.19309,
+            "bss": -0.0728,
+            "ece10": 0.1208,
+            "mean_p": 0.1139,
+            "rate": 0.2347
+          },
+          "M1_intercept": {
+            "n": 5476,
+            "O_over_E": 1.025,
+            "brier": 0.17806,
+            "bss": 0.0107,
+            "ece10": 0.0305,
+            "mean_p": 0.229,
+            "rate": 0.2347,
+            "params": {
+              "c": 0.8409
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 5476,
+            "O_over_E": 1.024,
+            "brier": 0.17828,
+            "bss": 0.0095,
+            "ece10": 0.0337,
+            "mean_p": 0.2291,
+            "rate": 0.2347,
+            "params": {
+              "a0": 0.3608,
+              "a1": 0.7656
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 5476,
+            "O_over_E": 1.005,
+            "brier": 0.17801,
+            "bss": 0.011,
+            "ece10": 0.0292,
+            "mean_p": 0.2334,
+            "rate": 0.2347,
+            "params": {
+              "0": 0.9043,
+              "1": 0.8281,
+              "2": 0.8562
+            }
+          },
+          "M4_isotonic": {
+            "n": 5476,
+            "O_over_E": 1.014,
+            "brier": 0.17766,
+            "bss": 0.0129,
+            "ece10": 0.0219,
+            "mean_p": 0.2313,
+            "rate": 0.2347
+          }
+        },
+        "selected_on_validation": "M4_isotonic",
+        "recommendation": "M4_isotonic: brier=0.17766 O/E=1.014"
+      },
+      "3": {
+        "n_cal": 6365,
+        "n_val": 5368,
+        "cal_window_start": "2025-07-18",
+        "p_ref_dev_climatology": 0.4394,
+        "models": {
+          "M0_frozen": {
+            "n": 5368,
+            "O_over_E": 1.531,
+            "brier": 0.26691,
+            "bss": -0.0851,
+            "ece10": 0.1513,
+            "mean_p": 0.2851,
+            "rate": 0.4365
+          },
+          "M1_intercept": {
+            "n": 5368,
+            "O_over_E": 0.981,
+            "brier": 0.24406,
+            "bss": 0.0078,
+            "ece10": 0.0275,
+            "mean_p": 0.4448,
+            "rate": 0.4365,
+            "params": {
+              "c": 0.7065
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 5368,
+            "O_over_E": 0.987,
+            "brier": 0.24426,
+            "bss": 0.007,
+            "ece10": 0.0256,
+            "mean_p": 0.442,
+            "rate": 0.4365,
+            "params": {
+              "a0": 0.1885,
+              "a1": 0.4534
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 5368,
+            "O_over_E": 0.962,
+            "brier": 0.24375,
+            "bss": 0.009,
+            "ece10": 0.0323,
+            "mean_p": 0.4539,
+            "rate": 0.4365,
+            "params": {
+              "0": 0.6827,
+              "1": 0.6994,
+              "2": 0.7911
+            }
+          },
+          "M4_isotonic": {
+            "n": 5368,
+            "O_over_E": 0.981,
+            "brier": 0.24371,
+            "bss": 0.0092,
+            "ece10": 0.0195,
+            "mean_p": 0.4449,
+            "rate": 0.4365
+          }
+        },
+        "selected_on_validation": "M4_isotonic",
+        "recommendation": "M4_isotonic: brier=0.24371 O/E=0.981"
+      },
+      "5": {
+        "n_cal": 6267,
+        "n_val": 5333,
+        "cal_window_start": "2025-07-16",
+        "p_ref_dev_climatology": 0.5355,
+        "models": {
+          "M0_frozen": {
+            "n": 5333,
+            "O_over_E": 1.446,
+            "brier": 0.275,
+            "bss": -0.1046,
+            "ece10": 0.1643,
+            "mean_p": 0.368,
+            "rate": 0.5323
+          },
+          "M1_intercept": {
+            "n": 5333,
+            "O_over_E": 0.964,
+            "brier": 0.24836,
+            "bss": 0.0024,
+            "ece10": 0.0306,
+            "mean_p": 0.5524,
+            "rate": 0.5323,
+            "params": {
+              "c": 0.752
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 5333,
+            "O_over_E": 0.96,
+            "brier": 0.24793,
+            "bss": 0.0042,
+            "ece10": 0.0285,
+            "mean_p": 0.5543,
+            "rate": 0.5323,
+            "params": {
+              "a0": 1.3217,
+              "a1": 2.0371
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 5333,
+            "O_over_E": 0.945,
+            "brier": 0.24886,
+            "bss": 0.0004,
+            "ece10": 0.0319,
+            "mean_p": 0.5635,
+            "rate": 0.5323,
+            "params": {
+              "0": 0.8419,
+              "1": 0.7311,
+              "2": 0.7932
+            }
+          },
+          "M4_isotonic": {
+            "n": 5333,
+            "O_over_E": 0.959,
+            "brier": 0.24801,
+            "bss": 0.0038,
+            "ece10": 0.0255,
+            "mean_p": 0.5552,
+            "rate": 0.5323
+          }
+        },
+        "selected_on_validation": "M2_intercept_slope",
+        "recommendation": "M2_intercept_slope: brier=0.24793 O/E=0.96"
+      },
+      "10": {
+        "n_cal": 6273,
+        "n_val": 5226,
+        "cal_window_start": "2025-07-14",
+        "p_ref_dev_climatology": 0.6542,
+        "models": {
+          "M0_frozen": {
+            "n": 5226,
+            "O_over_E": 1.283,
+            "brier": 0.2443,
+            "bss": -0.0862,
+            "ece10": 0.1454,
+            "mean_p": 0.5131,
+            "rate": 0.6584
+          },
+          "M1_intercept": {
+            "n": 5226,
+            "O_over_E": 0.969,
+            "brier": 0.22351,
+            "bss": 0.0062,
+            "ece10": 0.0282,
+            "mean_p": 0.6792,
+            "rate": 0.6584,
+            "params": {
+              "c": 0.7033
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 5226,
+            "O_over_E": 0.973,
+            "brier": 0.2239,
+            "bss": 0.0045,
+            "ece10": 0.0327,
+            "mean_p": 0.6769,
+            "rate": 0.6584,
+            "params": {
+              "a0": 0.7127,
+              "a1": 0.5447
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 5226,
+            "O_over_E": 0.963,
+            "brier": 0.22529,
+            "bss": -0.0017,
+            "ece10": 0.0327,
+            "mean_p": 0.684,
+            "rate": 0.6584,
+            "params": {
+              "0": 0.8905,
+              "1": 0.6791,
+              "2": 0.6563
+            }
+          },
+          "M4_isotonic": {
+            "n": 5226,
+            "O_over_E": 0.97,
+            "brier": 0.22358,
+            "bss": 0.0059,
+            "ece10": 0.0282,
+            "mean_p": 0.6791,
+            "rate": 0.6584
+          }
+        },
+        "selected_on_validation": "M1_intercept",
+        "recommendation": "M1_intercept: brier=0.22351 O/E=0.969"
+      },
+      "21": {
+        "n_cal": 6084,
+        "n_val": 4892,
+        "cal_window_start": "2025-07-03",
+        "p_ref_dev_climatology": 0.7575,
+        "models": {
+          "M0_frozen": {
+            "n": 4892,
+            "O_over_E": 1.226,
+            "brier": 0.21544,
+            "bss": -0.0842,
+            "ece10": 0.1342,
+            "mean_p": 0.5942,
+            "rate": 0.7283
+          },
+          "M1_intercept": {
+            "n": 4892,
+            "O_over_E": 0.936,
+            "brier": 0.20002,
+            "bss": -0.0066,
+            "ece10": 0.0499,
+            "mean_p": 0.7782,
+            "rate": 0.7283,
+            "params": {
+              "c": 0.8744
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 4892,
+            "O_over_E": 0.936,
+            "brier": 0.20003,
+            "bss": -0.0066,
+            "ece10": 0.0498,
+            "mean_p": 0.7781,
+            "rate": 0.7283,
+            "params": {
+              "a0": 0.9005,
+              "a1": 0.9296
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 4892,
+            "O_over_E": 0.925,
+            "brier": 0.20389,
+            "bss": -0.0261,
+            "ece10": 0.0597,
+            "mean_p": 0.7875,
+            "rate": 0.7283,
+            "params": {
+              "0": 1.3174,
+              "1": 0.8192,
+              "2": 0.7861
+            }
+          },
+          "M4_isotonic": {
+            "n": 4892,
+            "O_over_E": 0.934,
+            "brier": 0.1998,
+            "bss": -0.0055,
+            "ece10": 0.0521,
+            "mean_p": 0.7801,
+            "rate": 0.7283
+          }
+        },
+        "selected_on_validation": "M4_isotonic",
+        "recommendation": "M4_isotonic: brier=0.1998 O/E=0.934"
+      },
+      "42": {
+        "n_cal": 6117,
+        "n_val": 3726,
+        "cal_window_start": "2025-06-17",
+        "p_ref_dev_climatology": 0.8334,
+        "models": {
+          "M0_frozen": {
+            "n": 3726,
+            "O_over_E": 1.111,
+            "brier": 0.18136,
+            "bss": -0.0103,
+            "ece10": 0.077,
+            "mean_p": 0.6954,
+            "rate": 0.7724
+          },
+          "M1_intercept": {
+            "n": 3726,
+            "O_over_E": 0.903,
+            "brier": 0.18236,
+            "bss": -0.0159,
+            "ece10": 0.0826,
+            "mean_p": 0.855,
+            "rate": 0.7724,
+            "params": {
+              "c": 0.949
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 3726,
+            "O_over_E": 0.904,
+            "brier": 0.18235,
+            "bss": -0.0158,
+            "ece10": 0.0821,
+            "mean_p": 0.8545,
+            "rate": 0.7724,
+            "params": {
+              "a0": 1.1744,
+              "a1": 0.7222
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 3726,
+            "O_over_E": 0.898,
+            "brier": 0.18704,
+            "bss": -0.0419,
+            "ece10": 0.088,
+            "mean_p": 0.8604,
+            "rate": 0.7724,
+            "params": {
+              "0": 1.581,
+              "1": 0.8846,
+              "2": 0.805
+            }
+          },
+          "M4_isotonic": {
+            "n": 3726,
+            "O_over_E": 0.9,
+            "brier": 0.18276,
+            "bss": -0.0181,
+            "ece10": 0.0856,
+            "mean_p": 0.858,
+            "rate": 0.7724
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.18136 O/E=1.111"
+      },
+      "63": {
+        "n_cal": 6094,
+        "n_val": 968,
+        "cal_window_start": "2025-05-21",
+        "p_ref_dev_climatology": 0.8701,
+        "models": {
+          "M0_frozen": {
+            "n": 968,
+            "O_over_E": 0.85,
+            "brier": 0.24278,
+            "bss": 0.1466,
+            "ece10": 0.1124,
+            "mean_p": 0.7508,
+            "rate": 0.6384
+          },
+          "M1_intercept": {
+            "n": 968,
+            "O_over_E": 0.715,
+            "brier": 0.29543,
+            "bss": -0.0385,
+            "ece10": 0.2551,
+            "mean_p": 0.8935,
+            "rate": 0.6384,
+            "params": {
+              "c": 1.026
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 968,
+            "O_over_E": 0.717,
+            "brier": 0.29421,
+            "bss": -0.0342,
+            "ece10": 0.2518,
+            "mean_p": 0.8902,
+            "rate": 0.6384,
+            "params": {
+              "a0": 2.0346,
+              "a1": 0.053
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 968,
+            "O_over_E": 0.709,
+            "brier": 0.30134,
+            "bss": -0.0592,
+            "ece10": 0.2616,
+            "mean_p": 0.9,
+            "rate": 0.6384,
+            "params": {
+              "0": 1.614,
+              "1": 0.9645,
+              "2": 0.9171
+            }
+          },
+          "M4_isotonic": {
+            "n": 968,
+            "O_over_E": 0.715,
+            "brier": 0.29505,
+            "bss": -0.0371,
+            "ece10": 0.2549,
+            "mean_p": 0.8933,
+            "rate": 0.6384
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.24278 O/E=0.85"
+      }
+    },
+    "prior_peak": {
+      "1": {
+        "n_cal": 100628,
+        "n_val": 64502,
+        "cal_window_start": "2025-07-22",
+        "p_ref_dev_climatology": 0.0411,
+        "models": {
+          "M0_frozen": {
+            "n": 64502,
+            "O_over_E": 0.728,
+            "brier": 0.00661,
+            "bss": 0.2838,
+            "ece10": 0.0035,
+            "mean_p": 0.0113,
+            "rate": 0.0082
+          },
+          "M1_intercept": {
+            "n": 64502,
+            "O_over_E": 0.629,
+            "brier": 0.00684,
+            "bss": 0.2591,
+            "ece10": 0.0051,
+            "mean_p": 0.0131,
+            "rate": 0.0082,
+            "params": {
+              "c": 0.1944
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 64502,
+            "O_over_E": 0.62,
+            "brier": 0.00681,
+            "bss": 0.2616,
+            "ece10": 0.0051,
+            "mean_p": 0.0133,
+            "rate": 0.0082,
+            "params": {
+              "a0": 0.085,
+              "a1": 0.9328
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 64502,
+            "O_over_E": 0.691,
+            "brier": 0.00668,
+            "bss": 0.2765,
+            "ece10": 0.0041,
+            "mean_p": 0.0119,
+            "rate": 0.0082,
+            "params": {
+              "0": -0.6371,
+              "1": 0.3644,
+              "2": -1.5942
+            }
+          },
+          "M4_isotonic": {
+            "n": 64502,
+            "O_over_E": 0.618,
+            "brier": 0.00672,
+            "bss": 0.2718,
+            "ece10": 0.0051,
+            "mean_p": 0.0133,
+            "rate": 0.0082
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.00661 O/E=0.728"
+      },
+      "3": {
+        "n_cal": 100670,
+        "n_val": 62793,
+        "cal_window_start": "2025-07-18",
+        "p_ref_dev_climatology": 0.0816,
+        "models": {
+          "M0_frozen": {
+            "n": 62793,
+            "O_over_E": 0.699,
+            "brier": 0.01324,
+            "bss": 0.3651,
+            "ece10": 0.0076,
+            "mean_p": 0.0243,
+            "rate": 0.017
+          },
+          "M1_intercept": {
+            "n": 62793,
+            "O_over_E": 0.574,
+            "brier": 0.01403,
+            "bss": 0.3276,
+            "ece10": 0.0129,
+            "mean_p": 0.0296,
+            "rate": 0.017,
+            "params": {
+              "c": 0.2708
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 62793,
+            "O_over_E": 0.555,
+            "brier": 0.014,
+            "bss": 0.329,
+            "ece10": 0.0137,
+            "mean_p": 0.0306,
+            "rate": 0.017,
+            "params": {
+              "a0": 0.1244,
+              "a1": 0.901
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 62793,
+            "O_over_E": 0.665,
+            "brier": 0.01329,
+            "bss": 0.3628,
+            "ece10": 0.0089,
+            "mean_p": 0.0255,
+            "rate": 0.017,
+            "params": {
+              "0": -0.4844,
+              "1": 0.4875,
+              "2": -0.9196
+            }
+          },
+          "M4_isotonic": {
+            "n": 62793,
+            "O_over_E": 0.543,
+            "brier": 0.01362,
+            "bss": 0.347,
+            "ece10": 0.0143,
+            "mean_p": 0.0313,
+            "rate": 0.017
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.01324 O/E=0.699"
+      },
+      "5": {
+        "n_cal": 100759,
+        "n_val": 61087,
+        "cal_window_start": "2025-07-16",
+        "p_ref_dev_climatology": 0.1112,
+        "models": {
+          "M0_frozen": {
+            "n": 61087,
+            "O_over_E": 0.662,
+            "brier": 0.01817,
+            "bss": 0.4012,
+            "ece10": 0.0121,
+            "mean_p": 0.0349,
+            "rate": 0.0231
+          },
+          "M1_intercept": {
+            "n": 61087,
+            "O_over_E": 0.524,
+            "brier": 0.01973,
+            "bss": 0.3497,
+            "ece10": 0.0211,
+            "mean_p": 0.0441,
+            "rate": 0.0231,
+            "params": {
+              "c": 0.3218
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 61087,
+            "O_over_E": 0.502,
+            "brier": 0.01971,
+            "bss": 0.3502,
+            "ece10": 0.023,
+            "mean_p": 0.0461,
+            "rate": 0.0231,
+            "params": {
+              "a0": 0.1695,
+              "a1": 0.8905
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 61087,
+            "O_over_E": 0.62,
+            "brier": 0.01832,
+            "bss": 0.3961,
+            "ece10": 0.0145,
+            "mean_p": 0.0373,
+            "rate": 0.0231,
+            "params": {
+              "0": -0.3428,
+              "1": 0.5649,
+              "2": -0.7021
+            }
+          },
+          "M4_isotonic": {
+            "n": 61087,
+            "O_over_E": 0.488,
+            "brier": 0.01906,
+            "bss": 0.3717,
+            "ece10": 0.0242,
+            "mean_p": 0.0473,
+            "rate": 0.0231
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.01817 O/E=0.662"
+      },
+      "10": {
+        "n_cal": 100891,
+        "n_val": 56820,
+        "cal_window_start": "2025-07-14",
+        "p_ref_dev_climatology": 0.169,
+        "models": {
+          "M0_frozen": {
+            "n": 56820,
+            "O_over_E": 0.587,
+            "brier": 0.02796,
+            "bss": 0.4546,
+            "ece10": 0.0244,
+            "mean_p": 0.0584,
+            "rate": 0.0343
+          },
+          "M1_intercept": {
+            "n": 56820,
+            "O_over_E": 0.444,
+            "brier": 0.03216,
+            "bss": 0.3728,
+            "ece10": 0.0431,
+            "mean_p": 0.0773,
+            "rate": 0.0343,
+            "params": {
+              "c": 0.3982
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 56820,
+            "O_over_E": 0.421,
+            "brier": 0.03225,
+            "bss": 0.3711,
+            "ece10": 0.0472,
+            "mean_p": 0.0815,
+            "rate": 0.0343,
+            "params": {
+              "a0": 0.2574,
+              "a1": 0.8843
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 56820,
+            "O_over_E": 0.533,
+            "brier": 0.02887,
+            "bss": 0.4369,
+            "ece10": 0.0304,
+            "mean_p": 0.0643,
+            "rate": 0.0343,
+            "params": {
+              "0": -0.1527,
+              "1": 0.6793,
+              "2": -0.4255
+            }
+          },
+          "M4_isotonic": {
+            "n": 56820,
+            "O_over_E": 0.405,
+            "brier": 0.03114,
+            "bss": 0.3926,
+            "ece10": 0.0504,
+            "mean_p": 0.0847,
+            "rate": 0.0343
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.02796 O/E=0.587"
+      },
+      "21": {
+        "n_cal": 101293,
+        "n_val": 47356,
+        "cal_window_start": "2025-07-03",
+        "p_ref_dev_climatology": 0.258,
+        "models": {
+          "M0_frozen": {
+            "n": 47356,
+            "O_over_E": 0.492,
+            "brier": 0.04456,
+            "bss": 0.5117,
+            "ece10": 0.0528,
+            "mean_p": 0.1038,
+            "rate": 0.051
+          },
+          "M1_intercept": {
+            "n": 47356,
+            "O_over_E": 0.36,
+            "brier": 0.05604,
+            "bss": 0.386,
+            "ece10": 0.0909,
+            "mean_p": 0.1419,
+            "rate": 0.051,
+            "params": {
+              "c": 0.467
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 47356,
+            "O_over_E": 0.339,
+            "brier": 0.05685,
+            "bss": 0.3771,
+            "ece10": 0.0995,
+            "mean_p": 0.1505,
+            "rate": 0.051,
+            "params": {
+              "a0": 0.3432,
+              "a1": 0.8724
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 47356,
+            "O_over_E": 0.418,
+            "brier": 0.04936,
+            "bss": 0.4592,
+            "ece10": 0.0711,
+            "mean_p": 0.1221,
+            "rate": 0.051,
+            "params": {
+              "0": 0.0942,
+              "1": 0.7587,
+              "2": -0.1009
+            }
+          },
+          "M4_isotonic": {
+            "n": 47356,
+            "O_over_E": 0.327,
+            "brier": 0.05488,
+            "bss": 0.3987,
+            "ece10": 0.1051,
+            "mean_p": 0.1561,
+            "rate": 0.051
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.04456 O/E=0.492"
+      },
+      "42": {
+        "n_cal": 101653,
+        "n_val": 29279,
+        "cal_window_start": "2025-06-17",
+        "p_ref_dev_climatology": 0.3747,
+        "models": {
+          "M0_frozen": {
+            "n": 29279,
+            "O_over_E": 0.417,
+            "brier": 0.07779,
+            "bss": 0.5147,
+            "ece10": 0.1114,
+            "mean_p": 0.1909,
+            "rate": 0.0795
+          },
+          "M1_intercept": {
+            "n": 29279,
+            "O_over_E": 0.304,
+            "brier": 0.10773,
+            "bss": 0.3279,
+            "ece10": 0.1821,
+            "mean_p": 0.2616,
+            "rate": 0.0795,
+            "params": {
+              "c": 0.5233
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 29279,
+            "O_over_E": 0.286,
+            "brier": 0.11112,
+            "bss": 0.3068,
+            "ece10": 0.1987,
+            "mean_p": 0.2782,
+            "rate": 0.0795,
+            "params": {
+              "a0": 0.4108,
+              "a1": 0.8306
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 29279,
+            "O_over_E": 0.332,
+            "brier": 0.09672,
+            "bss": 0.3967,
+            "ece10": 0.16,
+            "mean_p": 0.2395,
+            "rate": 0.0795,
+            "params": {
+              "0": 0.2774,
+              "1": 0.8086,
+              "2": 0.1488
+            }
+          },
+          "M4_isotonic": {
+            "n": 29279,
+            "O_over_E": 0.279,
+            "brier": 0.10772,
+            "bss": 0.328,
+            "ece10": 0.2052,
+            "mean_p": 0.2847,
+            "rate": 0.0795
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.07779 O/E=0.417"
+      },
+      "63": {
+        "n_cal": 102101,
+        "n_val": 11161,
+        "cal_window_start": "2025-05-21",
+        "p_ref_dev_climatology": 0.4604,
+        "models": {
+          "M0_frozen": {
+            "n": 11161,
+            "O_over_E": 0.367,
+            "brier": 0.12334,
+            "bss": 0.4413,
+            "ece10": 0.1918,
+            "mean_p": 0.3031,
+            "rate": 0.1113
+          },
+          "M1_intercept": {
+            "n": 11161,
+            "O_over_E": 0.28,
+            "brier": 0.17608,
+            "bss": 0.2024,
+            "ece10": 0.286,
+            "mean_p": 0.3973,
+            "rate": 0.1113,
+            "params": {
+              "c": 0.52
+            }
+          },
+          "M2_intercept_slope": {
+            "n": 11161,
+            "O_over_E": 0.271,
+            "brier": 0.18011,
+            "bss": 0.1842,
+            "ece10": 0.2995,
+            "mean_p": 0.4107,
+            "rate": 0.1113,
+            "params": {
+              "a0": 0.4476,
+              "a1": 0.8298
+            }
+          },
+          "M3_regime_intercept": {
+            "n": 11161,
+            "O_over_E": 0.293,
+            "brier": 0.16345,
+            "bss": 0.2596,
+            "ece10": 0.268,
+            "mean_p": 0.3792,
+            "rate": 0.1113,
+            "params": {
+              "0": 0.2852,
+              "1": 0.8284,
+              "2": 0.2394
+            }
+          },
+          "M4_isotonic": {
+            "n": 11161,
+            "O_over_E": 0.27,
+            "brier": 0.17487,
+            "bss": 0.2079,
+            "ece10": 0.3009,
+            "mean_p": 0.4121,
+            "rate": 0.1113
+          }
+        },
+        "selected_on_validation": "M0_frozen",
+        "recommendation": "M0_frozen: brier=0.12334 O/E=0.367"
+      }
+    }
+  },
+  "generated": "2026-08-14T18:32:15+00:00"
+}
