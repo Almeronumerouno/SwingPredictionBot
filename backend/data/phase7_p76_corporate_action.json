@@ -1,0 +1,93 @@
+{
+  "method": "P7.6 corporate-action integrity (raw vs adj_close)",
+  "ca_detection": "jump faktor f=raw/adj antar bar |dlogf| > log(1.01); big > 5% (split/bonus/rights/dividen besar)",
+  "window": {
+    "peak_lookback": 252,
+    "event_window_bars": 3,
+    "artifact_definition": "dd_raw>0.05 & dd_adj<0.01"
+  },
+  "stats": {
+    "bars": 296289,
+    "dd_raw_gt5pct": 261985,
+    "dd_adj_gt5pct": 257360,
+    "state_error_gt5pct": 13728,
+    "ca_artifact_bars": 603,
+    "ca_artifact_signal_bars": 603,
+    "episodes_total": 4609,
+    "episodes_ca_overlap": 513,
+    "episodes_artifact": 7,
+    "p21_on_artifact_raw": 0.5211,
+    "p21_on_artifact_adj": 0.6867
+  },
+  "n_events": 988,
+  "n_stocks_with_ca": 365,
+  "n_big_events": 274,
+  "n_ara_raw_real": 2649,
+  "n_ara_palsu_adj": 12,
+  "median_jump_pct": 3.278,
+  "p95_jump_pct": 9.397,
+  "top_artifact_stocks": [
+    {
+      "code": "MPMX",
+      "n_events": 3,
+      "ca_artifact_bars": 58,
+      "state_error_bars": 280
+    },
+    {
+      "code": "CLPI",
+      "n_events": 3,
+      "ca_artifact_bars": 50,
+      "state_error_bars": 132
+    },
+    {
+      "code": "BSSR",
+      "n_events": 7,
+      "ca_artifact_bars": 49,
+      "state_error_bars": 318
+    },
+    {
+      "code": "BJTM",
+      "n_events": 2,
+      "ca_artifact_bars": 39,
+      "state_error_bars": 210
+    },
+    {
+      "code": "CFIN",
+      "n_events": 2,
+      "ca_artifact_bars": 26,
+      "state_error_bars": 286
+    },
+    {
+      "code": "DVLA",
+      "n_events": 5,
+      "ca_artifact_bars": 24,
+      "state_error_bars": 138
+    },
+    {
+      "code": "POWR",
+      "n_events": 5,
+      "ca_artifact_bars": 23,
+      "state_error_bars": 103
+    },
+    {
+      "code": "DMAS",
+      "n_events": 2,
+      "ca_artifact_bars": 19,
+      "state_error_bars": 288
+    },
+    {
+      "code": "PBID",
+      "n_events": 3,
+      "ca_artifact_bars": 18,
+      "state_error_bars": 277
+    },
+    {
+      "code": "TOTL",
+      "n_events": 3,
+      "ca_artifact_bars": 18,
+      "state_error_bars": 130
+    }
+  ],
+  "policy": "raw = execution/event semantics (harga eksekusi aktual, deteksi ARA, gate RTF); adj_close = historical statistical state bila dipakai model statistik (tidak dipakai di jalur produksi saat ini); CA terdeteksi via flag ca_note di build_recovery_analysis (P7.6)",
+  "generated": "2026-08-16T04:51:02+00:00"
+}

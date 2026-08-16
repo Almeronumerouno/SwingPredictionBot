@@ -1,6 +1,16 @@
 """
 _calibrate_recovery_model.py — Kalibrasi model recovery EMPIRIS pengganti GBM.
 
+!!! LEGACY / NOT FOR PRODUCTION (P7.4, 16-08-2026) !!!
+Script ini adalah kalibrator LAMA (methodology pre-P6). Production params
+(data/recovery_model_params.json) HANYA boleh ditulis oleh calibrator yang
+telah disetujui: _phase6_p61_calibrate.py (protocol frozen P6: split global
+kronologis cutoff 70% tanggal + purge label-overlap + embargo 5 hari
+kalender; provenance wajib).
+Untuk mencegah overwrite tidak sengaja: script ini MENOLAK menulis ke
+recovery_model_params.json kecuali dijalankan dgn --allow-prod-write
+(tidak disarankan; hanya untuk audit/rollback eksplisit oleh lead).
+
 Model:
     P_recover(dd_fraction, t) = 1 / (1 + exp(a_t + b_t * dd_fraction))
     dd_fraction = 1 - (harga_trough / prior_peak)
@@ -25,7 +35,9 @@ Output:
                                     tabel base-rate per bucket dd.
 
 Usage:
-    python _calibrate_recovery_model.py                     # pakai universe_ohlcv.npz
+    python _calibrate_recovery_model.py                     # laporan SAJA (menolak tulis prod)
+    python _calibrate_recovery_model.py --out <path>        # simpan ke path lain
+    python _calibrate_recovery_model.py --allow-prod-write  # TIDAK disarankan
     python _calibrate_recovery_model.py --peak-lookback 126  # sensitivitas window
 """
 
@@ -266,7 +278,27 @@ def main() -> None:
     ap.add_argument("--out", default=PARAMS_PATH)
     ap.add_argument("--peak-lookback", type=int, default=252)
     ap.add_argument("--no-save", action="store_true", help="hanya laporan, tanpa simpan")
+    ap.add_argument(
+        "--allow-prod-write", action="store_true",
+        help="P7.4: izinkan menulis ke recovery_model_params.json PRODUKSI "
+             "(TIDAK disarankan — jalur legacy; production hanya via "
+             "_phase6_p61_calibrate.py)",
+    )
     args = ap.parse_args()
+
+    # P7.4: hard guard — script legacy tidak boleh menimpa production params
+    # tanpa flag eksplisit (mencegah overwrite metodologi lama ke produksi).
+    out_path = os.path.abspath(args.out)
+    prod_path = os.path.abspath(PARAMS_PATH)
+    if out_path == prod_path and not args.allow_prod_write:
+        print(
+            "REFUSED (P7.4): _calibrate_recovery_model.py adalah LEGACY. "
+            "Menulis ke recovery_model_params.json dilarang tanpa "
+            "--allow-prod-write. Gunakan --out <path lain> utk menyimpan "
+            "hasil, atau _phase6_p61_calibrate.py utk kalibrasi produksi.",
+            file=sys.stderr,
+        )
+        return 1
 
     d = np.load(args.npz)
     rows, lens = d["rows"], d["lens"]

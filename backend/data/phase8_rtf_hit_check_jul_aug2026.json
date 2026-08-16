@@ -1,0 +1,2708 @@
+{
+ "definisi": {
+  "sinyal": "detect_accumulation valid (density>=30%, min 2 heavy, SMA20, below event, likuiditas ADV20)",
+  "hit": "b10: max(high[i+1..i+10])/close[i]-1 >= +10% (definisi _baseline_compare.py)",
+  "window": "2026-08-03 s/d 2026-08-14 (bar terakhir dataset; 15-16 Agu akhir pekan)"
+ },
+ "per_tanggal": {
+  "2026-07-01": [
+   {
+    "code": "AYLS",
+    "close0": 155.0
+   },
+   {
+    "code": "ENAK",
+    "close0": 292.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 69.0
+   },
+   {
+    "code": "ESIP",
+    "close0": 129.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 128.68902587890625
+   },
+   {
+    "code": "PTPW",
+    "close0": 1290.0
+   },
+   {
+    "code": "RICY",
+    "close0": 75.0
+   }
+  ],
+  "2026-07-02": [
+   {
+    "code": "AYLS",
+    "close0": 162.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 122.0
+   },
+   {
+    "code": "ENAK",
+    "close0": 296.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 71.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 84.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 128.68902587890625
+   },
+   {
+    "code": "RICY",
+    "close0": 77.0
+   }
+  ],
+  "2026-07-03": [
+   {
+    "code": "AYLS",
+    "close0": 159.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 121.0
+   },
+   {
+    "code": "ENAK",
+    "close0": 294.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 73.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 86.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 125.82926940917969
+   },
+   {
+    "code": "RBMS",
+    "close0": 58.0
+   },
+   {
+    "code": "RICY",
+    "close0": 78.0
+   },
+   {
+    "code": "SAME",
+    "close0": 328.0
+   },
+   {
+    "code": "STRK",
+    "close0": 70.0
+   }
+  ],
+  "2026-07-06": [
+   {
+    "code": "AYLS",
+    "close0": 158.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 122.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 78.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 117.25
+   },
+   {
+    "code": "RICY",
+    "close0": 77.0
+   },
+   {
+    "code": "RMKO",
+    "close0": 388.0
+   }
+  ],
+  "2026-07-07": [
+   {
+    "code": "AYLS",
+    "close0": 156.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 119.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 74.0
+   },
+   {
+    "code": "FUTR",
+    "close0": 218.0
+   },
+   {
+    "code": "PADI",
+    "close0": 80.73863220214844
+   },
+   {
+    "code": "PEGE",
+    "close0": 117.25
+   },
+   {
+    "code": "RGAS",
+    "close0": 200.0
+   },
+   {
+    "code": "RMKO",
+    "close0": 360.0
+   }
+  ],
+  "2026-07-08": [
+   {
+    "code": "BBRM",
+    "close0": 113.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 74.0
+   },
+   {
+    "code": "FUTR",
+    "close0": 218.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 78.0
+   },
+   {
+    "code": "PADI",
+    "close0": 81.66666412353516
+   },
+   {
+    "code": "PEGE",
+    "close0": 117.25
+   },
+   {
+    "code": "RGAS",
+    "close0": 202.0
+   },
+   {
+    "code": "RMKO",
+    "close0": 330.0
+   },
+   {
+    "code": "STRK",
+    "close0": 70.0
+   }
+  ],
+  "2026-07-09": [
+   {
+    "code": "APLN",
+    "close0": 124.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 115.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 60.0
+   },
+   {
+    "code": "COCO",
+    "close0": 173.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 71.0
+   },
+   {
+    "code": "KOKA",
+    "close0": 140.0
+   },
+   {
+    "code": "LAND",
+    "close0": 62.0
+   },
+   {
+    "code": "OILS",
+    "close0": 206.0
+   },
+   {
+    "code": "PADI",
+    "close0": 76.0
+   },
+   {
+    "code": "RGAS",
+    "close0": 204.0
+   },
+   {
+    "code": "RMKO",
+    "close0": 330.0
+   },
+   {
+    "code": "RODA",
+    "close0": 58.0
+   },
+   {
+    "code": "STRK",
+    "close0": 70.0
+   }
+  ],
+  "2026-07-10": [
+   {
+    "code": "APLN",
+    "close0": 125.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 116.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 63.0
+   },
+   {
+    "code": "COCO",
+    "close0": 167.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 73.0
+   },
+   {
+    "code": "LAND",
+    "close0": 63.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 81.0
+   },
+   {
+    "code": "MMIX",
+    "close0": 750.0
+   },
+   {
+    "code": "OILS",
+    "close0": 204.0
+   },
+   {
+    "code": "RGAS",
+    "close0": 210.0
+   },
+   {
+    "code": "RMKO",
+    "close0": 344.0
+   },
+   {
+    "code": "RODA",
+    "close0": 59.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 590.0
+   }
+  ],
+  "2026-07-13": [
+   {
+    "code": "APLN",
+    "close0": 125.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 114.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 72.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 80.0
+   },
+   {
+    "code": "MMIX",
+    "close0": 695.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 101.0
+   },
+   {
+    "code": "OILS",
+    "close0": 214.0
+   },
+   {
+    "code": "RGAS",
+    "close0": 208.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 550.0
+   }
+  ],
+  "2026-07-14": [
+   {
+    "code": "APLN",
+    "close0": 126.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 117.0
+   },
+   {
+    "code": "EPAC",
+    "close0": 71.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 93.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 81.0
+   },
+   {
+    "code": "MMIX",
+    "close0": 690.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 101.0
+   }
+  ],
+  "2026-07-15": [
+   {
+    "code": "APLN",
+    "close0": 137.0
+   },
+   {
+    "code": "ASRI",
+    "close0": 123.0
+   },
+   {
+    "code": "BBRM",
+    "close0": 117.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 68.0
+   },
+   {
+    "code": "INOV",
+    "close0": 124.0
+   },
+   {
+    "code": "KIJA",
+    "close0": 131.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 93.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 81.0
+   },
+   {
+    "code": "MHKI",
+    "close0": 136.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 97.0
+   },
+   {
+    "code": "RODA",
+    "close0": 64.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 620.0
+   }
+  ],
+  "2026-07-16": [
+   {
+    "code": "APLN",
+    "close0": 136.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 68.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 216.0
+   },
+   {
+    "code": "INOV",
+    "close0": 126.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 92.0
+   },
+   {
+    "code": "LAND",
+    "close0": 77.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 82.0
+   },
+   {
+    "code": "MHKI",
+    "close0": 137.0
+   },
+   {
+    "code": "MMIX",
+    "close0": 760.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 95.0
+   },
+   {
+    "code": "RODA",
+    "close0": 64.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 600.0
+   }
+  ],
+  "2026-07-17": [
+   {
+    "code": "APLN",
+    "close0": 136.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 68.0
+   },
+   {
+    "code": "GDST",
+    "close0": 92.0
+   },
+   {
+    "code": "INOV",
+    "close0": 129.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 91.0
+   },
+   {
+    "code": "LAND",
+    "close0": 78.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 80.0
+   },
+   {
+    "code": "MHKI",
+    "close0": 134.0
+   },
+   {
+    "code": "MMIX",
+    "close0": 770.0
+   },
+   {
+    "code": "NTBK",
+    "close0": 92.0
+   },
+   {
+    "code": "RODA",
+    "close0": 64.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 590.0
+   }
+  ],
+  "2026-07-20": [
+   {
+    "code": "APLN",
+    "close0": 138.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 68.0
+   },
+   {
+    "code": "CTTH",
+    "close0": 134.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 212.0
+   },
+   {
+    "code": "GDST",
+    "close0": 92.0
+   },
+   {
+    "code": "KBLV",
+    "close0": 129.0
+   },
+   {
+    "code": "KIOS",
+    "close0": 95.0
+   },
+   {
+    "code": "LAND",
+    "close0": 77.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 79.0
+   },
+   {
+    "code": "MLPL",
+    "close0": 88.0
+   },
+   {
+    "code": "MLPT",
+    "close0": 1038.0
+   },
+   {
+    "code": "RBMS",
+    "close0": 68.0
+   },
+   {
+    "code": "RODA",
+    "close0": 64.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 595.0
+   },
+   {
+    "code": "SSIA",
+    "close0": 1740.0
+   }
+  ],
+  "2026-07-21": [
+   {
+    "code": "APLN",
+    "close0": 140.0
+   },
+   {
+    "code": "BIPP",
+    "close0": 69.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 208.0
+   },
+   {
+    "code": "FWCT",
+    "close0": 93.0
+   },
+   {
+    "code": "GDST",
+    "close0": 91.0
+   },
+   {
+    "code": "HOPE",
+    "close0": 191.0
+   },
+   {
+    "code": "LAND",
+    "close0": 78.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 80.0
+   },
+   {
+    "code": "RBMS",
+    "close0": 66.0
+   },
+   {
+    "code": "RODA",
+    "close0": 64.0
+   },
+   {
+    "code": "SKBM",
+    "close0": 575.0
+   },
+   {
+    "code": "SQMI",
+    "close0": 71.0
+   }
+  ],
+  "2026-07-22": [
+   {
+    "code": "CTTH",
+    "close0": 136.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 206.0
+   },
+   {
+    "code": "FWCT",
+    "close0": 93.0
+   },
+   {
+    "code": "GDST",
+    "close0": 93.0
+   },
+   {
+    "code": "HOPE",
+    "close0": 192.0
+   },
+   {
+    "code": "MEDS",
+    "close0": 80.0
+   },
+   {
+    "code": "NETV",
+    "close0": 55.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 58.0
+   },
+   {
+    "code": "RBMS",
+    "close0": 68.0
+   },
+   {
+    "code": "RISE",
+    "close0": 1055.0
+   },
+   {
+    "code": "SQMI",
+    "close0": 71.0
+   },
+   {
+    "code": "SSIA",
+    "close0": 1755.0
+   },
+   {
+    "code": "TRON",
+    "close0": 114.0
+   }
+  ],
+  "2026-07-23": [
+   {
+    "code": "BBYB",
+    "close0": 254.0
+   },
+   {
+    "code": "COCO",
+    "close0": 141.0
+   },
+   {
+    "code": "CTTH",
+    "close0": 133.0
+   },
+   {
+    "code": "DSSA",
+    "close0": 875.0
+   },
+   {
+    "code": "FORU",
+    "close0": 3110.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 204.0
+   },
+   {
+    "code": "FWCT",
+    "close0": 92.0
+   },
+   {
+    "code": "GDST",
+    "close0": 92.0
+   },
+   {
+    "code": "HOPE",
+    "close0": 174.0
+   },
+   {
+    "code": "KBLV",
+    "close0": 133.0
+   },
+   {
+    "code": "MINE",
+    "close0": 220.0
+   },
+   {
+    "code": "NANO",
+    "close0": 30.0
+   },
+   {
+    "code": "NETV",
+    "close0": 52.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 57.0
+   },
+   {
+    "code": "RBMS",
+    "close0": 68.0
+   },
+   {
+    "code": "RISE",
+    "close0": 1025.0
+   },
+   {
+    "code": "SQMI",
+    "close0": 69.0
+   },
+   {
+    "code": "SSIA",
+    "close0": 1720.0
+   },
+   {
+    "code": "SULI",
+    "close0": 89.0
+   },
+   {
+    "code": "TRON",
+    "close0": 113.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 810.0
+   }
+  ],
+  "2026-07-24": [
+   {
+    "code": "BAPI",
+    "close0": 16.0
+   },
+   {
+    "code": "BBYB",
+    "close0": 244.0
+   },
+   {
+    "code": "CTTH",
+    "close0": 122.0
+   },
+   {
+    "code": "DSSA",
+    "close0": 870.0
+   },
+   {
+    "code": "FWCT",
+    "close0": 91.0
+   },
+   {
+    "code": "HOPE",
+    "close0": 177.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 63.0
+   },
+   {
+    "code": "KBLV",
+    "close0": 123.0
+   },
+   {
+    "code": "LPPS",
+    "close0": 78.0
+   },
+   {
+    "code": "LUCK",
+    "close0": 113.0
+   },
+   {
+    "code": "NANO",
+    "close0": 29.0
+   },
+   {
+    "code": "NETV",
+    "close0": 51.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 55.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 122.0
+   },
+   {
+    "code": "RBMS",
+    "close0": 66.0
+   },
+   {
+    "code": "RISE",
+    "close0": 1030.0
+   },
+   {
+    "code": "SQMI",
+    "close0": 72.0
+   },
+   {
+    "code": "SSIA",
+    "close0": 1650.0
+   },
+   {
+    "code": "SULI",
+    "close0": 88.0
+   },
+   {
+    "code": "SWID",
+    "close0": 101.0
+   },
+   {
+    "code": "TRON",
+    "close0": 110.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 770.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 52.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 70.0
+   }
+  ],
+  "2026-07-27": [
+   {
+    "code": "AWAN",
+    "close0": 149.0
+   },
+   {
+    "code": "BAPI",
+    "close0": 17.0
+   },
+   {
+    "code": "BBYB",
+    "close0": 244.0
+   },
+   {
+    "code": "BULL",
+    "close0": 416.0
+   },
+   {
+    "code": "DSSA",
+    "close0": 855.0
+   },
+   {
+    "code": "HOPE",
+    "close0": 190.0
+   },
+   {
+    "code": "INAI",
+    "close0": 166.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 64.0
+   },
+   {
+    "code": "LUCK",
+    "close0": 114.0
+   },
+   {
+    "code": "MLPT",
+    "close0": 1605.0
+   },
+   {
+    "code": "RISE",
+    "close0": 1025.0
+   },
+   {
+    "code": "SQMI",
+    "close0": 68.0
+   },
+   {
+    "code": "SULI",
+    "close0": 89.0
+   },
+   {
+    "code": "SWID",
+    "close0": 100.0
+   },
+   {
+    "code": "TRON",
+    "close0": 111.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 800.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 52.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 70.0
+   }
+  ],
+  "2026-07-28": [
+   {
+    "code": "BAPI",
+    "close0": 18.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 104.0
+   },
+   {
+    "code": "BULL",
+    "close0": 410.0
+   },
+   {
+    "code": "DOOH",
+    "close0": 206.0
+   },
+   {
+    "code": "DSSA",
+    "close0": 830.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 206.0
+   },
+   {
+    "code": "GDST",
+    "close0": 97.0
+   },
+   {
+    "code": "INAI",
+    "close0": 178.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 63.0
+   },
+   {
+    "code": "LUCK",
+    "close0": 113.0
+   },
+   {
+    "code": "MLPT",
+    "close0": 1495.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 59.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 121.0
+   },
+   {
+    "code": "RISE",
+    "close0": 995.0
+   },
+   {
+    "code": "SULI",
+    "close0": 89.0
+   },
+   {
+    "code": "SWID",
+    "close0": 101.0
+   },
+   {
+    "code": "TRON",
+    "close0": 111.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 770.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 52.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 67.0
+   }
+  ],
+  "2026-07-29": [
+   {
+    "code": "BAJA",
+    "close0": 191.0
+   },
+   {
+    "code": "BAPI",
+    "close0": 19.0
+   },
+   {
+    "code": "BULL",
+    "close0": 398.0
+   },
+   {
+    "code": "BVIC",
+    "close0": 92.0
+   },
+   {
+    "code": "DIVA",
+    "close0": 125.0
+   },
+   {
+    "code": "DMMX",
+    "close0": 176.0
+   },
+   {
+    "code": "FORU",
+    "close0": 3030.0
+   },
+   {
+    "code": "GDST",
+    "close0": 94.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 60.0
+   },
+   {
+    "code": "LUCK",
+    "close0": 105.0
+   },
+   {
+    "code": "MCAS",
+    "close0": 276.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 56.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 119.0
+   },
+   {
+    "code": "SULI",
+    "close0": 87.0
+   },
+   {
+    "code": "SWID",
+    "close0": 103.0
+   },
+   {
+    "code": "TFAS",
+    "close0": 190.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 710.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 52.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 63.0
+   }
+  ],
+  "2026-07-30": [
+   {
+    "code": "BAPI",
+    "close0": 20.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 97.0
+   },
+   {
+    "code": "CTTH",
+    "close0": 127.0
+   },
+   {
+    "code": "DIVA",
+    "close0": 123.0
+   },
+   {
+    "code": "DMMX",
+    "close0": 179.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 208.0
+   },
+   {
+    "code": "GDST",
+    "close0": 97.0
+   },
+   {
+    "code": "KOBX",
+    "close0": 161.0
+   },
+   {
+    "code": "LUCK",
+    "close0": 108.0
+   },
+   {
+    "code": "MCAS",
+    "close0": 260.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 56.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 119.0
+   },
+   {
+    "code": "SWID",
+    "close0": 102.0
+   },
+   {
+    "code": "TFAS",
+    "close0": 190.0
+   },
+   {
+    "code": "TNCA",
+    "close0": 164.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 720.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 52.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 64.0
+   }
+  ],
+  "2026-07-31": [
+   {
+    "code": "AISA",
+    "close0": 118.0
+   },
+   {
+    "code": "BAPI",
+    "close0": 21.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 98.0
+   },
+   {
+    "code": "DIVA",
+    "close0": 122.0
+   },
+   {
+    "code": "DMMX",
+    "close0": 186.0
+   },
+   {
+    "code": "GDST",
+    "close0": 97.0
+   },
+   {
+    "code": "HATM",
+    "close0": 530.0
+   },
+   {
+    "code": "INAI",
+    "close0": 177.0
+   },
+   {
+    "code": "KOBX",
+    "close0": 161.0
+   },
+   {
+    "code": "KOTA",
+    "close0": 147.0
+   },
+   {
+    "code": "MCAS",
+    "close0": 264.0
+   },
+   {
+    "code": "MGNA",
+    "close0": 115.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 56.0
+   },
+   {
+    "code": "TFAS",
+    "close0": 193.0
+   },
+   {
+    "code": "VKTR",
+    "close0": 730.0
+   }
+  ],
+  "2026-08-03": [
+   {
+    "code": "AISA",
+    "close0": 120.0
+   },
+   {
+    "code": "BAPI",
+    "close0": 19.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 97.0
+   },
+   {
+    "code": "DMMX",
+    "close0": 186.0
+   },
+   {
+    "code": "DOSS",
+    "close0": 159.0
+   },
+   {
+    "code": "KOBX",
+    "close0": 161.0
+   },
+   {
+    "code": "MCAS",
+    "close0": 250.0
+   },
+   {
+    "code": "MGNA",
+    "close0": 114.0
+   },
+   {
+    "code": "MINE",
+    "close0": 228.0
+   },
+   {
+    "code": "PAMG",
+    "close0": 56.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 127.0
+   },
+   {
+    "code": "TFAS",
+    "close0": 188.0
+   },
+   {
+    "code": "TNCA",
+    "close0": 164.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 68.0
+   }
+  ],
+  "2026-08-04": [
+   {
+    "code": "BAPI",
+    "close0": 18.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 97.0
+   },
+   {
+    "code": "DIVA",
+    "close0": 132.0
+   },
+   {
+    "code": "DMMX",
+    "close0": 185.0
+   },
+   {
+    "code": "FAST",
+    "close0": 334.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 210.0
+   },
+   {
+    "code": "GZCO",
+    "close0": 175.0
+   },
+   {
+    "code": "IATA",
+    "close0": 90.0
+   },
+   {
+    "code": "KOBX",
+    "close0": 168.0
+   },
+   {
+    "code": "MCAS",
+    "close0": 244.0
+   },
+   {
+    "code": "MGNA",
+    "close0": 113.0
+   },
+   {
+    "code": "MINE",
+    "close0": 234.0
+   },
+   {
+    "code": "MSKY",
+    "close0": 61.0
+   },
+   {
+    "code": "PSDN",
+    "close0": 129.0
+   },
+   {
+    "code": "TFAS",
+    "close0": 187.0
+   },
+   {
+    "code": "TNCA",
+    "close0": 162.0
+   },
+   {
+    "code": "UCID",
+    "close0": 412.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 68.0
+   }
+  ],
+  "2026-08-05": [
+   {
+    "code": "ADMG",
+    "close0": 220.0
+   },
+   {
+    "code": "AISA",
+    "close0": 120.0
+   },
+   {
+    "code": "BAPI",
+    "close0": 17.0
+   },
+   {
+    "code": "BNBR",
+    "close0": 101.0
+   },
+   {
+    "code": "FAST",
+    "close0": 316.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 206.0
+   },
+   {
+    "code": "JKON",
+    "close0": 84.0
+   },
+   {
+    "code": "KOBX",
+    "close0": 170.0
+   },
+   {
+    "code": "MGNA",
+    "close0": 114.0
+   },
+   {
+    "code": "MINE",
+    "close0": 234.0
+   },
+   {
+    "code": "MITI",
+    "close0": 210.0
+   },
+   {
+    "code": "MSKY",
+    "close0": 63.0
+   },
+   {
+    "code": "OPMS",
+    "close0": 122.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 100.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 127.0
+   },
+   {
+    "code": "ZATA",
+    "close0": 73.0
+   }
+  ],
+  "2026-08-06": [
+   {
+    "code": "BAPI",
+    "close0": 18.0
+   },
+   {
+    "code": "ENZO",
+    "close0": 81.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 206.0
+   },
+   {
+    "code": "GZCO",
+    "close0": 175.0
+   },
+   {
+    "code": "HDFA",
+    "close0": 98.0
+   },
+   {
+    "code": "ICON",
+    "close0": 114.0
+   },
+   {
+    "code": "JKON",
+    "close0": 88.0
+   },
+   {
+    "code": "LIVE",
+    "close0": 218.0
+   },
+   {
+    "code": "MERI",
+    "close0": 113.0
+   },
+   {
+    "code": "MGNA",
+    "close0": 113.0
+   },
+   {
+    "code": "MINE",
+    "close0": 234.0
+   },
+   {
+    "code": "MITI",
+    "close0": 212.0
+   },
+   {
+    "code": "OPMS",
+    "close0": 129.0
+   },
+   {
+    "code": "PADA",
+    "close0": 184.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 99.0
+   },
+   {
+    "code": "TRUK",
+    "close0": 670.0
+   }
+  ],
+  "2026-08-07": [
+   {
+    "code": "BAPI",
+    "close0": 19.0
+   },
+   {
+    "code": "ENZO",
+    "close0": 81.0
+   },
+   {
+    "code": "FAST",
+    "close0": 366.0
+   },
+   {
+    "code": "FUJI",
+    "close0": 208.0
+   },
+   {
+    "code": "GTSI",
+    "close0": 192.0
+   },
+   {
+    "code": "GZCO",
+    "close0": 174.0
+   },
+   {
+    "code": "HDFA",
+    "close0": 97.0
+   },
+   {
+    "code": "IATA",
+    "close0": 115.0
+   },
+   {
+    "code": "ICON",
+    "close0": 115.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 95.0
+   },
+   {
+    "code": "LIVE",
+    "close0": 222.0
+   },
+   {
+    "code": "MDIA",
+    "close0": 230.0
+   },
+   {
+    "code": "MITI",
+    "close0": 208.0
+   },
+   {
+    "code": "OPMS",
+    "close0": 125.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 102.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 149.0
+   }
+  ],
+  "2026-08-10": [
+   {
+    "code": "BAPI",
+    "close0": 20.0
+   },
+   {
+    "code": "ENZO",
+    "close0": 79.0
+   },
+   {
+    "code": "ERTX",
+    "close0": 190.0
+   },
+   {
+    "code": "FAST",
+    "close0": 364.0
+   },
+   {
+    "code": "GTSI",
+    "close0": 189.0
+   },
+   {
+    "code": "HDFA",
+    "close0": 98.0
+   },
+   {
+    "code": "ICON",
+    "close0": 114.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 95.0
+   },
+   {
+    "code": "JKON",
+    "close0": 87.0
+   },
+   {
+    "code": "LIVE",
+    "close0": 212.0
+   },
+   {
+    "code": "MINE",
+    "close0": 240.0
+   },
+   {
+    "code": "MITI",
+    "close0": 196.0
+   },
+   {
+    "code": "PADA",
+    "close0": 185.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 102.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 158.0
+   },
+   {
+    "code": "WMUU",
+    "close0": 59.0
+   }
+  ],
+  "2026-08-11": [
+   {
+    "code": "BAPI",
+    "close0": 18.0
+   },
+   {
+    "code": "DSSA",
+    "close0": 945.0
+   },
+   {
+    "code": "EMDE",
+    "close0": 77.0
+   },
+   {
+    "code": "ENZO",
+    "close0": 74.0
+   },
+   {
+    "code": "GRIA",
+    "close0": 138.0
+   },
+   {
+    "code": "GTSI",
+    "close0": 178.0
+   },
+   {
+    "code": "HDFA",
+    "close0": 96.0
+   },
+   {
+    "code": "IATA",
+    "close0": 126.0
+   },
+   {
+    "code": "ICON",
+    "close0": 116.0
+   },
+   {
+    "code": "ISAT",
+    "close0": 2150.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 89.0
+   },
+   {
+    "code": "JKON",
+    "close0": 85.0
+   },
+   {
+    "code": "LIVE",
+    "close0": 210.0
+   },
+   {
+    "code": "MERI",
+    "close0": 116.0
+   },
+   {
+    "code": "MINE",
+    "close0": 234.0
+   },
+   {
+    "code": "MITI",
+    "close0": 190.0
+   },
+   {
+    "code": "OKAS",
+    "close0": 115.0
+   },
+   {
+    "code": "PADA",
+    "close0": 170.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 100.0
+   },
+   {
+    "code": "SLIS",
+    "close0": 75.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 154.0
+   }
+  ],
+  "2026-08-12": [
+   {
+    "code": "BAPI",
+    "close0": 19.0
+   },
+   {
+    "code": "EMDE",
+    "close0": 78.0
+   },
+   {
+    "code": "ENZO",
+    "close0": 75.0
+   },
+   {
+    "code": "GMFI",
+    "close0": 62.0
+   },
+   {
+    "code": "GTSI",
+    "close0": 188.0
+   },
+   {
+    "code": "HDFA",
+    "close0": 96.0
+   },
+   {
+    "code": "IATA",
+    "close0": 128.0
+   },
+   {
+    "code": "JGLE",
+    "close0": 93.0
+   },
+   {
+    "code": "MERI",
+    "close0": 116.0
+   },
+   {
+    "code": "PADA",
+    "close0": 184.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 103.0
+   },
+   {
+    "code": "SLIS",
+    "close0": 78.0
+   },
+   {
+    "code": "TRUK",
+    "close0": 780.0
+   }
+  ],
+  "2026-08-13": [
+   {
+    "code": "BAPI",
+    "close0": 20.0
+   },
+   {
+    "code": "CSMI",
+    "close0": 119.0
+   },
+   {
+    "code": "DART",
+    "close0": 182.0
+   },
+   {
+    "code": "EMDE",
+    "close0": 77.0
+   },
+   {
+    "code": "GMFI",
+    "close0": 60.0
+   },
+   {
+    "code": "IATA",
+    "close0": 120.0
+   },
+   {
+    "code": "IOTF",
+    "close0": 72.0
+   },
+   {
+    "code": "OKAS",
+    "close0": 118.0
+   },
+   {
+    "code": "PADA",
+    "close0": 173.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 103.0
+   },
+   {
+    "code": "STAR",
+    "close0": 380.0
+   },
+   {
+    "code": "SWID",
+    "close0": 113.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 188.0
+   },
+   {
+    "code": "TRUK",
+    "close0": 665.0
+   },
+   {
+    "code": "WTON",
+    "close0": 79.0
+   }
+  ],
+  "2026-08-14": [
+   {
+    "code": "BAPI",
+    "close0": 20.0
+   },
+   {
+    "code": "BRRC",
+    "close0": 63.0
+   },
+   {
+    "code": "CUAN",
+    "close0": 825.0
+   },
+   {
+    "code": "DART",
+    "close0": 166.0
+   },
+   {
+    "code": "GMFI",
+    "close0": 59.0
+   },
+   {
+    "code": "IATA",
+    "close0": 115.0
+   },
+   {
+    "code": "IOTF",
+    "close0": 71.0
+   },
+   {
+    "code": "OKAS",
+    "close0": 117.0
+   },
+   {
+    "code": "PEGE",
+    "close0": 110.0
+   },
+   {
+    "code": "TMPO",
+    "close0": 195.0
+   },
+   {
+    "code": "WTON",
+    "close0": 78.0
+   }
+  ]
+ },
+ "hit_per_tanggal": {
+  "2026-07-01": {
+   "n": 7,
+   "hit": 3
+  },
+  "2026-07-02": {
+   "n": 7,
+   "hit": 3
+  },
+  "2026-07-03": {
+   "n": 10,
+   "hit": 5
+  },
+  "2026-07-06": {
+   "n": 6,
+   "hit": 1
+  },
+  "2026-07-07": {
+   "n": 8,
+   "hit": 2
+  },
+  "2026-07-08": {
+   "n": 9,
+   "hit": 5
+  },
+  "2026-07-09": {
+   "n": 13,
+   "hit": 9
+  },
+  "2026-07-10": {
+   "n": 13,
+   "hit": 8
+  },
+  "2026-07-13": {
+   "n": 9,
+   "hit": 6
+  },
+  "2026-07-14": {
+   "n": 7,
+   "hit": 3
+  },
+  "2026-07-15": {
+   "n": 12,
+   "hit": 3
+  },
+  "2026-07-16": {
+   "n": 12,
+   "hit": 6
+  },
+  "2026-07-17": {
+   "n": 12,
+   "hit": 6
+  },
+  "2026-07-20": {
+   "n": 15,
+   "hit": 6
+  },
+  "2026-07-21": {
+   "n": 12,
+   "hit": 4
+  },
+  "2026-07-22": {
+   "n": 13,
+   "hit": 4
+  },
+  "2026-07-23": {
+   "n": 21,
+   "hit": 10
+  },
+  "2026-07-24": {
+   "n": 24,
+   "hit": 17
+  },
+  "2026-07-27": {
+   "n": 18,
+   "hit": 14
+  },
+  "2026-07-28": {
+   "n": 20,
+   "hit": 16
+  },
+  "2026-07-29": {
+   "n": 19,
+   "hit": 16
+  },
+  "2026-07-30": {
+   "n": 18,
+   "hit": 16
+  },
+  "2026-07-31": {
+   "n": 15,
+   "hit": 11
+  },
+  "2026-08-03": {
+   "n": 14,
+   "hit": 8
+  },
+  "2026-08-04": {
+   "n": 18,
+   "hit": 13
+  },
+  "2026-08-05": {
+   "n": 16,
+   "hit": 10
+  },
+  "2026-08-06": {
+   "n": 16,
+   "hit": 9
+  },
+  "2026-08-07": {
+   "n": 16,
+   "hit": 9
+  },
+  "2026-08-10": {
+   "n": 16,
+   "hit": 5
+  },
+  "2026-08-11": {
+   "n": 21,
+   "hit": 11
+  },
+  "2026-08-12": {
+   "n": 13,
+   "hit": 4
+  },
+  "2026-08-13": {
+   "n": 15,
+   "hit": 5
+  },
+  "2026-08-14": {
+   "n": 11,
+   "hit": 0
+  }
+ },
+ "per_saham_unik": {
+  "AYLS": {
+   "signal_date": "2026-07-01",
+   "close0": 155.0,
+   "hit_date": "2026-07-02",
+   "horizon": 10
+  },
+  "ENAK": {
+   "signal_date": "2026-07-01",
+   "close0": 292.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "EPAC": {
+   "signal_date": "2026-07-01",
+   "close0": 69.0,
+   "hit_date": "2026-07-06",
+   "horizon": 10
+  },
+  "ESIP": {
+   "signal_date": "2026-07-01",
+   "close0": 129.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "PEGE": {
+   "signal_date": "2026-07-01",
+   "close0": 128.68902587890625,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "PTPW": {
+   "signal_date": "2026-07-01",
+   "close0": 1290.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "RICY": {
+   "signal_date": "2026-07-01",
+   "close0": 75.0,
+   "hit_date": "2026-07-02",
+   "horizon": 10
+  },
+  "BBRM": {
+   "signal_date": "2026-07-02",
+   "close0": 122.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "KIOS": {
+   "signal_date": "2026-07-02",
+   "close0": 84.0,
+   "hit_date": "2026-07-08",
+   "horizon": 10
+  },
+  "RBMS": {
+   "signal_date": "2026-07-03",
+   "close0": 58.0,
+   "hit_date": "2026-07-10",
+   "horizon": 10
+  },
+  "SAME": {
+   "signal_date": "2026-07-03",
+   "close0": 328.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "STRK": {
+   "signal_date": "2026-07-03",
+   "close0": 70.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "RMKO": {
+   "signal_date": "2026-07-06",
+   "close0": 388.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "FUTR": {
+   "signal_date": "2026-07-07",
+   "close0": 218.0,
+   "hit_date": "2026-07-14",
+   "horizon": 10
+  },
+  "PADI": {
+   "signal_date": "2026-07-07",
+   "close0": 80.73863220214844,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "RGAS": {
+   "signal_date": "2026-07-07",
+   "close0": 200.0,
+   "hit_date": "2026-07-15",
+   "horizon": 10
+  },
+  "NTBK": {
+   "signal_date": "2026-07-08",
+   "close0": 78.0,
+   "hit_date": "2026-07-09",
+   "horizon": 10
+  },
+  "APLN": {
+   "signal_date": "2026-07-09",
+   "close0": 124.0,
+   "hit_date": "2026-07-15",
+   "horizon": 10
+  },
+  "BIPP": {
+   "signal_date": "2026-07-09",
+   "close0": 60.0,
+   "hit_date": "2026-07-10",
+   "horizon": 10
+  },
+  "COCO": {
+   "signal_date": "2026-07-09",
+   "close0": 173.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "KOKA": {
+   "signal_date": "2026-07-09",
+   "close0": 140.0,
+   "hit_date": "2026-07-10",
+   "horizon": 10
+  },
+  "LAND": {
+   "signal_date": "2026-07-09",
+   "close0": 62.0,
+   "hit_date": "2026-07-10",
+   "horizon": 10
+  },
+  "OILS": {
+   "signal_date": "2026-07-09",
+   "close0": 206.0,
+   "hit_date": "2026-07-13",
+   "horizon": 10
+  },
+  "RODA": {
+   "signal_date": "2026-07-09",
+   "close0": 58.0,
+   "hit_date": "2026-07-13",
+   "horizon": 10
+  },
+  "MEDS": {
+   "signal_date": "2026-07-10",
+   "close0": 81.0,
+   "hit_date": "2026-07-16",
+   "horizon": 10
+  },
+  "MMIX": {
+   "signal_date": "2026-07-10",
+   "close0": 750.0,
+   "hit_date": "2026-07-17",
+   "horizon": 10
+  },
+  "SKBM": {
+   "signal_date": "2026-07-10",
+   "close0": 590.0,
+   "hit_date": "2026-07-14",
+   "horizon": 10
+  },
+  "ASRI": {
+   "signal_date": "2026-07-15",
+   "close0": 123.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "INOV": {
+   "signal_date": "2026-07-15",
+   "close0": 124.0,
+   "hit_date": "2026-07-22",
+   "horizon": 10
+  },
+  "KIJA": {
+   "signal_date": "2026-07-15",
+   "close0": 131.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "MHKI": {
+   "signal_date": "2026-07-15",
+   "close0": 136.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "FUJI": {
+   "signal_date": "2026-07-16",
+   "close0": 216.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "GDST": {
+   "signal_date": "2026-07-17",
+   "close0": 92.0,
+   "hit_date": "2026-07-27",
+   "horizon": 10
+  },
+  "CTTH": {
+   "signal_date": "2026-07-20",
+   "close0": 134.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "KBLV": {
+   "signal_date": "2026-07-20",
+   "close0": 129.0,
+   "hit_date": "2026-07-21",
+   "horizon": 10
+  },
+  "MLPL": {
+   "signal_date": "2026-07-20",
+   "close0": 88.0,
+   "hit_date": "2026-07-21",
+   "horizon": 10
+  },
+  "MLPT": {
+   "signal_date": "2026-07-20",
+   "close0": 1038.0,
+   "hit_date": "2026-07-21",
+   "horizon": 10
+  },
+  "SSIA": {
+   "signal_date": "2026-07-20",
+   "close0": 1740.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "FWCT": {
+   "signal_date": "2026-07-21",
+   "close0": 93.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "HOPE": {
+   "signal_date": "2026-07-21",
+   "close0": 191.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "SQMI": {
+   "signal_date": "2026-07-21",
+   "close0": 71.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "NETV": {
+   "signal_date": "2026-07-22",
+   "close0": 55.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "PAMG": {
+   "signal_date": "2026-07-22",
+   "close0": 58.0,
+   "hit_date": "2026-07-27",
+   "horizon": 10
+  },
+  "RISE": {
+   "signal_date": "2026-07-22",
+   "close0": 1055.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "TRON": {
+   "signal_date": "2026-07-22",
+   "close0": 114.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "BBYB": {
+   "signal_date": "2026-07-23",
+   "close0": 254.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "DSSA": {
+   "signal_date": "2026-07-23",
+   "close0": 875.0,
+   "hit_date": "2026-08-06",
+   "horizon": 10
+  },
+  "FORU": {
+   "signal_date": "2026-07-23",
+   "close0": 3110.0,
+   "hit_date": "2026-07-24",
+   "horizon": 10
+  },
+  "MINE": {
+   "signal_date": "2026-07-23",
+   "close0": 220.0,
+   "hit_date": "2026-08-03",
+   "horizon": 10
+  },
+  "NANO": {
+   "signal_date": "2026-07-23",
+   "close0": 30.0,
+   "hit_date": "2026-07-28",
+   "horizon": 10
+  },
+  "SULI": {
+   "signal_date": "2026-07-23",
+   "close0": 89.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "VKTR": {
+   "signal_date": "2026-07-23",
+   "close0": 810.0,
+   "hit_date": "2026-08-06",
+   "horizon": 10
+  },
+  "BAPI": {
+   "signal_date": "2026-07-24",
+   "close0": 16.0,
+   "hit_date": "2026-07-28",
+   "horizon": 10
+  },
+  "JGLE": {
+   "signal_date": "2026-07-24",
+   "close0": 63.0,
+   "hit_date": "2026-08-03",
+   "horizon": 10
+  },
+  "LPPS": {
+   "signal_date": "2026-07-24",
+   "close0": 78.0,
+   "hit_date": "2026-08-05",
+   "horizon": 10
+  },
+  "LUCK": {
+   "signal_date": "2026-07-24",
+   "close0": 113.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "PSDN": {
+   "signal_date": "2026-07-24",
+   "close0": 122.0,
+   "hit_date": "2026-07-27",
+   "horizon": 10
+  },
+  "SWID": {
+   "signal_date": "2026-07-24",
+   "close0": 101.0,
+   "hit_date": "2026-08-07",
+   "horizon": 10
+  },
+  "WMUU": {
+   "signal_date": "2026-07-24",
+   "close0": 52.0,
+   "hit_date": "2026-08-07",
+   "horizon": 10
+  },
+  "ZATA": {
+   "signal_date": "2026-07-24",
+   "close0": 70.0,
+   "hit_date": "2026-08-03",
+   "horizon": 10
+  },
+  "AWAN": {
+   "signal_date": "2026-07-27",
+   "close0": 149.0,
+   "hit_date": "2026-07-28",
+   "horizon": 10
+  },
+  "BULL": {
+   "signal_date": "2026-07-27",
+   "close0": 416.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "INAI": {
+   "signal_date": "2026-07-27",
+   "close0": 166.0,
+   "hit_date": "2026-07-28",
+   "horizon": 10
+  },
+  "BNBR": {
+   "signal_date": "2026-07-28",
+   "close0": 104.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "DOOH": {
+   "signal_date": "2026-07-28",
+   "close0": 206.0,
+   "hit_date": "2026-07-30",
+   "horizon": 10
+  },
+  "BAJA": {
+   "signal_date": "2026-07-29",
+   "close0": 191.0,
+   "hit_date": "2026-07-30",
+   "horizon": 10
+  },
+  "BVIC": {
+   "signal_date": "2026-07-29",
+   "close0": 92.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "DIVA": {
+   "signal_date": "2026-07-29",
+   "close0": 125.0,
+   "hit_date": "2026-08-04",
+   "horizon": 10
+  },
+  "DMMX": {
+   "signal_date": "2026-07-29",
+   "close0": 176.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "MCAS": {
+   "signal_date": "2026-07-29",
+   "close0": 276.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "TFAS": {
+   "signal_date": "2026-07-29",
+   "close0": 190.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "KOBX": {
+   "signal_date": "2026-07-30",
+   "close0": 161.0,
+   "hit_date": "2026-08-04",
+   "horizon": 10
+  },
+  "TNCA": {
+   "signal_date": "2026-07-30",
+   "close0": 164.0,
+   "hit_date": "2026-07-31",
+   "horizon": 10
+  },
+  "AISA": {
+   "signal_date": "2026-07-31",
+   "close0": 118.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "HATM": {
+   "signal_date": "2026-07-31",
+   "close0": 530.0,
+   "hit_date": "2026-08-07",
+   "horizon": 10
+  },
+  "KOTA": {
+   "signal_date": "2026-07-31",
+   "close0": 147.0,
+   "hit_date": "2026-08-03",
+   "horizon": 10
+  },
+  "MGNA": {
+   "signal_date": "2026-07-31",
+   "close0": 115.0,
+   "hit_date": null,
+   "horizon": 10
+  },
+  "DOSS": {
+   "signal_date": "2026-08-03",
+   "close0": 159.0,
+   "hit_date": "2026-08-05",
+   "horizon": 9
+  },
+  "FAST": {
+   "signal_date": "2026-08-04",
+   "close0": 334.0,
+   "hit_date": "2026-08-06",
+   "horizon": 8
+  },
+  "GZCO": {
+   "signal_date": "2026-08-04",
+   "close0": 175.0,
+   "hit_date": null,
+   "horizon": 8
+  },
+  "IATA": {
+   "signal_date": "2026-08-04",
+   "close0": 90.0,
+   "hit_date": "2026-08-06",
+   "horizon": 8
+  },
+  "MSKY": {
+   "signal_date": "2026-08-04",
+   "close0": 61.0,
+   "hit_date": "2026-08-06",
+   "horizon": 8
+  },
+  "UCID": {
+   "signal_date": "2026-08-04",
+   "close0": 412.0,
+   "hit_date": "2026-08-10",
+   "horizon": 8
+  },
+  "ADMG": {
+   "signal_date": "2026-08-05",
+   "close0": 220.0,
+   "hit_date": "2026-08-07",
+   "horizon": 7
+  },
+  "JKON": {
+   "signal_date": "2026-08-05",
+   "close0": 84.0,
+   "hit_date": "2026-08-07",
+   "horizon": 7
+  },
+  "MITI": {
+   "signal_date": "2026-08-05",
+   "close0": 210.0,
+   "hit_date": null,
+   "horizon": 7
+  },
+  "OPMS": {
+   "signal_date": "2026-08-05",
+   "close0": 122.0,
+   "hit_date": "2026-08-10",
+   "horizon": 7
+  },
+  "TMPO": {
+   "signal_date": "2026-08-05",
+   "close0": 127.0,
+   "hit_date": "2026-08-06",
+   "horizon": 7
+  },
+  "ENZO": {
+   "signal_date": "2026-08-06",
+   "close0": 81.0,
+   "hit_date": null,
+   "horizon": 6
+  },
+  "HDFA": {
+   "signal_date": "2026-08-06",
+   "close0": 98.0,
+   "hit_date": "2026-08-11",
+   "horizon": 6
+  },
+  "ICON": {
+   "signal_date": "2026-08-06",
+   "close0": 114.0,
+   "hit_date": "2026-08-10",
+   "horizon": 6
+  },
+  "LIVE": {
+   "signal_date": "2026-08-06",
+   "close0": 218.0,
+   "hit_date": null,
+   "horizon": 6
+  },
+  "MERI": {
+   "signal_date": "2026-08-06",
+   "close0": 113.0,
+   "hit_date": "2026-08-07",
+   "horizon": 6
+  },
+  "PADA": {
+   "signal_date": "2026-08-06",
+   "close0": 184.0,
+   "hit_date": "2026-08-07",
+   "horizon": 6
+  },
+  "TRUK": {
+   "signal_date": "2026-08-06",
+   "close0": 670.0,
+   "hit_date": "2026-08-07",
+   "horizon": 6
+  },
+  "GTSI": {
+   "signal_date": "2026-08-07",
+   "close0": 192.0,
+   "hit_date": null,
+   "horizon": 5
+  },
+  "MDIA": {
+   "signal_date": "2026-08-07",
+   "close0": 230.0,
+   "hit_date": "2026-08-10",
+   "horizon": 5
+  },
+  "ERTX": {
+   "signal_date": "2026-08-10",
+   "close0": 190.0,
+   "hit_date": null,
+   "horizon": 4
+  },
+  "EMDE": {
+   "signal_date": "2026-08-11",
+   "close0": 77.0,
+   "hit_date": null,
+   "horizon": 3
+  },
+  "GRIA": {
+   "signal_date": "2026-08-11",
+   "close0": 138.0,
+   "hit_date": "2026-08-12",
+   "horizon": 3
+  },
+  "ISAT": {
+   "signal_date": "2026-08-11",
+   "close0": 2150.0,
+   "hit_date": "2026-08-12",
+   "horizon": 3
+  },
+  "OKAS": {
+   "signal_date": "2026-08-11",
+   "close0": 115.0,
+   "hit_date": "2026-08-12",
+   "horizon": 3
+  },
+  "SLIS": {
+   "signal_date": "2026-08-11",
+   "close0": 75.0,
+   "hit_date": "2026-08-13",
+   "horizon": 3
+  },
+  "GMFI": {
+   "signal_date": "2026-08-12",
+   "close0": 62.0,
+   "hit_date": null,
+   "horizon": 2
+  },
+  "CSMI": {
+   "signal_date": "2026-08-13",
+   "close0": 119.0,
+   "hit_date": "2026-08-14",
+   "horizon": 1
+  },
+  "DART": {
+   "signal_date": "2026-08-13",
+   "close0": 182.0,
+   "hit_date": null,
+   "horizon": 1
+  },
+  "IOTF": {
+   "signal_date": "2026-08-13",
+   "close0": 72.0,
+   "hit_date": null,
+   "horizon": 1
+  },
+  "STAR": {
+   "signal_date": "2026-08-13",
+   "close0": 380.0,
+   "hit_date": "2026-08-14",
+   "horizon": 1
+  },
+  "WTON": {
+   "signal_date": "2026-08-13",
+   "close0": 79.0,
+   "hit_date": null,
+   "horizon": 1
+  },
+  "BRRC": {
+   "signal_date": "2026-08-14",
+   "close0": 63.0,
+   "hit_date": null,
+   "horizon": 0
+  },
+  "CUAN": {
+   "signal_date": "2026-08-14",
+   "close0": 825.0,
+   "hit_date": null,
+   "horizon": 0
+  }
+ },
+ "total": {
+  "n": 456,
+  "hit": 248,
+  "hit_rate": 0.543859649122807,
+  "n_unique": 111,
+  "n_unique_hit": 70
+ }
+}

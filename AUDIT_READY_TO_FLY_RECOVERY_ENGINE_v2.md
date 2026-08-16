@@ -3636,3 +3636,728 @@ Fundamentals      = risk context only
 Verdict P4.8 kelak dibaca sebagai: **validation terhadap seluruh probability
 stack terbaru** (P6 recovery estimation + M1 candidate + p_min frozen) sebagai
 satu production probability pipeline.
+
+---
+
+# 39. TODO Tambahan — Production Integrity & Execution Audit (P7)
+
+> Catatan: Semua TODO di bawah ini adalah tambahan. Seluruh isi, keputusan,
+> prioritas, roadmap, dan TODO pada §0–§7 di atas tetap dipertahankan tanpa
+> perubahan.
+>
+> (Catatan metodologi: sumber Reddit/GitHub yang ditemukan selama riset —
+> script indikator "volume breakout" TradingView, dsb. — sengaja tidak dikutip
+> sebagai evidence di atas karena tidak menyertakan validasi walk-forward/OOS
+> yang bisa diverifikasi, sesuai instruksi untuk tidak memperlakukan sumber
+> komunitas setara bukti akademik.)
+
+## Recommended Execution Order — P7
+
+P7.1 Backtest Temporal Integrity → P7.2 Portfolio-Level Aggregation →
+P7.3 Realistic Execution Standard → P7.4 Production Calibration/Provenance
+Guard → P7.5 Recovery Episode/Dependence Sensitivity → P7.6 Corporate-Action
+Integrity → P7.7 Survivorship/Historical Universe Integrity → P7.8 Embargo
+Sensitivity → P7.9 Walk-Forward Selection Transparency → P7.10 Stale
+Methodology/Legacy Guard → P7.11 Base-Rate Artifact Integrity → P7.12
+Probability CI Semantics → P7.13 Final Holdout Pre-Registration → P7.14 Final
+Claims Audit → **P4.8 FINAL LOCKED HOLDOUT — RUN ONCE**
+
+## Important scope rule
+
+P7 tidak berarti semua item otomatis harus mengubah production. Untuk item yang
+berbentuk sensitivity/research (P7.5, P7.6, P7.8, P7.9), hasil negatif atau null
+dapat menjadi alasan yang valid untuk **tidak** mengubah architecture.
+
+Tujuan P7 adalah: memperbaiki validity dan mengetahui apakah assumption
+tertentu benar-benar consequential, **bukan** membuat model semakin kompleks.
+
+## Checklist Status P7 (di-update setiap progres)
+
+- [x] P7.1 — Backtest Temporal Integrity [CRITICAL] — selesai 16-08-2026
+- [x] P7.2 — Portfolio-Level Backtest Aggregation [CRITICAL] — selesai 16-08-2026
+- [ ] P7.3 — Realistic Execution Standard [CRITICAL]
+- [ ] P7.4 — Production Calibration / Parameter Provenance Guard [CRITICAL]
+- [ ] P7.5 — Recovery Episode / Dependence Sensitivity [HIGH]
+- [ ] P7.6 — Corporate-Action Integrity [HIGH]
+- [ ] P7.7 — Survivorship / Historical Universe Integrity [HIGH]
+- [ ] P7.8 — Embargo Sensitivity [MEDIUM/HIGH]
+- [ ] P7.9 — Walk-Forward Selection Transparency [MEDIUM]
+- [ ] P7.10 — Stale Methodology / Legacy Guard [MEDIUM]
+- [ ] P7.11 — Base-Rate Artifact Integrity [MEDIUM]
+- [ ] P7.12 — Probability CI Semantics [MEDIUM]
+- [ ] P7.13 — Final Holdout Pre-Registration [CRITICAL]
+- [ ] P7.14 — Final Claims Audit [HIGH]
+
+## Detail TODO P7
+
+### P7.1 — Backtest Temporal Integrity [CRITICAL]
+
+Audit backtest.py untuk memastikan seluruh metadata keputusan pada trade entry
+memakai signal state t-1 ketika entry dilakukan pada open_t.
+
+**TEMUAN (16-08-2026):** Entry path memakai `recs[i-1]` (benar — sinyal bar
+i-1), TETAPI seluruh metadata keputusan diambil dari bar EKSEKUSI i:
+`atr_val[i]`, `_risk_level(atr_val, i)`, `gate[i]`, `rvol[i]`,
+`signals["trend"/"momentum"/"volume"/"price_action"][i]`, `swing_scores[i]`
+(entry_score). Untuk entry_mode="open", ATR/komponen bar i BELUM tersedia saat
+open i (bar i belum selesai) → **current-bar leakage pada SL, TP, risk_level,
+confidence, entry_score, breakeven trigger, trailing stop**.
+
+**FIX:** Decision timestamp = close bar sinyal (i-1). Semua metadata keputusan
+diambil dari bar i-1: `atr_val[i-1]`, `_risk_level(atr_val, i-1)`,
+`gate[i-1]`, `rvol[i-1]`, komponen & swing_score `[i-1]`. Harga eksekusi tetap
+bar i (`open_[i]` utk mode open, `close[i]` utk mode close) — itu konvensi
+eksekusi, bukan metadata keputusan. Exit path sudah benar sejak audit #7
+(`recs[i-1]` utk REVERSAL; SL/TP pakai high/low bar i — legal karena posisi
+sudah terbuka sejak open i).
+
+**Unit test:** `backend/test_temporal_integrity.py` — 3 test yang SECARA
+EKSPLISIT gagal bila bar eksekusi bocor (entry_score ≠ score bar sinyal,
+SL/TP ≠ ATR[i-1], risk_level/confidence ≠ state i-1):
+- Sebelum patch: 2/3 FAIL (banyak bukti leakage: entry_score 38.6 vs 34.6, SL
+  1042.55 vs 1043.72, dll)
+- Sesudah patch: 3/3 PASS (data sintetis deterministik, tanpa network)
+
+**Regression (data real, entry_mode=open, slippage 25bps, 5 saham):**
+- BBCA: 7→8 trades, ret 12.88%→4.12%, sharpe 0.79→0.40 (SL/TP & exit berubah
+  karena metadata kini dari bar sinyal — dampak integrity, bukan tuning)
+- BBRI: ret −5.73%→−4.62%, sharpe −0.14→−0.08, trades tetap 10
+- ASII: ret 22.26%→23.88%, trades tetap 9
+- TLKM: ret −3.72%→−3.36%, trades tetap 6
+- KOKA: ret 5.29%→6.21%, trades tetap 6
+- Tidak ada error; tidak ada parameter yang diubah (hanya indexing metadata).
+
+**Audit seluruh field Trade dataclass:** entry_date/exit_date/entry_price/
+exit_price = harga & tanggal eksekusi (legal); stop_loss/take_profit = kini
+dari ATR[i-1]; return_pct/holding_days/exit_reason = hasil; entry_score/
+confidence/risk_level = kini dari bar sinyal. Tidak ada field tersisa yang
+memakai bar eksekusi utk keputusan.
+
+**Verifikasi "bukan tuning performa":** diff hanya mengubah `[i]` → `[i-1]`
+pada 7 lokasi metadata entry + komentar. Tidak ada konstanta/parameter yang
+diubah.
+
+- [x] Pastikan ATR, risk_level, SL, TP, entry_score, confidence, regime, dan
+      seluruh execution metadata yang memengaruhi trade berasal dari informasi
+      yang memang tersedia pada decision timestamp.
+- [x] Untuk entry_mode="open": gunakan state/ATR dari t-1, bukan ATR bar entry t.
+- [x] Tambahkan unit test yang secara eksplisit gagal apabila execution-bar
+      high/low/close/ATR bocor ke parameter trade yang sudah dieksekusi pada open_t.
+- [x] Audit seluruh field pada Trade dataclass untuk kemungkinan current-bar leakage.
+- [x] Re-run backtest regression setelah patch.
+- [x] Verifikasi bahwa perubahan hanya memperbaiki temporal integrity dan
+      bukan tuning performa.
+- [x] Acceptance: tidak ada feature/metadata dari bar t yang digunakan untuk
+      menentukan trade yang sudah dieksekusi pada open_t.
+
+### P7.2 — Portfolio-Level Backtest Aggregation [CRITICAL]
+
+**TEMUAN (16-08-2026):** `walkforward.py main()` menghitung portfolio metrics
+dengan cara yang salah secara metodologis:
+1. `oos_total_return = sum(return_pct per trade)` — return portfolio ≠ sum
+   return trade (tanpa compound, tanpa waktu, tanpa modal).
+2. `oos_sharpe = mean(oos_sharpe per window)` — mean dari Sharpe per window,
+   bukan Sharpe dari portfolio return series.
+3. `windows = len(set(window_id))` — window_id TIDAK unik global
+   (`build_windows` memulai dari 1 utk TIAp saham); 3 saham × 4 window
+   dilaporkan sbg 4 window, padahal 12.
+4. Max DD dihitung dari trade return berurutan (bukan equity curve harian
+   dengan cash/positions).
+
+**FIX — modul baru `backend/portfolio.py`:**
+- `build_portfolio_series(events, prices, capital, max_positions, fee_buy_pct,
+  fee_sell_pct, lot_size)` — simulasi deterministic dari SATU chronological
+  series: per hari exit → entry → mark-to-market. Posisi per code dgn shares
+  bertanda (short didukung, gross collateral tanpa margin call — model
+  eksplisit). Notional per posisi = capital/max_positions (default 3) →
+  exposure ≤ ~100%. Slippage SUDAH di harga eksekusi (diterapkan backtest);
+  fee dihitung engine (fee_buy_pct/fee_sell_pct asimetris, audit fix #14).
+- Semua metric dari series: Sharpe, Sortino (downside std), max DD kronologis,
+  CAGR, turnover (Σ notional / avg equity), total cost, avg exposure,
+  peak_positions, skipped_events (entry gagal krn modal < 1 lot — transparan,
+  tidak crash).
+- `events_from_wf_results(results)` — konversi WFResult → PortfolioEvent
+  (direction 'BUY'/'SELL' → ±1).
+- walkforward.py: windows = `len(set((code, window_id)))`; oos_total_return/
+  oos_sharpe/oos_max_dd = portfolio metrics; tambah `portfolio_metrics`
+  (sortino, cagr, turnover, total_cost, n_days, avg_exposure, peak_positions,
+  skipped_events) + `portfolio_series` (full series, reproducibility).
+  Win rate tetap trade-level (deskripsi distribusi trade, bukan portfolio
+  return). Per-window results tetap tersedia di `results`.
+
+**Verifikasi:**
+- Sanity test sintetis 3/3 PASS: (A) compound sequential — 2×+10% berturut
+  = +19.9% (BUKAN 20% sum), equity 1.199.000, sharpe cocok formula;
+  (B) entry di-skip krn modal < 1 lot → skipped_events=1, tidak crash;
+  (C) 2 posisi paralel max_positions=2 → +10%, peak 2, exposure rata-rata
+  0.5 (hari exit: posisi ditutup pagi → exposure 0).
+- Run walk-forward lokal (BBCA, BBRI, ASII; train 252 / test 63, min-trades 1):
+  12 windows (benar; sebelumnya salah lapor 4), 50 trade OOS, portfolio:
+  return −3.92%, CAGR −1.71%, Sharpe −0.11, Sortino −0.09, max DD 13.21%,
+  turnover 31.3, cost Rp 693.602, 585 hari, avg exposure 29.4%, peak 3.
+  (Catatan: angka historical yg dilaporkan dgn metode lama TIDAK sebanding —
+  wajib re-run bila dibandingkan.)
+
+- [x] Pisahkan per-stock/per-window metrics dari portfolio-level metrics.
+- [x] Bangun chronological portfolio equity curve.
+- [x] Aggregate cash, positions, entries, exits, fees, slippage, dan exposure
+      berdasarkan timestamp.
+- [x] Hitung portfolio daily return dari equity curve.
+- [x] Hitung Sharpe dari satu portfolio return series, bukan mean dari Sharpe
+      per window.
+- [x] Hitung Sortino dari portfolio return series.
+- [x] Hitung maximum drawdown dari chronological equity curve.
+- [x] Hitung CAGR/annualized return dari equity curve.
+- [x] Hitung turnover.
+- [x] Hitung total transaction cost.
+- [x] Jangan menggunakan sum(trade_return_pct) sebagai portfolio return.
+- [x] Jangan menggunakan mean(window_sharpe) sebagai portfolio Sharpe.
+- [x] Pastikan window_id unik secara global atau diganti dengan (stock, window_id).
+- [x] Acceptance: portfolio metrics dapat direproduksi dari satu chronological
+      equity/cash/position series.
+
+### P7.3 — Realistic Execution Standard [CRITICAL]
+
+**IMPLEMENTASI (16-08-2026) — `backend/backtest.py`:**
+1. **next-open = PRIMARY**: `BacktestConfig.entry_mode` default berubah
+   `"close"` → `"open"` (eksekusi open bar berikutnya utk sinyal close t-1).
+   `"close"` tetap tersedia utk komparasi historis saja.
+2. **Baseline slippage**: default `slippage_bps` 0.0 → **25.0** (satu sisi,
+   buy naik / sell turun, diterapkan pada harga entry & exit). Sensitivity
+   0/25/50/100 bps tetap dieksplorasi secara eksplisit via param (P6.4).
+3. **Gap-through-stop audit**: SUDAH benar sejak P6.4 — exit di `open_[i]`
+   bila gap melewati stop (`min(SL, open)` BUY-SL, `max(TP, open)` BUY-TP,
+   dst.). Tidak mengasumsikan harga intraday lebih baik.
+4. **Intrabar ambiguity SL vs TP**: SL dicek LEBIH DULU daripada TP pada bar
+   yang sama (SL-first, konservatif) — kini didokumentasikan di docstring.
+5. **Conservative rules documentation**: paragraf P7.3 di docstring modul —
+   SL-first, gap-through di open, breakeven tidak same-bar, trailing pakai
+   atr_entry, REVERSAL exit di close (legacy konservatif), net-of-fees.
+6. **Spread/impact proxy**: slippage_bps = proxy gabungan spread + market
+   impact satu sisi (didokumentasikan; data bid/ask harian tidak tersedia di
+   dataset — proxy eksplisit, bukan asumsi silent).
+7. **ADV/participation constraint + partial-fill stress test**: field baru
+   `max_adv_fraction` (0 = off). Bila aktif: notional trade dibandingkan dgn
+   ADV20 (volume i-21..i-2 — informasi tersedia saat decision di close i-1,
+   tidak memakai bar eksekusi); entry melebihi fraksi ADV di-SKIP dan
+   dihitung di `BacktestMetrics.skipped_adv_entries` (baru).
+8. **Net-of-fees headline**: return_pct, equity curve, total_return, sharpe,
+   max_dd SUDAH net fee asimetris (audit fix #14) + slippage. total_fees
+   tetap dilaporkan terpisah. Headline = NET.
+9. **Legacy close+0bps = historical comparison only**: konvensi reporting
+   P6.4 dipertahankan — hasil legacy hanya utk perbandingan, bukan headline.
+
+**Verifikasi:**
+- `test_temporal_integrity.py` tetap 3/3 PASS dgn default baru (open/25bps).
+- ADV constraint teruji: BBCA (likuid) — 0 entry di-skip (notional ≪ ADV,
+  wajar); KOKA (illiquid) cap 0.1% → 151 entry di-skip (32→8 trades, ret
+  −81.5%→−35.7%); cap 0.02% → 187 skip (0 trade, ret 0); BBYB cap 0.1% →
+  35 skip. Stress test berfungsi & transparan (counter di metrics).
+- **Catatan dampak**: default baru mengubah hasil SEMUA backtest/walk-forward
+  yang memakai default (sebelumnya close/0bps) — angka historical tidak
+  sebanding; re-run wajib sebelum perbandingan apa pun.
+
+- [x] Jadikan next-open sebagai primary research execution mode untuk signal
+      yang tersedia pada close t-1.
+- [x] Tetapkan satu baseline slippage yang realistis untuk primary evaluation.
+- [x] Tetap simpan sensitivity 0 / 25 / 50 / 100 bps.
+- [x] Audit gap-through-stop.
+- [x] Audit intrabar ambiguity ketika SL dan TP sama-sama tersentuh dalam satu bar.
+- [x] Dokumentasikan rule konservatif untuk ambiguous bars.
+- [x] Tambahkan spread/impact proxy bila data memungkinkan.
+- [x] Tambahkan participation/partial-fill stress test.
+- [x] Tambahkan ADV/notional participation constraint untuk posisi besar.
+- [x] Report PnL net-of-fees-and-slippage sebagai headline trading result.
+- [x] Pertahankan legacy close + 0bps hanya sebagai historical comparison,
+      bukan primary result.
+- [x] Acceptance: hasil utama tidak bergantung pada execution convention yang
+      optimistic.
+
+### P7.4 — Production Calibration / Parameter Provenance Guard [CRITICAL]
+
+**IMPLEMENTASI (16-08-2026):**
+1. **`_calibrate_recovery_model.py` = LEGACY**: docstring ditandai
+   "LEGACY / NOT FOR PRODUCTION". Hard guard di `main()`: menulis ke
+   `recovery_model_params.json` produksi DITOLAK (exit 1, pesan REFUSED)
+   kecuali `--allow-prod-write` eksplisit (tidak disarankan). Output tetap
+   bisa disimpan ke path lain via `--out`.
+2. **Provenance metadata** ditambahkan ke `recovery_model_params.json`
+   (blok `provenance`): source_script (_phase6_p61_calibrate.py),
+   calibration_version (P6.1), protocol frozen P6 (teks lengkap), dataset,
+   n_codes (963), **dataset_hash** (sha256 universe_ohlcv.npz =
+   d60aac04...), cutoff_date (2025-11-24), purge_rule, embargo_days (5),
+   created_at, **parameter_hash** (sha256 canonical blok horizons =
+   ea9c4124...), **locked: true**, locked_since.
+   - Diverifikasi: seluruh isi model (horizons, base_rate_table, split_info,
+     dll.) IDENTIK sebelum/sesudah — hanya metadata ditambahkan.
+   - **PENTING (traceability)**: hash FILE berubah F495252969... →
+     **1adb085eb2b8cfc9ae3b5584460f08b3ffa9db5b08fae14b29ad183d1323ef33**
+     karena penambahan provenance; parameter model TIDAK berubah
+     (diverifikasi via parameter_hash + diff JSON). Backup pre-P7.4:
+     %TEMP%\opencode\recovery_model_params.pre_p74.json.
+3. **Hard guard di `recovery.py`** (`_load_recovery_model_params`): produksi
+   wajib punya `provenance.locked == True`, source_script, parameter_hash,
+   dan hash ulang blok horizons harus cocok — kalau tidak: model recovery
+   TIDAK dipakai (return None + pesan REFUSED ke stderr; API tetap jalan
+   tanpa model, konservatif). Helper baru `_params_hash()`.
+4. **Backup immutable**: `recovery_model_params_pre_p6_backup.json` dan
+   `recovery_model_params_p6.json` di-set READ-ONLY (attrib +R, Windows).
+5. **Smoke tests (semua PASS)**:
+   - `_load_recovery_model_params()` memuat OK dgn provenance valid;
+     modifikasi tak sah (a=999 + hash palsu) TERDETEKSI via hash mismatch.
+   - `_calibrate_recovery_model.py` tanpa flag → REFUSED, exit 1, tidak
+     menulis apa pun.
+   - `recovery_model_probs(0.20)` → 7 horizon, CI cluster bootstrap utuh.
+   - `import api` OK; `build_recovery_analysis` OK (jalur API recovery).
+
+- [x] Tandai _calibrate_recovery_model.py sebagai LEGACY / NOT FOR PRODUCTION
+      atau cegah script tersebut menulis production params.
+- [x] Pastikan hanya calibrator yang telah disetujui dapat menulis
+      recovery_model_params.json.
+- [x] Tambahkan provenance metadata pada production params: source script,
+      dataset hash, cutoff date, purge, embargo, calibration version,
+      creation timestamp, parameter hash.
+- [x] Tambahkan hard guard pada recovery.py bila metadata/provenance production
+      tidak cocok dengan protocol frozen.
+- [x] Pastikan backup legacy params tetap immutable/read-only.
+- [x] Re-run API/recovery smoke tests setelah guard diterapkan.
+- [x] Acceptance: tidak ada jalur legacy yang dapat secara tidak sengaja
+      meng-overwrite production recovery parameters dengan methodology lama.
+
+### P7.5 — Recovery Episode / Dependence Sensitivity [HIGH]
+
+**IMPLEMENTASI (16-08-2026)** — script `_p75_episode_sensitivity.py`,
+output `data/phase7_p75_episode.json` (B=100, seed 42). Estimator
+episode-representative = 1 obs per episode drawdown (bar TROUGH = argmax
+dd; definisi episode F2.2, run kontigu dd>0 dari trailing peak 252),
+target/split/purge/embargo IDENTIK dgn produksi (cutoff 2025-11-24
+diverifikasi sama dgn params produksi; 4.4–4.6 rb episode per horizon;
+durasi episode median 15 hari; obs per episode ~58–60).
+
+**Hasil OOS (test bersih):**
+- Brier mentah: daily lebih baik h<=10 (0.016 vs 0.088 … 0.063 vs
+  0.074), episode lebih baik h>=21 (0.071 vs 0.095 … 0.050 vs 0.182).
+  TIDAK fair langsung — populasi berbeda (base rate episode jauh lebih
+  tinggi: mean_p 0.26–0.82 vs 0.02–0.43).
+- Brier Skill Score vs base rate: EPISODE LEBIH TINGGI DI SEMUA h
+  (0.565/0.652/0.697/0.704/0.709/0.710/0.399 vs daily
+  0.234/0.241/0.239/0.232/0.202/0.127/0.035).
+- Calibration: episode c_int positif (0.27–1.24 = under-predict low-end),
+  daily c_int negatif (−0.15..−1.00 = over-predict low-end); slope episode
+  lebih dekat 1 utk h<=21.
+- Stock-cluster bootstrap diff Brier (episode−daily), CI90 sangat ketat:
+  h<=10 diff POSITIF (episode lebih buruk, 0% resamples), h>=21 diff
+  NEGATIF (episode lebih baik, 100%). Perbedaan bukan noise, tapi
+  komposisi populasi: episode estimator menang di saham dgn BANYAK
+  episode (Brier 0.11–0.19 → 0.03–0.11), daily menang di saham
+  few-episode (mayoritas universe; median episode per stock = 1).
+
+**KEPUTUSAN: PRODUCTION TETAP DAILY-EVENT ESTIMATOR (TIDAK DIGANTI).**
+Alasan (sesuai aturan P7.5 — jangan ganti hanya karena point estimate
+berbeda; butuh incremental OOS evidence):
+1. Semantik sinyal berbeda: produksi memberi estimasi per-baris setiap
+   hari drawdown (user butuh P "hari ini"), episode estimator hanya
+   menjawab "di titik trough" — mengubah arti output sinyal.
+2. Brier mentah di horizon sinyal utama h1–h21: daily menang h<=10,
+   kalah h=21 — bukti campur, bukan incremental evidence yang jelas.
+3. Episode estimator sensitif thd komposisi sampel (menang hanya di
+   saham many-episode = minoritas); daily lebih robust di mayoritas
+   universe.
+Hasil negatif/null utk promotion = alasan valid TIDAK mengubah
+produksi (scope rule P7). Catatan riset lanjutan (non-production):
+episode-weighted training atau conditioning trough bisa dieksplorasi
+jika sinyal harian tetap dibutuhkan.
+
+- [x] Bandingkan current daily-event recovery estimator vs episode-representative
+      estimator.
+- [x] Gunakan definisi episode yang sudah dipakai F2.2 agar tidak membuat event
+      definition baru.
+- [x] Gunakan target semantics yang sama.
+- [x] Gunakan split temporal + purge/embargo yang sama.
+- [x] Gunakan stock-cluster bootstrap.
+- [x] Bandingkan: probability level, Brier, Brier Skill, calibration intercept,
+      calibration slope, reliability.
+- [x] Analisis sensitivity terhadap jumlah episode per stock.
+- [x] Jangan mengganti production estimator hanya karena point estimate berbeda;
+      promotion harus membutuhkan incremental OOS evidence.
+- [x] Acceptance: keputusan daily-event vs episode estimator dibuat berdasarkan
+      evidence OOS, bukan preferensi modelling.
+
+### P7.6 — Corporate-Action Integrity [HIGH]
+
+**IMPLEMENTASI (16-08-2026)** — script `_p76_corporate_action.py`,
+output `data/phase7_p76_corporate_action.json`. Deteksi CA = lompatan
+faktor f = raw_close/adj_close antar bar (>1% material; >5% split/
+bonus/rights/dividen besar) pada 963 saham universe.
+
+**Audit (raw vs adj):**
+- 988 CA events di 365 saham; 274 big (>5%); median jump 3.28%,
+  p95 9.40%.
+- State drawdown: dd_raw > 5% di 88.4% bar vs dd_adj 86.9%
+  (perbedaan ~1.6pp = efek CA). State error |dd_raw - dd_adj| > 5%:
+  13.728 bar (4.63%), terkonsentrasi di saham dgn banyak event
+  (MPMX, CLPI, BSSR, BJTM, CFIN...).
+- **CA-artifact drawdown signal** (dd_raw > 5% TAPI dd_adj < 1%):
+  hanya 603 bar (0.20% bars valid); episode drawdown murni artifact:
+  7 dari 4.609 (0.15%). Dampak sinyal kecil.
+- **Bias probabilitas KONSERVATIF, bukan overestimasi**: pada bar
+  CA-artifact, P(h21) raw mean 0.521 vs counterfactual adj 0.687 —
+  0/603 bar ter-overestimasi >5pp. Model raw mengukur target "kembali
+  ke peak raw" (level pra-CA) yang memang lebih sulit tercapai.
+- Re-test RTF/ARA policy: ARA raw >= +9.9% = 2.649 bar; ARA PALSU di
+  adjusted (adj>=9.9% tapi raw<9.9%) = 12 bar — konfirmasi keputusan
+  raw (kasus DUTI terdokumentasi di recovery.py: adjusted bisa bikin
+  ARA palsu).
+
+**PERUBAHAN PRODUKSI (minimal, defensif):**
+- `recovery.py`: helper `_detect_corporate_action()` — deteksi lompatan
+  faktor adj >2% dalam ~5 bar terakhir; flag **ca_note** ditambahkan di
+  `build_recovery_analysis` (ada di response walau valid=False / data
+  pendek). `api.py`: field `ca_note: str | None` di RecoveryResponse.
+- Acceptance P7.6 terpenuhi: corporate action TIDAK dapat menciptakan
+  artificial recovery signal TANPA TERDETEKSI (0.2% bar artifact kini
+  ter-flag di jalur analisis user).
+
+**POLICY FINAL (data contract, universe_meta.json note diperbarui):**
+- RAW (raw_close) = basis eksekusi & event semantics: entry/exit
+  backtest, deteksi ARA, gate RTF, % change harian, params recovery
+  P6.1 (basis_harga raw) — PERTAHANKAN, konsisten semua jalur.
+- ADJ (adj_close) = referensi statistik historis & deteksi CA saja;
+  TIDAK dipakai jalur produksi mana pun.
+- CA material dideteksi & di-flag via ca_note (konteks, bukan sinyal).
+- Tidak mengganti pipeline ke Adj Close (verifikasi definisi
+  adjustment Yahoo diperlukan utk itu; DUTI case membuktikan adjusted
+  bermasalah utk event detection).
+
+- [x] Identifikasi saham/period yang memiliki split, bonus, rights, atau
+      corporate action material.
+- [x] Bandingkan recovery state menggunakan raw price vs
+      corporate-action-normalized price.
+- [x] Audit apakah artificial drawdown/recovery dapat muncul dari corporate action.
+- [x] Tentukan policy eksplisit: raw price untuk execution/event semantics;
+      normalized series untuk historical statistical state bila diperlukan.
+- [x] Jangan mengganti seluruh pipeline ke Adj Close tanpa memverifikasi definisi
+      adjustment.
+- [x] Re-test drawdown, recovery target, RTF event, dan SMA policy terhadap
+      corporate-action cases.
+- [x] Dokumentasikan policy final di data-contract.
+- [x] Acceptance: corporate action tidak dapat menciptakan artificial recovery
+      signal tanpa terdeteksi.
+
+### P7.7 — Survivorship / Historical Universe Integrity [HIGH]
+
+**IMPLEMENTASI (16-08-2026)** — P6.5 dijalankan ulang (`_phase6_p65_
+survivorship.py` -> `phase6_survivorship.json`) + audit tambahan
+(`_p77_survivorship_extra.py` -> `data/phase7_p77_survivorship.json`).
+
+**Angka kunci:**
+- Universe live 963 kode vs delisted 31 seeds (16 dgn data, 15 tanpa;
+  sumber SahamOK/IDXChannel/CNBC — IDX API resmi tidak dapat diakses
+  Cloudflare 403/503). Delisted fraction universe = 3.1%.
+- **Direct OOS contamination = 0**: semua bar delisted berakhir SEBELUM
+  window OOS (>= 2025-11-24) — evaluasi OOS TIDAK terkontaminasi;
+  sisanya murni survivorship limitation (bias Shumway-style):
+  overpred model produksi pada saham delisted h=21 +0.054, h=63 +0.144;
+  refit universe+delisted: delta b relatif max 0.0013 (h=63) — dampak
+  parameter kecil.
+- **RTF khusus delisted (baru)**: 15 saham delisted dgn >= 150 bar,
+  27 episode ARA total → **0 sinyal akumulasi valid** (semua gagal gate:
+  data pendek / di bawah level event / dll). RTF tidak menghasilkan
+  sinyal dari saham yang akhirnya delisted — bias survivorship RTF
+  minimal.
+- **Suspensi (baru)**: universe 38.109 bar volume=0 di 910/963 saham
+  (136 saham suspensi panjang >= 20 bar); episode drawdown overlap
+  zero-vol = 232/4.609 (5.0%). Bar suspensi tetap dipakai state
+  recovery (close flat -> dd menanjak tanpa volume) — dampak kecil,
+  limitation didokumentasikan; 53 saham universe data pendek (< 260
+  bar) otomatis di-skip model recovery.
+- **IPO entry dates (baru)**: npz window = 2024-02-27..2026-08-14
+  (900 bar); 962/963 saham mulai dari awal window — data availability
+  != listing date; tanggal IPO resmi tidak tercatat (limitation).
+- Label resmi: "survivorship-limited backtest" (config.py + P6.5).
+
+**KEPUTUSAN**: tidak ada perubahan produksi. Klaim performa universe-
+wide tetap "survivorship-limited" (BUKAN unbiased). Keterbatasan
+didokumentasikan: coverage delisted parsial, missing delisting return
+(gap_ok=False), suspensi, IPO date tidak tersedia.
+
+- [x] Tambahkan historical universe membership bila source memungkinkan.
+- [x] Masukkan delisted securities ke historical evaluation sesuai availability.
+- [x] Tangani delisting date/reason.
+- [x] Tangani suspended stocks secara eksplisit.
+- [x] Tangani IPO entry dates.
+- [x] Dokumentasikan missing delisting return sebagai limitation jika tidak
+      tersedia.
+- [x] Jalankan ulang survivorship test khusus RTF.
+- [x] Pisahkan: direct OOS contamination vs broader survivorship limitation.
+- [x] Acceptance: klaim universe-wide performance tidak disebut unbiased bila
+      historical membership belum lengkap.
+
+### P7.8 — Embargo Sensitivity [MEDIUM/HIGH]
+
+**IMPLEMENTASI (16-08-2026)** — `_p78_embargo_sensitivity.py` ->
+`data/phase7_p78_embargo.json`. Cutoff FROZEN (2025-11-24) & purge
+label-overlap FROZEN; hanya embargo 5/10/20 hari kalender divariasikan.
+
+**Hasil (test bersih, identik utk ketiga embargo):**
+- AUC test TIDAK berubah: h1 0.9576 ... h63 0.8025 (semua varian).
+- Brier test TIDAK berubah material: max |ΔBrier| vs embargo 5 =
+  0.0008 (embargo 10), 0.0036 (embargo 20).
+- Calibration intercept/slope nyaris identik (embargo 10: c_int
+  -0.157 vs -0.155; slope 0.967 vs 0.968 di h1).
+- Fitted params: embargo 10 max |Δa| 0.016, |Δb| 0.046; embargo 20
+  max |Δa| 0.057, |Δb| 0.287 (h1 b=-30.9 -> rel < 1%).
+- Sampel: embargo 5 train h1 127.213 / purge 3.297; embargo 20
+  train 118.122 / purge 12.388 (train mengecil ~7%, test SAMA
+  karena test = date_s >= cutoff).
+
+**KEPUTUSAN: FINAL EMBARGO = 5 HARI (dipertahankan, status quo).**
+Alasan (stability/integrity, BUKAN profit): (1) metrik OOS identik di
+semua varian -> embargo lebih panjang tidak memberi perbaikan
+stabilitas; (2) embargo 5 = sampel train terbesar & buffer minimal
+yang sudah mencakup ~3 hari trading; (3) parameter terstabil. Dicatat
+sebelum final holdout (P4.8): embargo final = 5 hari kalender.
+
+- [x] Evaluate embargo 5 calendar days.
+- [x] Evaluate embargo 10 calendar days.
+- [x] Evaluate embargo 20 calendar days.
+- [x] Pertahankan cutoff dan purge tetap frozen.
+- [x] Bandingkan: AUC, Brier, calibration intercept, calibration slope, fitted
+      parameters, sample size.
+- [x] Pilih embargo final sebelum final holdout.
+- [x] Catat alasan pemilihan secara reproducible.
+- [x] Jangan memilih embargo berdasarkan profit OOS.
+- [x] Acceptance: final embargo dipilih berdasarkan stability/statistical
+      integrity, bukan performance cherry-picking.
+
+### P7.9 — Walk-Forward Selection Transparency [MEDIUM]
+
+**IMPLEMENTASI (16-08-2026)** — `_p79_walkforward_transparency.py` ->
+`data/phase7_p79_walkforward.json`. Re-run walk-forward (train 252 /
+test 63, purge 10 + embargo 10, grid 36 kandidat) pada BBCA/BBRI/ASII/
+TLKM dgn return_meta=True + metadata seleksi per window disimpan.
+
+**Hasil:**
+- Total candidate trials per window: 36 (konstan, dari WF_OPT_GRID
+  3x3x2x2) — tercatat per window di per_window_log.
+- Windows: 16 total, 16 evaluated, **0 skipped** (skip rate 0.0%);
+  alasan: kandidat pada train 252 bar selalu >= WF_OPT_MIN_TRADES=10
+  di saham liquid ini; skip_reasons kosong.
+- Breakdown regime (train slice ±10%): down 8 (0 skip), sideways 5
+  (0 skip), up 3 (0 skip) — tidak ada window yang ter-skip di regime
+  manapun pada sampel ini; breakdown liquidity: median avg-vol per
+  saham dicatat (skipped = n/a krn 0 skip).
+- Parameter-selection frequency: mode share (kandidat sama menang) =
+  37.5% — pemenang paling sering: adx_gate_ceiling=15,
+  atr_sl_multiplier=2.0, rvol_breakout_confirm=1.2,
+  swing_buy_threshold=68 (6/16 window).
+- Parameter stability antar-window berturut-turut: 37.5% (6/16 pasang
+  memilih kombinasi identik) — seleksi cukup bervariasi per window;
+  konsisten dgn grid kecil yg di-optimasi per window di data train.
+- Selection metadata FULL disimpan (per window: winner params,
+  train_sharpe/trades, OOS sharpe/return/win rate, regime, avg vol)
+  utk audit tanpa aggregate Sharpe tunggal.
+
+- [x] Report total candidate trials per window.
+- [x] Report parameter-selection frequency.
+- [x] Report parameter stability antar-window.
+- [x] Report skipped-window rate.
+- [x] Breakdown skipped windows by regime.
+- [x] Breakdown skipped windows by liquidity/universe availability.
+- [x] Quantify how often the same candidate wins.
+- [x] Simpan full selection metadata untuk audit.
+- [x] Jangan menambahkan CPCV/PBO/DSR sebelum evidence menunjukkan kebutuhan.
+- [x] Acceptance: selection process dapat diaudit tanpa mengandalkan satu
+      aggregate Sharpe number.
+
+### P7.10 — Stale Methodology / Legacy Guard [MEDIUM]
+
+**IMPLEMENTASI (16-08-2026):**
+- Grep seluruh source: klaim "70/30" hanya tersisa di konteks yang
+  sudah diklarifikasi — config.py:186 annotation (P6.1 menggantikan
+  split bar 70/30 yang bocor), `_calibrate_recovery_model.py` (LEGACY
+  banner P7.4 + guard --allow-prod-write), `_fase2_*`/`_validate_
+  recovery.py`/`_bootstrap_recovery.py` (riset historis berkonteks
+  fase). Tidak ada methodology competing yang tampak production-valid.
+- `_reliability.py`: ditambah banner **LEGACY-METHODOLOGY (P7.10)** —
+  script memakai split temporal 70/30 pre-P6; produksi = P6.1
+  (chronological cutoff 70% tanggal + purge label-overlap + embargo 5);
+  hasil 12-Agu-2026 = riset historis utk audit kalibrasi.
+- `gorengan.py`: klaim "memperkirakan probabilitas" utk Gorengan Risk
+  Score (heuristic composite 0-100) diperbaiki -> "mengukur risiko,
+  BUKAN probabilitas terkalibrasi" (score tidak dideskripsikan sbg
+  probability).
+- User-facing terminology: api.py sudah pakai `large_upmove_*` (P6.7
+  C14); istilah internal "ARA" selalu disertai klarifikasi "BUKAN
+  definisi ARA resmi BEI" (config.py:278, recovery.py:486).
+- swing_score di api.py: tidak pernah dideskripsikan sebagai
+  probability (hanya `float | None` + recommendation). recovery_model
+  score = probabilitas terkalibrasi (sah — beda jalur).
+
+- [x] Grep seluruh source untuk klaim lama 70/30, position split, atau
+      performance claim sebelum P6.
+- [x] Tandai script lama sebagai LEGACY bila masih dipertahankan.
+- [x] Hapus/annotate stale performance claims yang tidak lagi valid.
+- [x] Pastikan developer-facing comments mengarah ke methodology P6 terbaru.
+- [x] Pastikan user-facing terminology large_upmove_* digunakan, bukan ARA legacy.
+- [x] Pastikan score tidak pernah dideskripsikan sebagai probability.
+- [x] Acceptance: tidak ada dua methodology competing yang sama-sama tampak
+      production-valid.
+
+### P7.11 — Base-Rate Artifact Integrity [MEDIUM]
+
+**IMPLEMENTASI (16-08-2026):**
+- Audit `recovery_model_params.json`: runtime (recovery.py) HANYA
+  membaca blok `horizons.<h>.a` & `.b` (recovery_model_probs =
+  logistic(a + b*dd)); `_params_hash` = sha256 canonical COMPACT
+  (separators=(",",":")) dari blok horizons — diverifikasi cocok dgn
+  provenance.parameter_hash `ea9c41244210...`. HASH FILE (seluruh
+  file) berubah 1adb085e... -> **992CC0CB32D138067DBE211F9B3DE2D13B462E5B88DFB0DE80671B64D10970D3**
+  hanya karena metadata P7.11 ditambahkan; kontrak P7.4 (parameter_
+  hash blok horizons + locked) TIDAK berubah — verified match.
+- `base_rate_table` = statistik FULL-HISTORY (semua bar, semua saham,
+  tanpa split — build_base_rate_table di _calibrate_recovery_model.
+  py) — **diagnostic-only, TIDAK pernah dibaca runtime** (cek grep:
+  tidak ada referensi di recovery.py/api.py).
+- `ci_cluster` = cluster bootstrap (resample saham) dari TRAIN split
+  saja (fit ulang di train; percentile 90%) — bukan full-history.
+- `auc_test/brier_test/calibration/n_*_test` di blok horizons =
+  diagnostic OOS, tidak dibaca runtime.
+- **Source-mask ditambahkan ke artifact** (P7.11, hash horizons
+  tidak berubah — verified 67caef.../compact ea9c4124...):
+  `base_rate_table_meta` = {scope: full_history_diagnostic_only,
+  used_by_runtime: false, runtime_uses: [horizons.<h>.a, .b]} dan
+  `runtime_contract` = {reads: {horizons: [a, b]}, diagnostic_only:
+  [base_rate_table, ci_cluster, auc_*, brier_test, calibration,
+  n_*_test, rec_rate]}.
+- Acceptance terpenuhi: tidak ada statistik future-derived/
+  full-history yang masuk jalur probabilitas produksi (a, b dari
+  TRAIN; cluster CI dari TRAIN). Smoke: load OK, probs OK.
+
+- [x] Audit base_rate_table pada recovery_model_params_p6.json.
+- [x] Pastikan statistik yang dapat memengaruhi runtime hanya berasal dari
+      TRAIN/development.
+- [x] Pisahkan diagnostic statistics full-history dari production parameter
+      statistics.
+- [x] Jika base_rate_table tidak digunakan runtime, tandai jelas sebagai
+      diagnostic-only.
+- [x] Tambahkan source-mask metadata bila artifact menyimpan statistik penelitian.
+- [x] Acceptance: tidak ada future-derived statistic yang dapat diam-diam masuk
+      ke production probability path.
+
+### P7.12 — Probability CI Semantics [MEDIUM]
+
+**IMPLEMENTASI (16-08-2026):**
+- `recovery_model_probs` sekarang mengekspos metadata CI per horizon:
+  `ci_method` = "cluster_bootstrap_90pct" (primary; fallback legacy
+  "delta_method_90pct_legacy" hanya utk params pra-P6), `ci_level` = 90,
+  `ci_scope` = "parameter/estimation uncertainty antar-saham (cluster
+  bootstrap) — BUKAN prediction interval".
+- Docstring `recovery_model_probs` di-update: CI = ESTIMATION/PARAMETER
+  uncertainty (ketidakpastian a,b antar-saham), bukan prediction
+  interval; dilarang disebut "chance range".
+- `api.py::RecoveryProbability`: field `ci_method`, `ci_level`,
+  `ci_scope` ditambahkan (pass-through otomatis; verifikasi pydantic
+  OK). Tidak ada istilah "chance range"/misleading di API.
+- Stock-cluster bootstrap tetap PRIMARY uncertainty method (P6.2,
+  precomputed grid + interpolasi linear; delta method = legacy).
+- Acceptance: pengguna dapat membedakan point probability (`p_hit`)
+  dari uncertainty estimate (`ci_low/ci_high` + scope) secara jelas.
+
+- [x] Tambahkan metadata ci_method.
+- [x] Tambahkan ci_level.
+- [x] Tambahkan ci_scope.
+- [x] Jelaskan bahwa CI adalah estimation/parameter uncertainty, bukan prediction
+      interval.
+- [x] Pastikan UI/API tidak menyebut CI sebagai "chance range" atau istilah yang
+      misleading.
+- [x] Pastikan stock-cluster bootstrap tetap menjadi primary uncertainty method.
+- [x] Acceptance: pengguna dapat membedakan point probability dari uncertainty
+      estimate secara jelas.
+
+### P7.13 — Final Holdout Pre-Registration [CRITICAL]
+
+**IMPLEMENTASI (16-08-2026)** — dokumen `backend/data/phase7_p713_
+preregistration.json` (protocol **P4.8-protocol-v3.0**) + update
+`phase4_holdout_config.json` (production_params_snapshot → hash file
+aktual 992CC0CB... dgn catatan P7.4/P7.11; parameter_hash blok
+horizons ea9c4124... tetap match — hard guard P7.4 PASS). Semua
+keputusan dikunci SEBELUM P4.8 RUN ONCE:
+- Cutoff rule frozen: `--cutoff YYYY-MM-DD` argumen saat run (tanggal
+  mulai data genuinely unseen), exclude semua date_s < cutoff, purge
+  date_s + h <= last date; RUN ONCE, dilarang geser cutoff / rerun
+  methodology lain.
+- Production params hash frozen: file 992CC0CB...; shrinkage
+  D329FE16...; locked=True; parameter_hash ea9c4124... match.
+- M1 candidate frozen: previous_close h1/3/5, c = 0.9112/0.7382/
+  0.7387 (h10/h21 veto Case C; h42/63 = M0; prior_peak M0 semua h).
+- p_min = 0.68 FROZEN (P6.11).
+- Brier reference frozen: climatology DEV (<= 2026-01-23, purged) —
+  dilarang prevalence holdout sebagai reference.
+- Bootstrap seeds frozen: primary B=1000 seed 42 (stock-cluster),
+  sensitivity B=500 seed 7 (date-block 10 hari).
+- Acceptance rules frozen: 8 rules + overall PROMOTE/REJECT/
+  INCONCLUSIVE (operational selectivity < 0.50).
+- Embargo final = 5 hari (P7.8) dicatat utk seluruh evaluasi.
+- Verification: hash code/config 7 file kunci dicatat; dataset
+  snapshot d60aac04... (universe) + ede45b8a... (delisted); no
+  contamination (delisted di OOS = 0, P7.7); holdout BELUM dibuka;
+  selftest = DEV-only, bukan evidence; probability source stabil
+  (P7.4/P7.11).
+- Harness RUN-ONCE: phase4_holdout_config.json run_discipline + ABORT
+  bila hash params berubah (PIT-integrity).
+
+- [x] Freeze exact holdout cutoff rule/date.
+- [x] Freeze production params hash.
+- [x] Freeze M1 candidate parameters.
+- [x] Freeze p_min=0.68.
+- [x] Freeze Brier reference/base-rate.
+- [x] Freeze bootstrap seeds.
+- [x] Freeze acceptance rules.
+- [x] Verify no contamination.
+- [x] Verify no test run has touched holdout.
+- [x] Verify code/config hash.
+- [x] Verify dataset snapshot/hash.
+- [x] Record final protocol version.
+- [x] Mark harness as RUN-ONCE.
+- [x] Do not move cutoff to increase sample size.
+- [x] Do not rerun with different methodology after seeing result.
+- [x] Acceptance: P4.8 becomes a genuinely one-shot final evidence experiment.
+
+### P7.14 — Final Claims Audit [HIGH]
+
+**IMPLEMENTASI (16-08-2026)** — `backend/data/phase7_p714_claims.json`
+(11 klaim diaudit, C01–C11) + perbaikan README.md:
+- **README**: klaim backtest Fase 6 (win rate 55.3%, Sharpe 0.24,
+  +0.41%) di-annotate **LEGACY** — eksekusi close+0bps pre-P7.1 fix;
+  metode recovery di-update ke P6.1 (split kronologis + purge +
+  embargo 5, provenance hash); CI di-update ke cluster bootstrap +
+  semantics P7.12 (estimation uncertainty, bukan prediction
+  interval); validasi OOS di-update (periode eksak ≤ 2026-08-14 +
+  angka P6.1).
+- Separations tercatat: screening vs profitability; discrimination
+  (AUC) vs calibration (Brier/slope/ECE); probability quality vs
+  decision utility (P4.8 final_verdict); RTF standalone vs
+  incremental value.
+- Klaim C01 (RTF 3.4x) = research-backed dgn batasan konteks; C03
+  = ANNOTATED-LEGACY; C10 = pending P4.8; C11 (gorengan
+  "probabilitas") = FIXED P7.10.
+- Aturan global: klaim performa wajib OOS period; PnL wajib
+  konvensi eksekusi; universe-wide wajib survivorship limitation;
+  probabilistik wajib metodologi CI; RTF tidak diklaim "useless"
+  dari Phase 5; M5/M10 tidak diklaim "universally superior".
+
+- [x] Separate: research-backed claims / empirical project findings / heuristic
+      assumptions / unsupported-speculative claims.
+- [x] Separate screening usefulness from executable profitability.
+- [x] Separate discrimination from calibration.
+- [x] Separate probability quality from decision utility.
+- [x] Separate standalone RTF association from incremental value.
+- [x] Do not claim RTF is "useless" based solely on Phase 5.
+- [x] Do not claim M5/M10 is universally superior momentum.
+- [x] State exact OOS period for every performance claim.
+- [x] State execution convention for every PnL claim.
+- [x] State survivorship limitations for every universe-wide claim.
+- [x] State uncertainty/CI methodology for every probabilistic claim.
+- [x] Acceptance: every major claim in README/audit/API documentation can be
+      traced to a valid evidence source.

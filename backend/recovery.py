@@ -31,6 +31,7 @@ Dependensi: numpy dan math (stdlib).
 
 from __future__ import annotations
 
+import hashlib
 import math
 import os
 import json
@@ -171,6 +172,14 @@ def p_hit_ever(mu: float, sigma: float, a: float) -> float:
 # Model recovery empiris GLOBAL (logistic drawdown) - pengganti GBM
 # ---------------------------------------------------------------------------
 
+def _params_hash(data: dict) -> str:
+    """sha256 dari blok 'horizons' (isi model) — canonical, konsisten dgn
+    provenance.parameter_hash (P7.4)."""
+    canon = json.dumps(data.get("horizons", {}), sort_keys=True,
+                       separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(canon).hexdigest()
+
+
 def _load_recovery_model_params() -> Optional[dict]:
     """Load parameter model logistic-drawdown hasil kalibrasi offline.
 
@@ -178,6 +187,11 @@ def _load_recovery_model_params() -> Optional[dict]:
     (963 saham IDX, split global kronologis + purge/embargo, P6.1; target =
     prior high). Return None kalau file tidak ada / tidak valid -> pemanggil
     berjalan tanpa model.
+
+    P7.4 hard guard: produksi WAJIB punya provenance lengkap & locked=True,
+    dan parameter_hash harus cocok dgn blok horizons (deteksi modifikasi
+    tak sah / overwrite metodologi legacy). Bila tidak cocok -> None
+    (model TIDAK dipakai — konservatif).
     """
     try:
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -185,6 +199,19 @@ def _load_recovery_model_params() -> Optional[dict]:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if data.get("model") != "logistic_drawdown":
+            return None
+        prov = data.get("provenance") or {}
+        if not prov.get("locked") is True:
+            print("recovery.py: REFUSED — provenance.locked != True "
+                  "(P7.4 hard guard); model recovery nonaktif.", file=sys.stderr)
+            return None
+        if not prov.get("source_script") or not prov.get("parameter_hash"):
+            print("recovery.py: REFUSED — provenance tidak lengkap (P7.4); "
+                  "model recovery nonaktif.", file=sys.stderr)
+            return None
+        if _params_hash(data) != prov["parameter_hash"]:
+            print("recovery.py: REFUSED — parameter_hash mismatch (P7.4); "
+                  "model recovery nonaktif.", file=sys.stderr)
             return None
         return data
     except Exception:
@@ -222,9 +249,14 @@ def recovery_model_probs(dd: float,
 
     P = 1 / (1 + exp(a_h + b_h * dd_fraction)). Return None kalau parameter
     model tidak tersedia. Nilai dibulatkan 3 desimal (gaya API konsisten).
-    CI (interval 90%):
+    CI (interval 90%) — P7.12 semantics:
+      CI = ESTIMATION/PARAMETER uncertainty (ketidakpastian parameter a,b
+      antar-saham via cluster bootstrap), BUKAN prediction interval
+      (bukan rentang hasil aktual per saham/horizon). jangan disebut
+      "chance range".
       P6.2 (Agu 2026): bila params punya ci_cluster.<h> (cluster bootstrap
-      saham, percentile 90%, precomputed per grid dd) -> interpolasi linear.
+      saham, percentile 90%, precomputed per grid dd) -> interpolasi linear
+      (PRIMARY METHOD).
       Legacy: bila a_se/b_se/cov_ab tersedia, delta method pada skala logit
       (var_logit = se_a^2 + dd^2*se_b^2 + 2*dd*cov_ab, transformasi sigmoid),
       diskala ci_bootstrap.scale_a/scale_b (F2.3). Nilai None bila tak ada.
@@ -242,6 +274,7 @@ def recovery_model_probs(dd: float,
         logit = r["a"] + r["b"] * dd
         p = 1.0 / (1.0 + math.exp(-logit))
         ci_low = ci_high = None
+        ci_method = "cluster_bootstrap_90pct"  # P7.12: primary method
         # P6.2: cluster bootstrap CI (precomputed per grid dd) — diprioritaskan
         cc = params.get("ci_cluster", {}).get(str(h))
         if isinstance(cc, dict) and cc.get("fitted") and cc.get("prob_ci_grid"):
@@ -251,6 +284,7 @@ def recovery_model_probs(dd: float,
         # Legacy: delta method + scale (params lama pra-P6)
         elif r.get("a_se") is not None and r.get("b_se") is not None \
                 and r.get("cov_ab") is not None:
+            ci_method = "delta_method_90pct_legacy"
             cb = params.get("ci_bootstrap") or {}
             sa = cb.get("scale_a", 1.0) if isinstance(cb, dict) else 1.0
             sb = cb.get("scale_b", 1.0) if isinstance(cb, dict) else 1.0
@@ -263,7 +297,10 @@ def recovery_model_probs(dd: float,
             ci_low = round(1.0 / (1.0 + math.exp(-(logit - z * se_logit))), 3)
             ci_high = round(1.0 / (1.0 + math.exp(-(logit + z * se_logit))), 3)
         out.append({"horizon_days": h, "p_hit": round(p, 3),
-                    "ci_low": ci_low, "ci_high": ci_high})
+                    "ci_low": ci_low, "ci_high": ci_high,
+                    "ci_method": ci_method, "ci_level": 90,
+                    "ci_scope": ("parameter/estimation uncertainty antar-saham "
+                                 "(cluster bootstrap) — BUKAN prediction interval")})
     return out or None
 
 
@@ -831,13 +868,46 @@ def detect_accumulation(bars: list) -> dict:
 # Analisis lengkap
 # ---------------------------------------------------------------------------
 
+def _detect_corporate_action(bars: list) -> Optional[str]:
+    """P7.6: deteksi corporate action (split/bonus/rights/dividen material)
+    pada ~5 bar terakhir lewat lompatan faktor adj f = raw_close/adj_close
+    (>2% dalam satu hari). Return catatan atau None.
+
+    Raw & adjusted dari Yahoo: adj berubah level saat CA, raw tidak.
+    Kalau CA terjadi baru-baru ini, penurunan harga raw bisa bukan
+    penurunan nilai pasar — user perlu konteks.
+    """
+    if not bars or len(bars) < 2:
+        return None
+    raw = np.array([(getattr(b, "raw_close", None) or b.close) for b in bars],
+                   dtype=float)
+    adj = np.array([(getattr(b, "adj_close", None) or b.close) for b in bars],
+                   dtype=float)
+    ok = (raw > 0) & (adj > 0) & np.isfinite(raw) & np.isfinite(adj)
+    if ok.sum() < 2:
+        return None
+    f = raw / adj
+    with np.errstate(invalid="ignore", divide="ignore"):
+        dl = np.diff(np.log(f))
+    idx = np.flatnonzero(np.abs(dl) > np.log1p(0.02))  # >2% dalam 1 bar
+    if len(idx) == 0:
+        return None
+    j = int(idx[-1]) + 1  # bar setelah lompatan
+    if j < len(bars) - 5:  # hanya relevan kalau terjadi ~5 bar terakhir
+        return None
+    pct = float(np.expm1(dl[j - 1])) * 100.0
+    return (f"Corporate action terdeteksi pada bar ke-{j + 1} dari akhir "
+            f"(lompatan faktor penyesuaian {pct:+.1f}%): penurunan harga "
+            f"mungkin bukan penurunan nilai pasar (split/bonus/rights/dividen).")
+
+
 def build_recovery_analysis(
-    code: str,
-    nama: str,
-    bars: list,
-    drop_pct: float = config.RECOVERY_DROP_DEFAULT,
-    last_updated: Optional[str] = None,
-    ref_days: Optional[int] = None,
+        code: str,
+        nama: str,
+        bars: list,
+        drop_pct: Optional[float] = None,
+        ref_days: Optional[int] = None,
+        last_updated: str = "",
 ) -> dict:
     """
     Analisis recovery ke previous close untuk satu saham.
@@ -877,7 +947,11 @@ def build_recovery_analysis(
         "exit_plan": None,
         "vs_lookbacks": [],
         "accumulation": None,
+        "ca_note": None,   # P7.6: catatan corporate action bila terdeteksi
     }
+
+    # P7.6: flag corporate action (ada di response walau tanpa setup)
+    base["ca_note"] = _detect_corporate_action(bars)
 
     if len(close) < config.RECOVERY_MIN_BARS:
         base["signal_reason"] = (

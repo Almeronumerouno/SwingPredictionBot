@@ -1175,5 +1175,49 @@
   "ci_bootstrap": null,
   "generated": "2026-08-15T13:53:55+00:00",
   "dataset": "universe_ohlcv.npz",
-  "n_codes": 963
+  "n_codes": 963,
+  "provenance": {
+    "source_script": "_phase6_p61_calibrate.py",
+    "calibration_version": "P6.1",
+    "protocol": "frozen P6: split global kronologis cutoff 70% tanggal + purge label-overlap + embargo 5 hari kalender; target prior_peak, basis raw close; p_min 0.68 terpisah (config)",
+    "dataset": "universe_ohlcv.npz",
+    "n_codes": 963,
+    "dataset_hash": "d60aac045d19d364169273aefc6eccc894a2a394bde2096b46b3ab0dc53d1e13",
+    "cutoff_date": "2025-11-24",
+    "purge_rule": "buang obs train yg date_s < cutoff <= date_e",
+    "embargo_days": 5,
+    "created_at": "2026-08-15T13:53:55+00:00",
+    "parameter_hash": "ea9c41244210f25529b05dd59723b95c0deb5a90046bc7976363c96d08da787f",
+    "locked": true,
+    "locked_since": "2026-08-16"
+  },
+  "base_rate_table_meta": {
+    "scope": "full_history_diagnostic_only (semua bar semua saham, tanpa split)",
+    "used_by_runtime": false,
+    "note": "P7.11 (16-08-2026): base_rate_table TIDAK pernah dibaca oleh recovery.py/api.py; referensi statistik Exhibit-4 saja. Jalur produksi hanya membaca blok horizons (a,b).",
+    "runtime_uses": [
+      "horizons.<h>.a",
+      "horizons.<h>.b"
+    ]
+  },
+  "runtime_contract": {
+    "reads": {
+      "horizons": [
+        "a",
+        "b"
+      ]
+    },
+    "diagnostic_only": [
+      "base_rate_table",
+      "ci_cluster",
+      "auc_train",
+      "auc_test",
+      "brier_test",
+      "calibration",
+      "n_pos_test",
+      "n_episodes_test",
+      "rec_rate"
+    ],
+    "note": "P7.11: tidak ada statistik future-derived/full-history yang masuk ke jalur probabilitas produksi (a,b diturunkan TRAIN-only; cluster bootstrap CI dari TRAIN)."
+  }
 }

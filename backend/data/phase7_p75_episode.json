@@ -1,0 +1,1145 @@
+{
+  "method": "P7.5 episode/dependence sensitivity",
+  "episode_definition": "F2.2: run kontigu dd>0 (drawdown dari trailing peak 252), rep = bar trough (argmax dd)",
+  "target": "prior_peak (max high dalam h hari setelah bar rep) — identik P6",
+  "split": "global chronological cutoff 70% tanggal = 2025-11-24 + purge label-overlap + embargo 5 hari",
+  "horizons": {
+    "1": {
+      "daily": {
+        "n": 144725,
+        "base_rate": 0.0214,
+        "brier": 0.01601,
+        "bss": 0.234,
+        "mean_p": 0.0231,
+        "calib_intercept": -0.1549,
+        "calib_slope": 0.9679,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 6070,
+            "pred": 0.327,
+            "actual": 0.3147,
+            "dev": -0.0124
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 9169,
+            "pred": 0.1036,
+            "actual": 0.0796,
+            "dev": -0.024
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 11319,
+            "pred": 0.0264,
+            "actual": 0.0223,
+            "dev": -0.0041
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 26216,
+            "pred": 0.0038,
+            "actual": 0.0075,
+            "dev": 0.0037
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 38688,
+            "pred": 0.0001,
+            "actual": 0.0001,
+            "dev": -0.0001
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 34639,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 16909,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          }
+        ],
+        "a": 0.08709,
+        "b": -30.08368
+      },
+      "episode": {
+        "n": 1843,
+        "base_rate": 0.2811,
+        "brier": 0.08794,
+        "bss": 0.5648,
+        "mean_p": 0.2575,
+        "calib_intercept": 0.2718,
+        "calib_slope": 0.9478,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 447,
+            "pred": 0.7618,
+            "actual": 0.8121,
+            "dev": 0.0503
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 269,
+            "pred": 0.4097,
+            "actual": 0.4349,
+            "dev": 0.0252
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 140,
+            "pred": 0.1431,
+            "actual": 0.1929,
+            "dev": 0.0497
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 175,
+            "pred": 0.0206,
+            "actual": 0.0629,
+            "dev": 0.0423
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 211,
+            "pred": 0.0008,
+            "actual": 0.0,
+            "dev": -0.0008
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 309,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 270,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          }
+        ],
+        "a": 1.84482,
+        "b": -29.88831
+      },
+      "n_train_daily": 127213,
+      "n_train_episode": 2668,
+      "n_test_daily": 144725,
+      "n_test_episode": 1843,
+      "n_purged_daily": 3297,
+      "n_purged_episode": 54,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.01602,
+        "brier_episode_mean": 0.08799,
+        "diff_ep_minus_daily_mean": 0.07197,
+        "ci90_low": 0.07135,
+        "ci90_high": 0.07283,
+        "pct_episode_better": 0.0,
+        "mean_p_daily": 0.0232,
+        "mean_p_episode": 0.2586
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 753,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.3711,
+          "brier_stocks_few_ep": 0.00256,
+          "brier_stocks_many_ep": 0.19408,
+          "n_few_ep": 400,
+          "n_many_ep": 1443
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": 0.3734,
+          "brier_stocks_few_ep": 0.00322,
+          "brier_stocks_many_ep": 0.11142,
+          "n_few_ep": 400,
+          "n_many_ep": 1443
+        }
+      }
+    },
+    "3": {
+      "daily": {
+        "n": 143012,
+        "base_rate": 0.0428,
+        "brier": 0.03109,
+        "bss": 0.2407,
+        "mean_p": 0.0483,
+        "calib_intercept": -0.1917,
+        "calib_slope": 0.9813,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 6019,
+            "pred": 0.4429,
+            "actual": 0.4544,
+            "dev": 0.0115
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 9096,
+            "pred": 0.2342,
+            "actual": 0.1754,
+            "dev": -0.0589
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 11237,
+            "pred": 0.1061,
+            "actual": 0.0745,
+            "dev": -0.0316
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 26002,
+            "pred": 0.0301,
+            "actual": 0.0281,
+            "dev": -0.002
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 38200,
+            "pred": 0.0033,
+            "actual": 0.0053,
+            "dev": 0.002
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 34157,
+            "pred": 0.0002,
+            "actual": 0.0005,
+            "dev": 0.0003
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 16614,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          }
+        ],
+        "a": 0.3147,
+        "b": -19.69872
+      },
+      "episode": {
+        "n": 1824,
+        "base_rate": 0.4035,
+        "brier": 0.08376,
+        "bss": 0.652,
+        "mean_p": 0.3863,
+        "calib_intercept": 0.2186,
+        "calib_slope": 0.9721,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 443,
+            "pred": 0.8954,
+            "actual": 0.9413,
+            "dev": 0.0459
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 266,
+            "pred": 0.7439,
+            "actual": 0.7293,
+            "dev": -0.0146
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 136,
+            "pred": 0.5183,
+            "actual": 0.5294,
+            "dev": 0.0111
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 175,
+            "pred": 0.1945,
+            "actual": 0.2343,
+            "dev": 0.0398
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 209,
+            "pred": 0.0248,
+            "actual": 0.0574,
+            "dev": 0.0326
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 305,
+            "pred": 0.0011,
+            "actual": 0.0,
+            "dev": -0.0011
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 268,
+            "pred": 0.0,
+            "actual": 0.0,
+            "dev": -0.0
+          }
+        ],
+        "a": 2.61432,
+        "b": -20.50382
+      },
+      "n_train_daily": 125562,
+      "n_train_episode": 2646,
+      "n_test_daily": 143012,
+      "n_test_episode": 1824,
+      "n_purged_daily": 4948,
+      "n_purged_episode": 76,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.03112,
+        "brier_episode_mean": 0.08386,
+        "diff_ep_minus_daily_mean": 0.05274,
+        "ci90_low": 0.05243,
+        "ci90_high": 0.05321,
+        "pct_episode_better": 0.0,
+        "mean_p_daily": 0.0485,
+        "mean_p_episode": 0.3871
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 748,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.3965,
+          "brier_stocks_few_ep": 0.00339,
+          "brier_stocks_many_ep": 0.23985,
+          "n_few_ep": 396,
+          "n_many_ep": 1428
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": 0.2355,
+          "brier_stocks_few_ep": 0.00598,
+          "brier_stocks_many_ep": 0.10533,
+          "n_few_ep": 396,
+          "n_many_ep": 1428
+        }
+      }
+    },
+    "5": {
+      "daily": {
+        "n": 141306,
+        "base_rate": 0.0588,
+        "brier": 0.04213,
+        "bss": 0.2392,
+        "mean_p": 0.0682,
+        "calib_intercept": -0.2008,
+        "calib_slope": 1.0025,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 5966,
+            "pred": 0.4925,
+            "actual": 0.5218,
+            "dev": 0.0293
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 9026,
+            "pred": 0.3068,
+            "actual": 0.2392,
+            "dev": -0.0676
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 11156,
+            "pred": 0.1697,
+            "actual": 0.1104,
+            "dev": -0.0593
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 25791,
+            "pred": 0.0628,
+            "actual": 0.0498,
+            "dev": -0.0129
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 37705,
+            "pred": 0.0104,
+            "actual": 0.0126,
+            "dev": 0.0022
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 33670,
+            "pred": 0.0009,
+            "actual": 0.0015,
+            "dev": 0.0007
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 16334,
+            "pred": 0.0,
+            "actual": 0.0001,
+            "dev": 0.0
+          }
+        ],
+        "a": 0.41722,
+        "b": -16.08543
+      },
+      "episode": {
+        "n": 1815,
+        "base_rate": 0.459,
+        "brier": 0.0753,
+        "bss": 0.6967,
+        "mean_p": 0.4371,
+        "calib_intercept": 0.3077,
+        "calib_slope": 0.9617,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 440,
+            "pred": 0.9335,
+            "actual": 0.9705,
+            "dev": 0.037
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 263,
+            "pred": 0.8375,
+            "actual": 0.8631,
+            "dev": 0.0256
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 136,
+            "pred": 0.6713,
+            "actual": 0.6471,
+            "dev": -0.0242
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 174,
+            "pred": 0.3315,
+            "actual": 0.3678,
+            "dev": 0.0363
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 209,
+            "pred": 0.0586,
+            "actual": 0.11,
+            "dev": 0.0514
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 304,
+            "pred": 0.0033,
+            "actual": 0.0132,
+            "dev": 0.0098
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 267,
+            "pred": 0.0001,
+            "actual": 0.0,
+            "dev": -0.0001
+          }
+        ],
+        "a": 3.07315,
+        "b": -18.94066
+      },
+      "n_train_daily": 123909,
+      "n_train_episode": 2623,
+      "n_test_daily": 141306,
+      "n_test_episode": 1815,
+      "n_purged_daily": 6601,
+      "n_purged_episode": 99,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.04218,
+        "brier_episode_mean": 0.07537,
+        "diff_ep_minus_daily_mean": 0.03319,
+        "ci90_low": 0.03273,
+        "ci90_high": 0.03375,
+        "pct_episode_better": 0.0,
+        "mean_p_daily": 0.0686,
+        "mean_p_episode": 0.4378
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 746,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.3779,
+          "brier_stocks_few_ep": 0.00706,
+          "brier_stocks_many_ep": 0.24815,
+          "n_few_ep": 395,
+          "n_many_ep": 1420
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": 0.1274,
+          "brier_stocks_few_ep": 0.00981,
+          "brier_stocks_many_ep": 0.09352,
+          "n_few_ep": 395,
+          "n_many_ep": 1420
+        }
+      }
+    },
+    "10": {
+      "daily": {
+        "n": 137041,
+        "base_rate": 0.0896,
+        "brier": 0.06269,
+        "bss": 0.2315,
+        "mean_p": 0.1102,
+        "calib_intercept": -0.2464,
+        "calib_slope": 1.0439,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 5865,
+            "pred": 0.5634,
+            "actual": 0.6136,
+            "dev": 0.0502
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 8837,
+            "pred": 0.4132,
+            "actual": 0.3365,
+            "dev": -0.0767
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 10954,
+            "pred": 0.2801,
+            "actual": 0.1777,
+            "dev": -0.1024
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 25305,
+            "pred": 0.1397,
+            "actual": 0.0937,
+            "dev": -0.046
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 36528,
+            "pred": 0.0371,
+            "actual": 0.0331,
+            "dev": -0.0041
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 32403,
+            "pred": 0.0055,
+            "actual": 0.0053,
+            "dev": -0.0002
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 15563,
+            "pred": 0.0005,
+            "actual": 0.0006,
+            "dev": 0.0002
+          }
+        ],
+        "a": 0.59982,
+        "b": -12.33076
+      },
+      "episode": {
+        "n": 1796,
+        "base_rate": 0.5167,
+        "brier": 0.07402,
+        "bss": 0.7036,
+        "mean_p": 0.4942,
+        "calib_intercept": 0.36,
+        "calib_slope": 0.8947,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 432,
+            "pred": 0.962,
+            "actual": 0.9884,
+            "dev": 0.0264
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 258,
+            "pred": 0.9106,
+            "actual": 0.9419,
+            "dev": 0.0312
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 135,
+            "pred": 0.8138,
+            "actual": 0.7852,
+            "dev": -0.0286
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 173,
+            "pred": 0.5374,
+            "actual": 0.5318,
+            "dev": -0.0056
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 208,
+            "pred": 0.1466,
+            "actual": 0.2163,
+            "dev": 0.0698
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 301,
+            "pred": 0.0124,
+            "actual": 0.0432,
+            "dev": 0.0308
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 267,
+            "pred": 0.0003,
+            "actual": 0.0075,
+            "dev": 0.0072
+          }
+        ],
+        "a": 3.62589,
+        "b": -17.20024
+      },
+      "n_train_daily": 119773,
+      "n_train_episode": 2549,
+      "n_test_daily": 137041,
+      "n_test_episode": 1796,
+      "n_purged_daily": 10737,
+      "n_purged_episode": 173,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.06278,
+        "brier_episode_mean": 0.07409,
+        "diff_ep_minus_daily_mean": 0.01131,
+        "ci90_low": 0.01067,
+        "ci90_high": 0.01203,
+        "pct_episode_better": 0.0,
+        "mean_p_daily": 0.1107,
+        "mean_p_episode": 0.4951
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 742,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.3542,
+          "brier_stocks_few_ep": 0.01677,
+          "brier_stocks_many_ep": 0.23908,
+          "n_few_ep": 393,
+          "n_many_ep": 1403
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": 0.037,
+          "brier_stocks_few_ep": 0.02443,
+          "brier_stocks_many_ep": 0.08791,
+          "n_few_ep": 393,
+          "n_many_ep": 1403
+        }
+      }
+    },
+    "21": {
+      "daily": {
+        "n": 127588,
+        "base_rate": 0.1382,
+        "brier": 0.09501,
+        "bss": 0.2024,
+        "mean_p": 0.1873,
+        "calib_intercept": -0.3568,
+        "calib_slope": 1.1322,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 5674,
+            "pred": 0.6377,
+            "actual": 0.6972,
+            "dev": 0.0595
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 8531,
+            "pred": 0.5288,
+            "actual": 0.44,
+            "dev": -0.0888
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 10520,
+            "pred": 0.4197,
+            "actual": 0.2726,
+            "dev": -0.147
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 24230,
+            "pred": 0.2719,
+            "actual": 0.165,
+            "dev": -0.1069
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 33956,
+            "pred": 0.1129,
+            "actual": 0.0741,
+            "dev": -0.0388
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 29536,
+            "pred": 0.0291,
+            "actual": 0.0179,
+            "dev": -0.0112
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 13721,
+            "pred": 0.0049,
+            "actual": 0.0012,
+            "dev": -0.0037
+          }
+        ],
+        "a": 0.82096,
+        "b": -9.12202
+      },
+      "episode": {
+        "n": 1752,
+        "base_rate": 0.5805,
+        "brier": 0.07095,
+        "bss": 0.7086,
+        "mean_p": 0.5475,
+        "calib_intercept": 0.47,
+        "calib_slope": 0.9925,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 421,
+            "pred": 0.9713,
+            "actual": 1.0,
+            "dev": 0.0287
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 249,
+            "pred": 0.94,
+            "actual": 0.9719,
+            "dev": 0.0319
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 131,
+            "pred": 0.8849,
+            "actual": 0.916,
+            "dev": 0.0311
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 172,
+            "pred": 0.7092,
+            "actual": 0.75,
+            "dev": 0.0408
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 202,
+            "pred": 0.3127,
+            "actual": 0.3614,
+            "dev": 0.0487
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 298,
+            "pred": 0.049,
+            "actual": 0.1007,
+            "dev": 0.0517
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 258,
+            "pred": 0.0024,
+            "actual": 0.0078,
+            "dev": 0.0053
+          }
+        ],
+        "a": 3.84986,
+        "b": -14.50887
+      },
+      "n_train_daily": 110728,
+      "n_train_episode": 2383,
+      "n_test_daily": 127588,
+      "n_test_episode": 1752,
+      "n_purged_daily": 19782,
+      "n_purged_episode": 339,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.09517,
+        "brier_episode_mean": 0.07104,
+        "diff_ep_minus_daily_mean": -0.02414,
+        "ci90_low": -0.02572,
+        "ci90_high": -0.02216,
+        "pct_episode_better": 1.0,
+        "mean_p_daily": 0.1879,
+        "mean_p_episode": 0.5483
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 734,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.308,
+          "brier_stocks_few_ep": 0.0316,
+          "brier_stocks_many_ep": 0.21748,
+          "n_few_ep": 395,
+          "n_many_ep": 1357
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": -0.0645,
+          "brier_stocks_few_ep": 0.04816,
+          "brier_stocks_many_ep": 0.07759,
+          "n_few_ep": 395,
+          "n_many_ep": 1357
+        }
+      }
+    },
+    "42": {
+      "daily": {
+        "n": 109508,
+        "base_rate": 0.2018,
+        "brier": 0.1406,
+        "bss": 0.127,
+        "mean_p": 0.3168,
+        "calib_intercept": -0.6343,
+        "calib_slope": 1.3649,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 5387,
+            "pred": 0.7026,
+            "actual": 0.781,
+            "dev": 0.0784
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 8134,
+            "pred": 0.6309,
+            "actual": 0.5357,
+            "dev": -0.0953
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 9916,
+            "pred": 0.5549,
+            "actual": 0.3502,
+            "dev": -0.2047
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 22215,
+            "pred": 0.4352,
+            "actual": 0.2383,
+            "dev": -0.1969
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 29432,
+            "pred": 0.2606,
+            "actual": 0.1287,
+            "dev": -0.1319
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 23597,
+            "pred": 0.1105,
+            "actual": 0.0403,
+            "dev": -0.0702
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 9730,
+            "pred": 0.0329,
+            "actual": 0.0028,
+            "dev": -0.0301
+          }
+        ],
+        "a": 1.04255,
+        "b": -6.54046
+      },
+      "episode": {
+        "n": 1593,
+        "base_rate": 0.6516,
+        "brier": 0.06583,
+        "bss": 0.71,
+        "mean_p": 0.6334,
+        "calib_intercept": 0.1694,
+        "calib_slope": 1.2314,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 398,
+            "pred": 0.9743,
+            "actual": 1.0,
+            "dev": 0.0257
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 245,
+            "pred": 0.9536,
+            "actual": 1.0,
+            "dev": 0.0464
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 121,
+            "pred": 0.9213,
+            "actual": 0.9752,
+            "dev": 0.0539
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 164,
+            "pred": 0.8214,
+            "actual": 0.8476,
+            "dev": 0.0262
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 184,
+            "pred": 0.531,
+            "actual": 0.5,
+            "dev": -0.031
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 243,
+            "pred": 0.1641,
+            "actual": 0.1687,
+            "dev": 0.0046
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 218,
+            "pred": 0.0172,
+            "actual": 0.0229,
+            "dev": 0.0057
+          }
+        ],
+        "a": 3.90068,
+        "b": -11.60754
+      },
+      "n_train_daily": 94094,
+      "n_train_episode": 1964,
+      "n_test_daily": 109508,
+      "n_test_episode": 1593,
+      "n_purged_daily": 36416,
+      "n_purged_episode": 758,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.14099,
+        "brier_episode_mean": 0.06593,
+        "diff_ep_minus_daily_mean": -0.07506,
+        "ci90_low": -0.07854,
+        "ci90_high": -0.07114,
+        "pct_episode_better": 1.0,
+        "mean_p_daily": 0.3177,
+        "mean_p_episode": 0.6337
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 677,
+        "median_episodes_per_stock": 1.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": 0.2091,
+          "brier_stocks_few_ep": 0.06412,
+          "brier_stocks_many_ep": 0.16966,
+          "n_few_ep": 358,
+          "n_many_ep": 1235
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": -0.1803,
+          "brier_stocks_few_ep": 0.08997,
+          "brier_stocks_many_ep": 0.05883,
+          "n_few_ep": 358,
+          "n_many_ep": 1235
+        }
+      }
+    },
+    "63": {
+      "daily": {
+        "n": 91395,
+        "base_rate": 0.2519,
+        "brier": 0.18192,
+        "bss": 0.0347,
+        "mean_p": 0.4286,
+        "calib_intercept": -0.9966,
+        "calib_slope": 1.5516,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 5128,
+            "pred": 0.7483,
+            "actual": 0.8007,
+            "dev": 0.0524
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 7680,
+            "pred": 0.6941,
+            "actual": 0.5771,
+            "dev": -0.117
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 9160,
+            "pred": 0.6356,
+            "actual": 0.4034,
+            "dev": -0.2323
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 19934,
+            "pred": 0.5387,
+            "actual": 0.2928,
+            "dev": -0.2459
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 24623,
+            "pred": 0.378,
+            "actual": 0.1604,
+            "dev": -0.2175
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 17763,
+            "pred": 0.2028,
+            "actual": 0.0543,
+            "dev": -0.1485
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 6311,
+            "pred": 0.0799,
+            "actual": 0.0065,
+            "dev": -0.0734
+          }
+        ],
+        "a": 1.24168,
+        "b": -5.45041
+      },
+      "episode": {
+        "n": 1087,
+        "base_rate": 0.9089,
+        "brier": 0.04979,
+        "bss": 0.3985,
+        "mean_p": 0.822,
+        "calib_intercept": 1.2435,
+        "calib_slope": 1.3653,
+        "reliability": [
+          {
+            "bucket": "0.00-0.05",
+            "n": 383,
+            "pred": 0.9612,
+            "actual": 1.0,
+            "dev": 0.0388
+          },
+          {
+            "bucket": "0.05-0.10",
+            "n": 237,
+            "pred": 0.9385,
+            "actual": 1.0,
+            "dev": 0.0615
+          },
+          {
+            "bucket": "0.10-0.15",
+            "n": 112,
+            "pred": 0.9082,
+            "actual": 0.9911,
+            "dev": 0.0829
+          },
+          {
+            "bucket": "0.15-0.25",
+            "n": 136,
+            "pred": 0.8278,
+            "actual": 0.9632,
+            "dev": 0.1354
+          },
+          {
+            "bucket": "0.25-0.40",
+            "n": 101,
+            "pred": 0.6326,
+            "actual": 0.8218,
+            "dev": 0.1892
+          },
+          {
+            "bucket": "0.40-0.60",
+            "n": 73,
+            "pred": 0.3096,
+            "actual": 0.5068,
+            "dev": 0.1972
+          },
+          {
+            "bucket": "0.60-0.85",
+            "n": 36,
+            "pred": 0.0588,
+            "actual": 0.1667,
+            "dev": 0.1079
+          }
+        ],
+        "a": 3.41474,
+        "b": -9.13316
+      },
+      "n_train_daily": 77807,
+      "n_train_episode": 1524,
+      "n_test_daily": 91395,
+      "n_test_episode": 1087,
+      "n_purged_daily": 52703,
+      "n_purged_episode": 1198,
+      "bootstrap_diff": {
+        "fitted": true,
+        "n_boot": 100,
+        "brier_daily_mean": 0.18229,
+        "brier_episode_mean": 0.04995,
+        "diff_ep_minus_daily_mean": -0.13233,
+        "ci90_low": -0.14132,
+        "ci90_high": -0.1232,
+        "pct_episode_better": 1.0,
+        "mean_p_daily": 0.429,
+        "mean_p_episode": 0.8226
+      },
+      "episode_count_sensitivity": {
+        "n_stocks": 419,
+        "median_episodes_per_stock": 2.0,
+        "daily": {
+          "corr_abs_err_vs_ep_count": -0.1674,
+          "brier_stocks_few_ep": 0.17703,
+          "brier_stocks_many_ep": 0.12155,
+          "n_few_ep": 350,
+          "n_many_ep": 737
+        },
+        "episode": {
+          "corr_abs_err_vs_ep_count": -0.2591,
+          "brier_stocks_few_ep": 0.09249,
+          "brier_stocks_many_ep": 0.02952,
+          "n_few_ep": 350,
+          "n_many_ep": 737
+        }
+      }
+    }
+  },
+  "n_boot": 100,
+  "seed": 42,
+  "generated": "2026-08-16T04:47:36+00:00"
+}

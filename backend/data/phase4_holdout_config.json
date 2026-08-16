@@ -5,9 +5,9 @@
   "decision_reference": "keputusan user 15-08-2026: M1 = candidate (previous_close h1-21), M0 = KEEP (previous_close h42-63, prior_peak semua), p_min 0.68 frozen, isotonic sensitivity-only, validation = research/evaluation set. RE-FREEZE 15-08-2026 (P6.9/P6.10, keputusan user): params produksi di-switch ke P6 (correctness fix - split lama position-based/leaky); M1 di-re-evaluate di atas layer baru -> M1 = previous_close h1-21 SEMULA, DIREVISI jadi h1/3/5 (h10/h21 veto Case C saturation p_min; h42/63 M0; prior_peak M0 semua h). Holdout TIDAK dibuka; ini re-freeze methodology sebelum final experiment.",
 
   "production_params_snapshot": {
-    "recovery_model_params.json": "F495252969AF96CF6A0732659FD0F9A98BA78ECD879A23F566334B9C963FEAA1",
+    "recovery_model_params.json": "992CC0CB32D138067DBE211F9B3DE2D13B462E5B88DFB0DE80671B64D10970D3",
     "recovery_shrinkage_params.json": "D329FE1662B12F243204CADD8B337E26C68B6A0985F4951E9724F2AD759057EE",
-    "note": "PIT-integrity: harness ABORT bila hash params produksi berubah sejak freeze (probability source tidak boleh bergeser diam-diam). RE-FREEZE 15-08-2026 (P6.9/P6.10): recovery_model_params.json di-switch dari params lama (split position-based/leaky) ke params P6 (split global kronologis + purge + embargo). Hash baru dicatat di sini; params lama dibackup di recovery_model_params_pre_p6_backup.json."
+    "note": "PIT-integrity: harness ABORT bila hash params produksi berubah sejak freeze (probability source tidak boleh bergeser diam-diam). RE-FREEZE 15-08-2026 (P6.9/P6.10, keputusan user): recovery_model_params.json di-switch dari params lama (split position-based/leaky) ke params P6 (split global kronologis + purge + embargo). Hash baru dicatat di sini; params lama dibackup di recovery_model_params_pre_p6_backup.json. UPDATE 16-08-2026 (P7.4 + P7.11 + P7.13): hash file diperbarui ke 992CC0CB... krn metadata ditambahkan (provenance P7.4; base_rate_table_meta + runtime_contract P7.11). ISI MODEL TIDAK BERUBAH: parameter_hash blok horizons = ea9c41244210f25529b05dd59723b95c0deb5a90046bc7976363c96d08da787f diverifikasi cocok (P7.4 hard guard tetap PASS). Holdout belum dibuka — update ini = bagian pre-registration P7.13, sah dilakukan sebelum RUN ONCE."
   },
 
   "m1_candidate": {

@@ -1,8 +1,10 @@
 """
 gorengan.py — Gorengan Detection Engine.
 
-Menghitung Gorengan Risk Score (0-100) yang memperkirakan probabilitas
-sebuah saham menunjukkan karakteristik pump-and-dump ("saham gorengan").
+Menghitung Gorengan Risk Score (0-100) yang mengukur risiko sebuah saham
+menunjukkan karakteristik pump-and-dump ("saham gorengan"). Score ini
+adalah heuristic composite (P7.10: BUKAN probabilitas terkalibrasi —
+jangan diperlakukan sebagai probability).
 
 Ini BUKAN sinyal buy/sell. Ini adalah risk assessment layer yang
 memperingatkan user ketika price action menyerupai perilaku gorengan.

@@ -1,0 +1,53 @@
+{
+  "method": "P7.7 survivorship/universe integrity — audit tambahan",
+  "rtf_delisted": {
+    "n_stocks": 31,
+    "n_with_min_bars": 15,
+    "n_valid_signal": 0,
+    "n_ara_episodes": 27,
+    "reasons": {
+      "Belum pola akumulasi post-ARA volume tidak konsisten: kepadatan baru 25.0% (wajib >= 30.0%); harga BELUM di atas SMA20; likuiditas rendah: ADV20 58,174 lbr / Rp11,376,111 (floor 500,000 lbr & Rp250,000,000).": 1,
+      "Belum pernah ada large upmove (+10.0%) dalam history - tidak ada acuan distribusi.": 12,
+      "Belum pola akumulasi post-ARA volume tidak konsisten: kepadatan baru 0.4% (wajib >= 30.0%); likuiditas rendah: ADV20 0 lbr / Rp0 (floor 500,000 lbr & Rp250,000,000).": 1,
+      "Belum pola akumulasi post-ARA volume tidak konsisten: kepadatan baru 0.8% (wajib >= 30.0%); likuiditas rendah: ADV20 0 lbr / Rp0 (floor 500,000 lbr & Rp250,000,000).": 1
+    }
+  },
+  "suspension": {
+    "universe": {
+      "stocks_with_zero_vol": 910,
+      "zero_vol_bars": 38109,
+      "stocks_long_suspend": 136
+    },
+    "delisted": {
+      "stocks_with_zero_vol": 15,
+      "zero_vol_bars": 11846,
+      "stocks_long_suspend": 14
+    },
+    "dd_episodes_overlap_zero_vol": 4,
+    "dd_episodes_total": 6,
+    "universe_dd_episodes_overlap_zero_vol": 232,
+    "universe_dd_episodes_total": 4609,
+    "n_stocks_skip_model_data_short": 53
+  },
+  "zero_vol_run_min_bars": 20,
+  "ipo_availability": {
+    "global_first_date": "2024-02-27",
+    "n_stocks_at_start": 866,
+    "first_date_buckets": {
+      "<2016": 0,
+      "2016-2017": 0,
+      "2018-2019": 0,
+      "2020-2021": 0,
+      "2022-2023": 0,
+      "2024+": 962
+    },
+    "limitation": "first_date = ketersediaan data (bukan tanggal IPO resmi; IDX API resmi tidak dapat diakses). Saham listing belakangan punya histori lebih pendek."
+  },
+  "limitations": [
+    "delisted coverage parsial: 31 seeds (16 dgn data) dari SahamOK/IDXChannel/CNBC — IDX API resmi tidak dapat diakses (Cloudflare).",
+    "missing delisting return: bar terakhir Yahoo bisa > 45 hari sebelum delisting resmi (gap_ok=False; suspensi panjang / data tidak lengkap).",
+    "saham suspended: bar volume=0 tetap dipakai di state recovery (close flat -> dd menanjak tanpa volume) — dampak kecil, didokumentasikan sebagai limitation.",
+    "klaim universe-wide performance TIDAK unbiased (survivorship-limited); label di config & phase6_survivorship.json."
+  ],
+  "generated": "2026-08-16T04:56:16+00:00"
+}

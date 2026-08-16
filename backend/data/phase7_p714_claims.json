@@ -1,0 +1,125 @@
+{
+  "file": "phase7_p714_claims.json",
+  "phase": "P7.14 — Final Claims Audit [HIGH]",
+  "created": "2026-08-16",
+  "scope": "README.md, AUDIT_READY_TO_FLY_RECOVERY_ENGINE_v2.md, api.py (dokumentasi)",
+  "note": "Setiap klaim besar dapat ditelusuri ke evidence source; klaim tanpa source ditandai UNSUPPORTED dan dihapus/annotate.",
+
+  "separations": {
+    "screening_vs_profitability": "RTF/skoring = alat SCREENING (peringkat/prioritas), BUKAN klaim profit eksekusi. Klaim profit hanya dari backtest dgn konvensi eksekusi eksplisit.",
+    "discrimination_vs_calibration": "AUC = discrimination (ranking); Brier/slope/intercept/ECE = calibration. Keduanya dilaporkan terpisah (P4.8 metrics_probability_quality).",
+    "probability_quality_vs_decision_utility": "Kalibrasi probabilitas bagus TIDAK menjamin keputusan threshold menguntungkan (final_verdict P4.8: M1 tidak dipromosikan bila operational selectivity rusak walau Brier lebih baik).",
+    "rtf_standalone_vs_incremental": "Asosiasi RTF (univariat) != nilai inkremental di atas model lain (P5/P6: RTF dipakai sebagai gate + skor komponen, bukan klaim universal)."
+  },
+
+  "claims": [
+    {
+      "id": "C01",
+      "claim": "RTF edge ~3.4x (P(boom +10%/5hari) 18.4% vs kontrol 5.4%, p<1e-16, n=8092)",
+      "category": "research-backed (walk-forward anti-lookahead, 915 saham, 800 bar, 2026)",
+      "source": "config.py ACCUM_* comment (validasi 16-08); recovery.py detect_accumulation docstring",
+      "oos_period": "window 2026 pada 800 bar (data <= 2026-08-14)",
+      "limitations": "B10 OR (momentum 1.52-1.58 vs RTF 1.47) menunjukkan RTF BUKAN baseline terkuat secara universal; klaim RTF superiority DIBATASI konteks post-ARA gate. Jangan diklaim 'universally superior momentum'.",
+      "status": "VALID - dengan batasan konteks"
+    },
+    {
+      "id": "C02",
+      "claim": "Recovery model: AUC test 0.83-0.95, Brier 0.021-0.119 (validasi lama); P6.1 OOS: AUC 0.958-0.803, Brier 0.016-0.182",
+      "category": "empirical project finding (OOS)",
+      "source": "_validate_recovery.py --mode dataset; _phase6_p61_calibrate.py / P7.8 embargo 5",
+      "oos_period": "test 30% terakhir per saham (data <= 2026-08-14); P6.1: test bersih date_s >= 2025-11-24 s.d. 2026-08-14",
+      "limitations": "survivorship-limited (P6.5/P7.7): 963 saham live; delisted 31 seeds TIDAK di OOS (overpred h21 +0.054, h63 +0.144; delta b <= 0.0013)",
+      "status": "VALID - survivorship limitation wajib disebut utk klaim universe-wide"
+    },
+    {
+      "id": "C03",
+      "claim": "Backtest Fase 6: win rate 55.3%, Sharpe 0.24, +0.41% return (19 saham, 2025-12-23 s.d. 2026-07-24)",
+      "category": "UNSUPPORTED sebagai klaim performa saat ini (legacy)",
+      "source": "README tabel Fase 6 — pre-P7.1 leakage fix, close execution, tanpa slippage",
+      "oos_period": "2025-12-23 s.d. 2026-07-24",
+      "limitations": "Execution convention TIDAK valid (close+0bps, pre-fix). Di-annotate LEGACY di README (P7.14). Re-run wajib: open + 25bps + portfolio.py.",
+      "status": "ANNOTATED-LEGACY (jangan dikutip sebagai klaim performa)"
+    },
+    {
+      "id": "C04",
+      "claim": "Kalibrasi parameter Fase 6 (ADX ceiling 20, buy 70, ATR SL 3.0, RVOL 10, confirm 1.5) = parameter optimal",
+      "category": "empirical project finding (kalibrasi grid 243 combo x 19 saham)",
+      "source": "README tabel; backtest_calibrate.py; konfigurasi aktual di config.py",
+      "oos_period": "2025-12-23 s.d. 2026-07-24 (kalibrasi)",
+      "limitations": "Walk-forward P7.9: seleksi per window bervariasi (mode share 37.5%, stability antar-window 37.5%); 'optimal' = hasil kalibrasi Fase 6, bukan klaim universal. WF_OPT_GRID dipakai utk seleksi per window.",
+      "status": "VALID - 'optimal' dibatasi konteks kalibrasi Fase 6"
+    },
+    {
+      "id": "C05",
+      "claim": "P(recovery) CI 90% = estimation/parameter uncertainty (cluster bootstrap)",
+      "category": "empirical project finding (methodology statement)",
+      "source": "recovery_model_probs (P6.2/P7.12); recovery_model_params.json ci_cluster",
+      "oos_period": "n/a (methodology)",
+      "limitations": "BUKAN prediction interval; jangan disebut 'chance range' (P7.12).",
+      "status": "VALID"
+    },
+    {
+      "id": "C06",
+      "claim": "Squeeze volatilitas bukan leading signal breakout (OR 0.74-1.06); efek post-ARA hanya d+1; momentum baseline terkuat (B10 OR: RTF 1.47, momentum 1.52-1.58)",
+      "category": "research-backed (script validasi spesifik)",
+      "source": "_validate_squeeze.py; _validate_post_ara.py; _baseline_compare.py; _bootstrap_recovery.py",
+      "oos_period": "data 2026, dataset lokal (disebut di source script)",
+      "limitations": "OR univariat pada window riset; bukan klaim kausalitas universal; 'momentum terkuat' = konteks baseline compare B10.",
+      "status": "VALID - traceable ke script"
+    },
+    {
+      "id": "C07",
+      "claim": "Episode estimator recovery tidak dipromosikan; produksi = daily-event estimator",
+      "category": "empirical project finding (P7.5)",
+      "source": "_p75_episode_sensitivity.py -> data/phase7_p75_episode.json; MD P7.5",
+      "oos_period": "cutoff 2025-11-24, test date_s >= cutoff",
+      "limitations": "Mixed evidence h1-h21 (daily menang h<=10, episode h>=21); episode estimator sensitif komposisi saham.",
+      "status": "VALID - keputusan terdokumentasi"
+    },
+    {
+      "id": "C08",
+      "claim": "Corporate action tidak dapat menciptakan artificial recovery tanpa terdeteksi (ca_note flag)",
+      "category": "empirical project finding (P7.6)",
+      "source": "_p76_corporate_action.py -> data/phase7_p76_corporate_action.json; recovery._detect_corporate_action",
+      "oos_period": "data <= 2026-08-14 (988 CA events)",
+      "limitations": "Deteksi = heuristik lompatan faktor adj > 2%; CA tua (>= 10 bar) tidak di-flag (dampak kecil, documented).",
+      "status": "VALID"
+    },
+    {
+      "id": "C09",
+      "claim": "Delisting OOS contamination = 0; survivorship bias terbatas (overpred h21 +0.054, h63 +0.144)",
+      "category": "empirical project finding (P6.5/P7.7)",
+      "source": "_phase6_p65_survivorship.py; _p77_survivorship_extra.py -> phase7_p77_survivorship.json",
+      "oos_period": "OOS >= 2025-11-24 (0 saham delisted di window)",
+      "limitations": "Historical membership TIDAK lengkap (31 seeds/16 data); klaim universe-wide = survivorship-limited, BUKAN unbiased.",
+      "status": "VALID"
+    },
+    {
+      "id": "C10",
+      "claim": "M1 recalibration candidate (h1/3/5) memperbaiki kalibrasi; h10/h21 jenuh p_min",
+      "category": "empirical project finding (P6.9) + P4.8 pending verdict",
+      "source": "_phase6_p69_recalib.py -> phase6_p69_recalib.json; phase4_holdout_config.json m1_candidate",
+      "oos_period": "DEV P6 (cutoff 2025-11-24); holdout P4.8 = WAIT",
+      "limitations": "Belum validasi holdout; M1 tetap CANDIDATE sampai P4.8 verdict.",
+      "status": "VALID - pending final evidence"
+    },
+    {
+      "id": "C11",
+      "claim": "Gorengan Risk Score 'memperkirakan probabilitas'",
+      "category": "heuristic assumption (score 0-100 composite)",
+      "source": "gorengan.py (di-perbaiki P7.10: BUKAN probabilitas terkalibrasi)",
+      "oos_period": "n/a",
+      "limitations": "Heuristic, bukan probability; tidak boleh disebut probability.",
+      "status": "FIXED (wording diperbaiki)"
+    }
+  ],
+
+  "global_claim_rules": [
+    "Setiap klaim performa wajib menyatakan OOS period eksak",
+    "Setiap klaim PnL wajib menyatakan konvensi eksekusi (open + 25bps default pasca-P7.3)",
+    "Setiap klaim universe-wide wajib menyatakan survivorship limitation",
+    "Setiap klaim probabilistik wajib menyatakan metodologi uncertainty (CI cluster bootstrap 90%)",
+    "RTF tidak boleh diklaim 'useless' hanya dari Phase 5 (asosiasi standalone != nilai inkremental)",
+    "M5/M10 tidak boleh diklaim 'universally superior momentum' (konteks B10 window riset)"
+  ]
+}

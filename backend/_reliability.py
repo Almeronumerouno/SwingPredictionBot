@@ -2,10 +2,18 @@
 _reliability.py — Reliability diagram + ECE/MCE/Brier utk model recovery OOS
 (rombak TODO, Agu 2026).
 
+!!! LEGACY-METHODOLOGY (P7.10, 16-08-2026) !!!
+Script ini memakai METODOLOGI LAMA (pre-P6): split TEMPORAL 70/30 &
+purge SEDERHANA. Produksi saat ini = P6.1 (chronological cutoff 70%
+TANGGAL + purge label-overlap + embargo 5 hari; lihat config.py &
+_phase6_p61_calibrate.py). Hasil di bawah adalah riset historis
+(12-Agu-2026) utk AUDIT kalibrasi — BUKAN methodology produksi aktif.
+Jangan dipakai sebagai acuan split/purge.
+
 Pertanyaan: model P_recover(dd) = logistic — apakah OOS well-calibrated
 (prediksi == frekuensi aktual)? Perlu koreksi Platt/isotonic atau tidak?
 
-Metodologi (riset s2):
+Metodologi (riset s2, HISTORIS):
 - Gunakan skenario identik _calibrate_recovery_model: _collect_rows (raw),
   split TEMPORAL 70/30, fit LogisticRegression(penalty=None).
 - OOS: p = logistic OOS. Reliability diagram = QUANTILE binning 10 bin

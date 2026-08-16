@@ -195,6 +195,11 @@ class RecoveryProbability(BaseModel):
     p_hit: float
     ci_low: float | None = None
     ci_high: float | None = None
+    # P7.12: semantics CI — estimation/parameter uncertainty (bukan
+    # prediction interval). Jangan disebut "chance range" di UI.
+    ci_method: str | None = None
+    ci_level: int | None = None
+    ci_scope: str | None = None
 
 
 class RecoveryEmpirical(BaseModel):
@@ -304,6 +309,7 @@ class RecoveryResponse(BaseModel):
     exit_plan: RecoveryExitPlan | None
     vs_lookbacks: list[RecoveryVsLookback] = []
     accumulation: RecoveryAccumulation | None = None
+    ca_note: str | None = None  # P7.6: corporate action terdeteksi (konteks, bukan sinyal)
 
 
 class MarketStatusResponse(BaseModel):

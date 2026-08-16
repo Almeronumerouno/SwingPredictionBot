@@ -1,0 +1,373 @@
+{
+  "method": "P7.9 walk-forward selection transparency (re-run, return_meta=True)",
+  "window_spec": {
+    "train": 252,
+    "test": 63,
+    "purge": 10,
+    "embargo": 10
+  },
+  "candidates_per_window": 36,
+  "codes": [
+    "BBCA",
+    "BBRI",
+    "ASII",
+    "TLKM"
+  ],
+  "windows_total": 16,
+  "windows_evaluated": 16,
+  "windows_skipped": 0,
+  "skipped_rate": 0.0,
+  "skip_by_reason": {},
+  "skip_by_regime": {
+    "down": {
+      "total": 8,
+      "skipped": 0,
+      "skipped_rate": 0.0
+    },
+    "sideways": {
+      "total": 5,
+      "skipped": 0,
+      "skipped_rate": 0.0
+    },
+    "up": {
+      "total": 3,
+      "skipped": 0,
+      "skipped_rate": 0.0
+    }
+  },
+  "liquidity_median_avg_vol": {
+    "BBCA": {
+      "median_avg_vol_evaluated": 102556810.7,
+      "median_avg_vol_skipped": null
+    },
+    "BBRI": {
+      "median_avg_vol_evaluated": 253258602.2,
+      "median_avg_vol_skipped": null
+    },
+    "ASII": {
+      "median_avg_vol_evaluated": 45066818.9,
+      "median_avg_vol_skipped": null
+    },
+    "TLKM": {
+      "median_avg_vol_evaluated": 111099683.9,
+      "median_avg_vol_skipped": null
+    }
+  },
+  "selection_frequency": {
+    "{\"adx_gate_ceiling\": 15, \"atr_sl_multiplier\": 2.0, \"rvol_breakout_confirm\": 1.2, \"swing_buy_threshold\": 68}": 6,
+    "{\"adx_gate_ceiling\": 15, \"atr_sl_multiplier\": 2.0, \"rvol_breakout_confirm\": 1.5, \"swing_buy_threshold\": 68}": 6,
+    "{\"adx_gate_ceiling\": 15, \"atr_sl_multiplier\": 3.0, \"rvol_breakout_confirm\": 1.5, \"swing_buy_threshold\": 68}": 3,
+    "{\"adx_gate_ceiling\": 20, \"atr_sl_multiplier\": 3.0, \"rvol_breakout_confirm\": 1.2, \"swing_buy_threshold\": 68}": 1
+  },
+  "mode_share_same_candidate_wins": 0.375,
+  "mode_candidate": "{\"adx_gate_ceiling\": 15, \"atr_sl_multiplier\": 2.0, \"rvol_breakout_confirm\": 1.2, \"swing_buy_threshold\": 68}",
+  "adjacent_window_stability": 0.375,
+  "adjacent_pairs": 16,
+  "per_window_log": [
+    {
+      "code": "BBCA",
+      "window_id": 1,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 88473274.2,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": 0.05,
+      "train_trades": 15,
+      "oos_sharpe": 0.57,
+      "oos_total_return": 1.16,
+      "oos_win_rate": 33.3
+    },
+    {
+      "code": "BBCA",
+      "window_id": 2,
+      "skipped": false,
+      "reason": null,
+      "regime": "sideways",
+      "avg_vol_train": 93069324.6,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": -0.23,
+      "train_trades": 17,
+      "oos_sharpe": -2.9,
+      "oos_total_return": -21.64,
+      "oos_win_rate": 25.0
+    },
+    {
+      "code": "BBCA",
+      "window_id": 3,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 112044296.8,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": -0.5,
+      "train_trades": 21,
+      "oos_sharpe": 0.47,
+      "oos_total_return": 1.35,
+      "oos_win_rate": 40.0
+    },
+    {
+      "code": "BBCA",
+      "window_id": 4,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 126363835.7,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": -0.98,
+      "train_trades": 21,
+      "oos_sharpe": 1.17,
+      "oos_total_return": 5.9,
+      "oos_win_rate": 50.0
+    },
+    {
+      "code": "BBRI",
+      "window_id": 1,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 268901041.7,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": 0.1,
+      "train_trades": 18,
+      "oos_sharpe": -1.5,
+      "oos_total_return": -11.9,
+      "oos_win_rate": 25.0
+    },
+    {
+      "code": "BBRI",
+      "window_id": 2,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 260940534.5,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.16,
+      "train_trades": 18,
+      "oos_sharpe": -2.88,
+      "oos_total_return": -20.93,
+      "oos_win_rate": 25.0
+    },
+    {
+      "code": "BBRI",
+      "window_id": 3,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 245576669.8,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.25,
+      "train_trades": 20,
+      "oos_sharpe": -2.88,
+      "oos_total_return": -15.76,
+      "oos_win_rate": 33.3
+    },
+    {
+      "code": "BBRI",
+      "window_id": 4,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 235827528.6,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 3.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.86,
+      "train_trades": 18,
+      "oos_sharpe": 0.07,
+      "oos_total_return": -0.73,
+      "oos_win_rate": 50.0
+    },
+    {
+      "code": "ASII",
+      "window_id": 1,
+      "skipped": false,
+      "reason": null,
+      "regime": "sideways",
+      "avg_vol_train": 54558895.2,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": -0.67,
+      "train_trades": 16,
+      "oos_sharpe": -2.0,
+      "oos_total_return": -10.82,
+      "oos_win_rate": 0.0
+    },
+    {
+      "code": "ASII",
+      "window_id": 2,
+      "skipped": false,
+      "reason": null,
+      "regime": "sideways",
+      "avg_vol_train": 47189625.0,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": -1.45,
+      "train_trades": 17,
+      "oos_sharpe": -0.89,
+      "oos_total_return": -8.16,
+      "oos_win_rate": 40.0
+    },
+    {
+      "code": "ASII",
+      "window_id": 3,
+      "skipped": false,
+      "reason": null,
+      "regime": "up",
+      "avg_vol_train": 42944012.7,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.02,
+      "train_trades": 15,
+      "oos_sharpe": -0.58,
+      "oos_total_return": -4.07,
+      "oos_win_rate": 50.0
+    },
+    {
+      "code": "ASII",
+      "window_id": 4,
+      "skipped": false,
+      "reason": null,
+      "regime": "up",
+      "avg_vol_train": 41506254.4,
+      "winner_params": {
+        "adx_gate_ceiling": 20,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 3.0,
+        "rvol_breakout_confirm": 1.2
+      },
+      "train_sharpe": 0.3,
+      "train_trades": 11,
+      "oos_sharpe": -0.1,
+      "oos_total_return": -3.75,
+      "oos_win_rate": 66.7
+    },
+    {
+      "code": "TLKM",
+      "window_id": 1,
+      "skipped": false,
+      "reason": null,
+      "regime": "down",
+      "avg_vol_train": 126456166.3,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": 0.0,
+      "train_trades": 19,
+      "oos_sharpe": -5.31,
+      "oos_total_return": -29.92,
+      "oos_win_rate": 0.0
+    },
+    {
+      "code": "TLKM",
+      "window_id": 2,
+      "skipped": false,
+      "reason": null,
+      "regime": "sideways",
+      "avg_vol_train": 113116261.5,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 3.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -0.77,
+      "train_trades": 17,
+      "oos_sharpe": -0.25,
+      "oos_total_return": -3.61,
+      "oos_win_rate": 50.0
+    },
+    {
+      "code": "TLKM",
+      "window_id": 3,
+      "skipped": false,
+      "reason": null,
+      "regime": "sideways",
+      "avg_vol_train": 109083106.3,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 2.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.02,
+      "train_trades": 21,
+      "oos_sharpe": -0.56,
+      "oos_total_return": -4.83,
+      "oos_win_rate": 50.0
+    },
+    {
+      "code": "TLKM",
+      "window_id": 4,
+      "skipped": false,
+      "reason": null,
+      "regime": "up",
+      "avg_vol_train": 103639767.1,
+      "winner_params": {
+        "adx_gate_ceiling": 15,
+        "swing_buy_threshold": 68,
+        "atr_sl_multiplier": 3.0,
+        "rvol_breakout_confirm": 1.5
+      },
+      "train_sharpe": -1.05,
+      "train_trades": 16,
+      "oos_sharpe": 0.96,
+      "oos_total_return": 5.64,
+      "oos_win_rate": 50.0
+    }
+  ],
+  "generated": "2026-08-16T05:11:50+00:00"
+}

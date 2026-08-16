@@ -10,6 +10,26 @@ Pendekatan:
   3. Walk bars: sinyal → entry → SL/TP check → exit → metrics
 
 Parameter tuning via BacktestConfig tanpa sentuh config.py.
+
+P7.3 — Realistic Execution Standard (konservatif, didokumentasikan):
+  - Entry: next-open (entry_mode="open", PRIMARY) utk sinyal close t-1.
+    entry_mode="close" (legacy) hanya utk perbandingan historis.
+  - Slippage: baseline 25 bps SATU SISI sebagai proxy spread+market impact
+    (buy naik, sell turun; diterapkan pada harga entry & exit).
+  - Gap-through-stop: bila open[i] gap melewati SL/TP, exit dieksekusi di
+    open[i] (min(SL, open) utk BUY-SL, max(TP, open) utk BUY-TP, dst.) —
+    konservatif, tidak mengasumsikan harga intraday yang lebih baik.
+  - Intrabar ambiguity SL vs TP pada bar yang sama: SL dicek LEBIH DULU
+    (SL-first, konservatif).
+  - Breakeven: tidak pernah exit di bar yang sama dgn trigger (efek mulai
+    bar berikutnya); trailing stop pakai ATR saat entry (atr_entry).
+  - REVERSAL exit: eksekusi di close[i] dari sinyal recs[i-1] (konvensi
+    legacy close — konservatif, bukan open).
+  - Net-of-fees: return_pct, equity curve, dan seluruh headline metrics
+    (total_return, sharpe, max_dd) SUDAH net fee asimetris (audit fix #14)
+    dan slippage. PnL headline = NET of fees.
+  - ADV/participation constraint: opsional via max_adv_fraction (stress
+    test partial-fill / impact) — entry di-skip bila notional > fraksi × ADV20.
 """
 
 from __future__ import annotations
@@ -50,12 +70,19 @@ class BacktestConfig:
     long_only: bool = CFG.LONG_ONLY_MODE
     breakeven_trigger: float = CFG.BREAKEVEN_TRIGGER
     trailing_stop_multiplier: float = 0.0  # 0=disabled, >0 trail by N×ATR below peak
-    # P6.4 (Agu 2026): realisme eksekusi — audit C5/C6.
-    #   entry_mode "close" = perilaku lama (eksekusi close bar sinyal, C5)
-    #   entry_mode "open"  = eksekusi open bar berikutnya (konvensi market order)
-    #   slippage_bps       = slippage satu sisi (bps); buy naik, sell turun
-    entry_mode: str = "close"
-    slippage_bps: float = 0.0
+    # P6.4/P7.3 (Agu 2026): realisme eksekusi — audit C5/C6/P7.3.
+    #   entry_mode "open"  = PRIMARY (eksekusi open bar berikutnya, konvensi
+    #                        market order utk sinyal yang tersedia di close t-1)
+    #   entry_mode "close" = LEGACY (eksekusi close bar sinyal — comparison only)
+    #   slippage_bps       = baseline 25 bps satu sisi (proxy spread+impact);
+    #                        sensitivity 0/25/50/100 tetap dieksplorasi via param
+    entry_mode: str = "open"
+    slippage_bps: float = 25.0
+    # P7.3: ADV/participation constraint (stress test). 0 = off.
+    #   Bila aktif: notional trade > max_adv_fraction × ADV20 → entry di-skip
+    #   (dicatat di BacktestMetrics.skipped_adv_entries). ADV20 dihitung dari
+    #   bar ≤ i-2 (informasi tersedia saat decision di close i-1).
+    max_adv_fraction: float = 0.0
 
 
 # ──────────────────────────────────────────────
@@ -109,6 +136,8 @@ class BacktestMetrics:
     avg_rr: float
     sharpe: float
     total_fees: float
+    # P7.3: jumlah entry yang di-skip karena constraint ADV/participation
+    skipped_adv_entries: int = 0
     trades: list[BacktestTrade] = field(default_factory=list)
 
 
@@ -418,6 +447,7 @@ def run_backtest(
             avg_rr=0.0,
             sharpe=0.0,
             total_fees=0.0,
+            skipped_adv_entries=0,
         )
 
     # ── 4. Walk simulation ──
@@ -429,6 +459,7 @@ def run_backtest(
     in_position = False
     pos: dict = {}
     total_fees = 0.0
+    skipped_adv_entries = 0
     equity_curve = []
 
     for i in range(warmup, sim_end):
@@ -452,7 +483,12 @@ def run_backtest(
             if i <= warmup or recs[i-1] not in ("BUY", "SELL"):
                 continue
 
-            atr_i = atr_val[i]
+            # P7.1 TEMPORAL INTEGRITY: decision timestamp = close bar SINYAL (i-1).
+            # Semua metadata keputusan (ATR, risk_level, SL, TP, entry_score,
+            # confidence, regime, gate, rvol) WAJIB dari bar i-1 — informasi yang
+            # tersedia saat keputusan dibuat. Memakai bar eksekusi (i) = leakage:
+            # ATR[i] baru tersedia setelah close i, padahal entry di open i.
+            atr_i = atr_val[i - 1]
             if np.isnan(atr_i) or atr_i <= 0:
                 continue
 
@@ -468,7 +504,7 @@ def run_backtest(
                 entry_price *= (1.0 + slip_in) if direction == "BUY" \
                     else (1.0 - slip_in)
 
-            risk_lvl = _risk_level(atr_val, i)
+            risk_lvl = _risk_level(atr_val, i - 1)
             regime_i = signals["regimes"][i - 1]
             sl = _calc_sl(entry_price, atr_i, direction, risk_lvl, bt_config, regime=regime_i)
             tp = _calc_tp(entry_price, atr_i, direction, bt_config)
@@ -483,19 +519,30 @@ def run_backtest(
             if shares < _LOT_SIZE:
                 continue
 
+            # P7.3: ADV/participation constraint (stress test) — notional trade
+            # dibatasi thd ADV20 dari bar ≤ i-2 (volume i-1 tersedia saat close
+            # i-1 = decision time; window i-21..i-1 → gunakan max(0,i-21):i-1
+            # yang berakhir di i-2). Entry melebihi batas di-skip & dicatat.
+            if bt_config.max_adv_fraction > 0:
+                adv_vol = float(np.mean(volume[max(0, i - 21):i - 1]))
+                adv_value = adv_vol * entry_price
+                if adv_value > 0 and (shares * entry_price) > bt_config.max_adv_fraction * adv_value:
+                    skipped_adv_entries += 1
+                    continue
+
             fee_entry = entry_price * shares * bt_config.fee_buy_pct / 100
             total_fees += fee_entry
 
-            gate_i = float(signals["gate"][i])
-            rvol_i = float(rvol_val[i]) if not np.isnan(rvol_val[i]) else 0.0
+            gate_i = float(signals["gate"][i - 1])
+            rvol_i = float(rvol_val[i - 1]) if not np.isnan(rvol_val[i - 1]) else 0.0
             conf = _confidence(
                 {
-                    "trend": float(signals["trend"][i]),
-                    "momentum": float(signals["momentum"][i]),
-                    "volume": float(signals["volume"][i]),
-                    "price_action": float(signals["price_action"][i]),
+                    "trend": float(signals["trend"][i - 1]),
+                    "momentum": float(signals["momentum"][i - 1]),
+                    "volume": float(signals["volume"][i - 1]),
+                    "price_action": float(signals["price_action"][i - 1]),
                 },
-                float(swing_scores[i]),
+                float(swing_scores[i - 1]),
                 gate_i,
                 rvol_i,
                 bt_config,
@@ -511,7 +558,7 @@ def run_backtest(
                 "shares": shares,
                 "entry_idx": i,
                 "entry_date": dates[i],
-                "entry_score": float(swing_scores[i]),
+                "entry_score": float(swing_scores[i - 1]),
                 "entry_equity": current_equity,
                 "deploy_fraction": (shares * entry_price) / current_equity if current_equity > 0 else 0.0,
                 "confidence": conf,
@@ -723,6 +770,7 @@ def run_backtest(
         avg_rr=round(avg_rr, 2),
         sharpe=round(sharpe, 2),
         total_fees=round(total_fees, 0),
+        skipped_adv_entries=skipped_adv_entries,
         trades=trades,
     )
 

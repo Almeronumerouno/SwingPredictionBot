@@ -1046,5 +1046,5 @@
     "ZONE",
     "ZYRX"
   ],
-  "note": "raw close = harga pasar; adj_close = disesuaikan dividen/split (dipakai model recovery supaya gap dividen tidak jadi drawdown palsu)."
+  "note": "POLICY PRICE BASIS (P7.6): raw close = basis SEMUA jalur produksi (eksekusi backtest, deteksi ARA, gate RTF, % change harian, params recovery P6.1 'basis_harga: raw close/high'); adj_close = penyesuaian dividen/split Yahoo, HANYA referensi statistik historis & deteksi corporate action (tidak dipakai jalur produksi). Corporate action material dideteksi & di-flag via field ca_note di build_recovery_analysis (P7.6). Audit P7.6: 988 event CA di 365/963 saham; CA-artifact bars (dd_raw>5% tapi dd_adj<1%) cuma 0.20% bars; episode drawdown murni artifact 0.15%; bias probabilitas konservatif (P21 raw 0.52 vs counterfactual adj 0.69). Referensi: data/phase7_p76_corporate_action.json."
 }

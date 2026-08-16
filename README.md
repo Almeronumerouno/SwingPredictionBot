@@ -38,6 +38,16 @@ Swing trading signal generator untuk Bursa Efek Indonesia (IDX). Data dari IDX l
 | Max DD | 5.25% | **5.94%** |
 | Beat B&H | — | **13/19 (68%)** |
 
+> ⚠️ **LEGACY PERFORMANCE CLAIM (P7.14, 16-08-2026)** — angka di atas
+> berasal dari kalibrasi Fase 6 (v0.2.0): eksekusi **close bar sinyal**,
+> **tanpa slippage**, dan sebelum perbaikan P7.1–P7.3 (leakage entry-block,
+> default `entry_mode="open"` + `slippage_bps=25`, portfolio metrics via
+> `portfolio.py`). Angka ini **TIDAK valid sebagai klaim performa saat ini**
+> dan tidak boleh dikutip tanpa konvensi eksekusi. Klaim PnL yang valid
+> wajib menyatakan: periode OOS, konvensi eksekusi (open + 25bps),
+> survivor-ship limitation. Lihat `AUDIT_READY_TO_FLY_RECOVERY_ENGINE_v2.md`
+> (P7.1–P7.3) untuk detail.
+
 **Cara pakai backtest:**
 ```bash
 # 1 saham
@@ -70,7 +80,7 @@ python backtest_calibrate.py
 
 Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa peluangnya balik ke previous close dalam 1 hari sampai 1 bulan?"*
 
-- **Metode**: **model empiris global (logistic drawdown)** dikalibrasi dari 963 saham IDX (dataset lokal `data/universe_ohlcv.npz`, anti look-ahead, split temporal 70/30) + base rate empiris saham tsb (event = close turun ≥ X% di bawah previous close dalam 500 hari terakhir). Model: `P(hit prior high ≤ h hari) = 1/(1+exp(a_h + b_h × dd))`, dd = drawdown dari prior high (max close 252 hari), clamp 0–85%, horizon 1/3/5/10/21/42/63 hari. Parameter di `data/recovery_model_params.json`. GBM analitik di-deprecate (`gbm: null` di API).
+- **Metode**: **model empiris global (logistic drawdown)** dikalibrasi dari 963 saham IDX (dataset lokal `data/universe_ohlcv.npz`, anti look-ahead, **split global kronologis cutoff 70% tanggal + purge label-overlap + embargo 5 hari — P6.1**) + base rate empiris saham tsb (event = close turun ≥ X% di bawah previous close dalam 500 hari terakhir). Model: `P(hit prior high ≤ h hari) = 1/(1+exp(a_h + b_h × dd))`, dd = drawdown dari prior high (max close 252 hari), clamp 0–85%, horizon 1/3/5/10/21/42/63 hari. Parameter di `data/recovery_model_params.json` (provenance locked + parameter hash, P7.4). GBM analitik di-deprecate (`gbm: null` di API).
 - **Signal**:
   - `POTENTIAL` — P(recovery ≤ 21 hari) ≥ threshold (0.68 utk base rate empiris saham dgn ≥ 5 event; 0.50 utk model global)
   - `WATCH` — probabilitas menengah
@@ -78,10 +88,10 @@ Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa pel
   - Prioritas: base rate empiris per-saham (≥ 5 event) → fallback model global.
 - **Posisi vs Harga Acuan** — cek status harga sekarang vs close 1D/1W/1M/3M lalu (badge "Masih di Bawah" / "Udah di Atas" + jarak % per horizon).
 - **Volume & Akumulasi** — deteksi pola "akumulasi post-ARA lalu siap terbang": ARA (+10% harian) = puncak distribusi/dump, lalu tiap hari sejak ARA dibandingkan ke **rata-rata volume post-ARA** (baseline = seluruh bar post-ARA sebelum hari ini, tanpa hari ARA — anti-self-referencing) — minimal **2 hari** volume ≥ 2.0× baseline **dan kepadatan heavy ≥ 30%** (gate — tanpa ini edge mati) + harga **masih di bawah level ARA** (belum recovery) + harga **di atas SMA20** → badge "Siap Terbang". Divalidasi walk-forward anti-lookahead (915 saham IDX, 800 bar, 2026): P(boom +10%/5hari) arm **18.4%** vs kontrol **5.4%** (edge ~3.4x, p<1e-16, n=8.092; thr density 40%: 18.6% vs 5.6%, n=5.546). Baseline post-ARA teruji — kepadatan adalah kunci edge: tanpa gate density, sinyal 8.7% ≈ kontrol 8.7%. Info tambahan: `net_dist` (net distribution volume ±, skala −1..+1), `net_dist_heavy` (net distribution hanya hari heavy: #heavy dgn Close>Open / #heavy, skala 0..1 — definisi audit; komplementer dgn net_dist) & `sma_gap_pct` (jarak % ke SMA20).
-- **Confidence interval P(recover)** — tiap `p_hit` dilengkapi `ci_low/ci_high` (interval 90%, delta method skala logit; SE diskala faktor bootstrap 3.89/3.62 utk koreksi korelasi antar-bar — `ci_bootstrap` di params json). Di UI tampil sebagai range "(x-y%)".
+- **Confidence interval P(recover)** — tiap `p_hit` dilengkapi `ci_low/ci_high` (interval **90%, cluster bootstrap saham** — percentile, precomputed per grid dd, interpolasi — P6.2; delta method + scale = legacy fallback saja). **Semantics (P7.12): CI = estimation/parameter uncertainty antar-saham, BUKAN prediction interval** (bukan "chance range"). Metode/level/scope diekspos di API (`ci_method`/`ci_level`/`ci_scope`). Di UI tampil sebagai range "(x-y%)".
 - **Hasil verifikasi data 2026 (keputusan desain)** — squeeze volatilitas (ATR/Bollinger) **bukan** leading signal breakout (OR 0.74–1.06, ditolak — `_validate_squeeze.py`); efek buruk post-ARA hanya terasa di hari ke-1 lalu netral di ≥5 hari (`_validate_post_ara.py`, penalti harus meluruh, bukan blanket); momentum murni tetap baseline terkuat vs RTF (B10 OR: RTF 1.47, momentum 1.52–1.58; deep-drawdown tanpa model 1.07–1.11 — `_baseline_compare.py`); bootstrap saham → parameter recovery stabil, ranking transfer antar-regime AUC 0.80–0.83 tapi level under-prediksi di regime bearish (`_bootstrap_recovery.py`).
 - **Exit plan** (bila entry): target = prior high (bila sinyal model) atau previous close (bila base rate empiris), time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
-- **Validasi OOS** (`python _validate_recovery.py --mode dataset`, 963 saham, test-split 30% murni, prediksi = parameter produksi): AUC test 0.83–0.95 (h=1..21), Brier 0.021–0.119, kalibrasi bucket pred≈actual (deviasi ≤ 0.09 di bucket dangkal, < 0.03 sisanya) — model tidak overfit dan layak produksi. (Versi lama GBM FPT under-predict — Brier 1d 0.057 → 63d 0.372 — di-deprecate.)
+- **Validasi OOS** (`python _validate_recovery.py --mode dataset`, 963 saham, test-split 30% terakhir per saham, data ≤ 2026-08-14, prediksi = parameter produksi): AUC test 0.83–0.95 (h=1..21), Brier 0.021–0.119, kalibrasi bucket pred≈actual (deviasi ≤ 0.09 di bucket dangkal, < 0.03 sisanya). Validasi OOS P6.1 (split kronologis + purge/embargo, P7.8 tabel embargo 5): AUC test 0.958–0.803 (h1..h63), Brier 0.016–0.182 — model tidak overfit dan layak produksi. (Versi lama GBM FPT under-predict — Brier 1d 0.057 → 63d 0.372 — di-deprecate.)
 
 **Cara pakai:**
 ```bash
