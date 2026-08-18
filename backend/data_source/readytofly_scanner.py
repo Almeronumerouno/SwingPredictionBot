@@ -97,7 +97,10 @@ def _fetch_and_check_one(
         if len(bars) < config.RECOVERY_MIN_BARS:
             return None
 
-        accum = detect_accumulation(bars)
+        # P8 (keputusan user 16-08-2026): gate anti-repetisi AKTIF di produksi —
+        # sinyal hari ke-RTF_MAX_STREAK_DAYS+1 berturut-turut di-invalidasi
+        # (riset forensik Agu 2026; lihat config.RTF_MAX_STREAK_DAYS).
+        accum = detect_accumulation(bars, apply_streak_gate=True)
 
         # Determine status — rombak fase 1 (audit v2 §15):
         #   READY  = semua safety (below, liquidity) + semua quality

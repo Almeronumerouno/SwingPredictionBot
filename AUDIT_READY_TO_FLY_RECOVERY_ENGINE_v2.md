@@ -4361,3 +4361,72 @@ keputusan dikunci SEBELUM P4.8 RUN ONCE:
 - [x] State uncertainty/CI methodology for every probabilistic claim.
 - [x] Acceptance: every major claim in README/audit/API documentation can be
       traced to a valid evidence source.
+
+# 40. P8 — Studi Forensik RTF Hit vs Miss + Gate Anti-Repetisi (16-08-2026)
+
+**Status: RISET SELESAI · GATE **AKTIF DI PRODUKSI** (keputusan user 16-08-2026 —
+override freeze P6.11 untuk gate ini saja).**
+
+## 40.1 Metodologi (jujur, anti-overfit)
+- Dataset: 456 sinyal RTF mentah 1-Jul s/d 14-Agu-2026 (`backend/data/phase8_rtf_forensic.jsonl`),
+  label **b10** = definisi `_baseline_compare.py` (max high i+1..i+10 / close[i] >= +10%).
+- Point-in-time: semua fitur dihitung dari bar yang tersedia SAAT sinyal (tidak ada
+  look-ahead); regime pasar per tanggal; 1 kode universe punya `dates=None` (guard wajib).
+- Validasi: cross-check Juli vs Agustus (stabilitas arah) + bootstrap 5000x (CI gain).
+- Bukan holdout: 2 bulan data → semua temuan eksperimen, WILAYAH VALIDASI ULANG 800 hari.
+
+## 40.2 Temuan kunci
+- Base rate live: 54.4% HIT (248/456); Juli 58.0%, Agustus 47.4% (paruh bulan, censored ringan 12–14).
+- Tidak ada satu fitur pun yang diskriminatif kuat (AUC 0.42–0.56). Yang positif: density_pct
+  (0.555), hi_lo_pct (0.557), dd60_pct (0.562), post_ara_decay (0.551), cum_vol_ratio (0.548),
+  vol_conc_3d (0.545). Netral: net_dist (0.494), acc_density (0.480), z_vol (0.503), atr14 (0.488),
+  ret5/10/20, adv.
+- Counter-intuitive: net_dist negatif TIDAK lebih buruk (53.6% vs 55.2%); window_days KECIL lebih
+  baik (1–2: 66.7% vs >10: 47.6%) = masalah "stale/late RTF"; market sudah naik 5 hari → sinyal
+  telat (mkt_ret5 AUC 0.425; mkt_ret<=0 hari sinyal: 64.8% vs 51.1%).
+- **Temuan kunci anti-repetisi**: win-rate per hari beruntun pola RTF mentah valid =
+  hari 1: 57.9%, hari 2: 56.9%, hari 3: 63.4%, **hari 4+: 42.7%**. Aktivitas besar berulang
+  4+ hari tanpa expansion = distribusi berkedok akumulasi (stale), bukan absorption.
+- Miss taxonomy: 72% naik tapi < +10% (3–10%), ~21% stagnan, 1.4% turun; 62.5% HIT <= 3 hari.
+
+## 40.3 Kandidat yang ditolak / diterima
+- Ditolak sebagai gate keras: `mkt_ret5<=0` (Juli 76.1% tapi **0 sinyal di Agustus** — mematikan
+  sistem); `window_days<=10/8/6` (tidak stabil di Agustus); tuning density/ambang volume lain
+  (tidak menambah edge di luar gate existing; filosofi tidak diubah).
+- Diterima: **gate anti-repetisi `streak <= 3`** (RTF_MAX_STREAK_DAYS=3) — invalidation timing,
+  bukan threshold-tuning.
+
+## 40.4 Backtest BEFORE vs AFTER (`_p82_rtf_backtest_after.py`, data `phase8_rtf_before_after.json`)
+- TOTAL: 456→332 sinyal; 54.4% → **58.7% (+4.3pp)**; Juli +5.3pp (63.3%), Agustus +2.6pp (50.0%)
+  — naik di KEDUA bulan (stabil).
+- HIT dipertahankan 195/248 (**79%**); HIT dibuang 53 (21%; 33 di antaranya hit <=3 hari —
+  kerugian wajar: sahamnya sudah punya sinyal 1–3 sebelumnya); MISS dibuang 71 (false positive -34%).
+- Saham unik HIT: 82; hanya 3 kehilangan SEMUA HIT: **BBRM, LUCK, RISE** (pola: repetisi panjang
+  lalu expansion telat / marginal; SULI & PADI terselamatkan di streak<=3).
+- Bootstrap 5000x: gain mean **+4.31pp**, CI95 [-1.17, +9.61], **P(gain>0) = 94%**.
+- Jujur: CI lebar, n kecil; TIDAK ada transisi TIDAK→HIT (filter hanya menyaring).
+
+## 40.5 Implementasi (AKTIF di produksi, keputusan user 16-08-2026)
+- `config.RTF_MAX_STREAK_DAYS = 3` (+ komentar riset lengkap).
+- `recovery._accum_signal_streak(bars, cap)` — helper pure, maks ~3 panggilan
+  `detect_accumulation(bars[:j+1])` (tanpa gate, tidak rekursif).
+- `detect_accumulation(bars, apply_streak_gate=False)` — default OFF = perilaku lama (klaim 18.4%
+  tetap atribut definisi lama); ON → sinyal hari ke-4+ berturut-turut valid=False,
+  `rtf_streak_days` + `reason` + gate `anti_repetition=False`.
+- Scanner & API: `apply_streak_gate=True` AKTIF di `readytofly_scanner._fetch_and_check_one`
+  dan `recovery.build_recovery_analysis` (line `base["accumulation"]`).
+- Cache 2026-08-14 di-regenerate (`_p83_rtf_regenerate_cache.py`): 149 entries (0 dropped),
+  ready 11 → **8**; **BAPI, IATA, PEGE** turun status ready → almost (gate kualitas lain tetap
+  lolos) dengan `reason` anti-repetisi + gate `anti_repetition=False` — frontend tetap
+  menampilkan mereka di tab almost dengan penjelasan, bukan menyembunyikan.
+- **Implikasi P4.8**: holdout P4.8 tetap mengukur DEFINISI LAMA yang sudah pre-registered
+  (tanpa gate) — pre-registration tidak diubah. Gate baru dievaluasi via validasi 800 hari
+  (rekomendasi 40.6-1) dan opsional P4.8b baru yang harus di-pre-register sebelum data unseen.
+
+## 40.6 Rekomendasi
+1. (Wajib, segera) validasi ulang gate pada dataset penuh 800 hari — konversi
+   `_validate_accum4.py` jalur gate ON; klaim resmi baru hanya setelah ini.
+2. P4.8 tetap RUN ONCE dengan protokol lama (sudah pre-registered). Setelah verdict P4.8,
+   jika gate ingin diklaim resmi: pre-register P4.8b (definisi baru) sebelum data berikutnya.
+3. RTF_MAX_STREAK_DAYS=3 tetap default; nilai 2 (coverage 57%, +3.1pp) tersedia sebagai opsi
+   konservatif, 4 (+1.7pp hampir flat di Agustus) tidak direkomendasikan.

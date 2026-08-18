@@ -288,6 +288,21 @@ ACCUM_MIN_HEAVY_DAYS = 2        # minimal jumlah hari heavy di jendela
 ACCUM_HEAVY_RVOL = 2.0          # ambang volume "heavy" = x lipat baseline post-ARA (knob sensitivitas)
 ACCUM_MA20_DAYS = 20            # konfirmasi: close harus >= SMA(N) (di atas, bukan fresh cross)
 
+# Gate anti-repetisi (riset forensik Agu 2026, dataset Jul-Agu n=456, definisi
+# b10 high-based 10 hari): pola RTF mentah yang valid 4+ hari berturut-turut
+# TANPA expansion win-rate-nya membusuk drastis (hari ke-4+: 42.7% vs hari
+# 1/2/3: 57.9%/56.9%/63.4%) — aktivitas besar berulang tanpa respons harga =
+# kemungkinan distribusi berkedok akumulasi (stale), bukan absorption.
+# Sinyal di hari RTF_MAX_STREAK_DAYS+1 berturut-turut di-invalidasi
+# (detect_accumulation(..., apply_streak_gate=True), dipakai jalur produksi
+# scanner + API; default False = perilaku lama, klaim 18.4% tetap atribut
+# definisi lama). Eksperimen: 456->332 sinyal, 54.4%->58.7% (+4.3pp), stabil
+# Juli (+5.3) & Agu (+2.6); HIT dipertahankan 195/248 (79%); 71/208 miss
+# dibuang; hanya 3/82 saham unik HIT hilang total (BBRM, LUCK, RISE);
+# bootstrap 5k: mean +4.31pp, CI95 [-1.17, +9.61], P(gain>0)=94%. n kecil —
+# wajib validasi ulang dataset penuh (800 hari) sebelum klaim resmi baru.
+RTF_MAX_STREAK_DAYS = 3         # maks hari sinyal berturut-turut (termasuk hari ini)
+
 # Gate likuiditas (rombak TODO, riset Agu 2026): ADV 20 hari point-in-time,
 # hari ARA di-buang (volume ARA = antrean beli, bukan likuiditas keluar).
 # Uji base rate B10 (universe 963, 12-Agu-2026): prima 0.3176 (n=825) vs

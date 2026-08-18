@@ -485,7 +485,27 @@ def auto_drop_pct(sigma_daily: float, price: float) -> float:
     )
 
 
-def detect_accumulation(bars: list) -> dict:
+def _accum_signal_streak(bars: list, cap: int = 4) -> int:
+    """Hitung hari berturut-turut pola RTF mentah valid SEBELUM bar terakhir.
+
+    Dipakai gate anti-repetisi (RTF_MAX_STREAK_DAYS): memanggil
+    detect_accumulation (tanpa gate) utk slice t-1, t-2, ... sampai gagal.
+    Return jumlah hari valid berturut-turut sebelum hari ini (0 = kemarin
+    tidak valid). cap = maksimum iterasi ke belakang (efisiensi; kita hanya
+    perlu tahu apakah total sudah melewati RTF_MAX_STREAK_DAYS).
+    """
+    n = len(bars)
+    streak = 0
+    for j in range(n - 2, max(n - 2 - cap, -1), -1):
+        r = detect_accumulation(bars[: j + 1])
+        if r.get("valid"):
+            streak += 1
+        else:
+            break
+    return streak
+
+
+def detect_accumulation(bars: list, apply_streak_gate: bool = False) -> dict:
     """
     Deteksi pola "akumulasi post-large-upmove": saham yang baru saja
     distribusi besar (lonjakan naik tajam), lalu terkumpul lagi diam-diam
@@ -547,6 +567,19 @@ def detect_accumulation(bars: list) -> dict:
     dengan jumlah sinyal ~2.7x lebih banyak.
 
     Return: dict parameter dengan valid=False kalau tidak ada sinyal akumulasi.
+
+    Gate anti-repetisi (riset forensik Agu 2026, dataset Jul-Agu n=456,
+    definisi b10): pola RTF mentah yang valid 4+ hari berturut-turut TANPA
+    expansion punya win-rate jauh lebih rendah (hari ke-4+: 42.7% vs hari
+    1/2/3: 57.9%/56.9%/63.4%) — pola "aktivitas besar berulang tanpa respons
+    harga" = kemungkinan distribusi berkedok akumulasi (stale), bukan
+    absorption. Dengan apply_streak_gate=True, sinyal di hari
+    RTF_MAX_STREAK_DAYS+1 berturut-turut di-invalidasi (valid=False) dan
+    dict diberi field rtf_streak_days. Default False = perilaku lama
+    (klaim 18.4% tidak berubah). Eksperimen: +4.3pp (58.7% vs 54.4%),
+    79% HIT dipertahankan, 3/82 saham unik HIT hilang total; n kecil, CI
+    bootstrap 95% [-1.2, +9.6]pp — wajib validasi ulang dataset penuh
+    (800 hari) sebelum klaim resmi baru.
     """
     # Basis harga MENTAH (raw_close): % change riil pasar. Seri adjusted (close)
     # punya lompatan artifisial di batas ex-dividen/split (kasus DUTI: -1.3% riil
@@ -813,7 +846,7 @@ def detect_accumulation(bars: list) -> dict:
             or (t - 2 >= 0 and np.isfinite(sma[t - 2]) and close[t - 2] < sma[t - 2])
         ) else "above"
 
-    return {
+    res = {
         "valid": True,
         "ready_to_fly": True,
         "k_heavy": k,
@@ -862,6 +895,25 @@ def detect_accumulation(bars: list) -> dict:
         "warning": "Akumulasi post-large-upmove (harga belum recovery ke level event) + konfirmasi SMA20 "
                    "probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
     }
+
+    # Gate anti-repetisi (P8, riset forensik Agu 2026): pola RTF mentah yang
+    # bertahan 4+ hari berturut-turut tanpa expansion = win-rate membusuk
+    # (42.7% vs 57-63% hari 1-3) -> kemungkinan distribusi berkedok akumulasi.
+    if apply_streak_gate:
+        prev = _accum_signal_streak(bars, cap=config.RTF_MAX_STREAK_DAYS)
+        rtf_streak_total = prev + 1
+        res["rtf_streak_days"] = rtf_streak_total
+        if rtf_streak_total > config.RTF_MAX_STREAK_DAYS:
+            res["valid"] = False
+            res["ready_to_fly"] = False
+            res["reason"] = (
+                f"Pola RTF mentah valid {rtf_streak_total} hari berturut-turut "
+                f"(> {config.RTF_MAX_STREAK_DAYS}): anti-repetisi — aktivitas besar berulang "
+                f"tanpa expansion = kemungkinan distribusi berkedok akumulasi, bukan absorption "
+                f"(riset forensik Agu 2026; lihat RTF_MAX_STREAK_DAYS)."
+            )
+            res["gates"] = {**res["gates"], "anti_repetition": False}
+    return res
 
 
 # ---------------------------------------------------------------------------
@@ -1114,7 +1166,10 @@ def build_recovery_analysis(
         })
     base["vs_lookbacks"] = lookbacks
 
-    base["accumulation"] = detect_accumulation(bars)
+    # P8 (keputusan user 16-08-2026): gate anti-repetisi AKTIF di produksi —
+    # sinyal hari ke-RTF_MAX_STREAK_DAYS+1 berturut-turut di-invalidasi
+    # (riset forensik Agu 2026; lihat config.RTF_MAX_STREAK_DAYS).
+    base["accumulation"] = detect_accumulation(bars, apply_streak_gate=True)
 
     base["valid"] = True
     return base

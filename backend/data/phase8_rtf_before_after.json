@@ -1,0 +1,49 @@
+{
+  "gate": {
+    "name": "RTF_MAX_STREAK_DAYS",
+    "value": 3,
+    "desc": "sinyal hari ke-(max+1)+ berturut-turut di-invalidasi"
+  },
+  "dataset": "1 Jul - 14 Agu 2026, forensic.jsonl, label b10 (high-based +10% / 10 hari)",
+  "before": {
+    "n": 456,
+    "hit": 248,
+    "winrate": 54.4
+  },
+  "after": {
+    "n": 332,
+    "hit": 195,
+    "winrate": 58.7
+  },
+  "delta_pp": 4.3,
+  "per_bulan": {
+    "juli": {
+      "before": 58.0,
+      "after": 63.3,
+      "n": [
+        300,
+        218
+      ]
+    },
+    "agustus": {
+      "before": 47.4,
+      "after": 50.0,
+      "n": [
+        156,
+        114
+      ]
+    }
+  },
+  "perubahan": {
+    "hit_dipertahankan": 195,
+    "hit_dibuang": 53,
+    "miss_dibuang": 71,
+    "tidakhit_ke_hit": 0,
+    "saham_kehilangan_semua_hit": [
+      "BBRM",
+      "LUCK",
+      "RISE"
+    ]
+  },
+  "catatan": "n kecil (456 sinyal / 2 bulan); bootstrap 5k gain mean +4.31pp, CI95 [-1.17,+9.61], P(gain>0)=94%. Wajib validasi ulang dataset penuh 800 hari sebelum klaim resmi baru."
+}
