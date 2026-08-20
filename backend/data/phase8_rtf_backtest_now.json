@@ -1,0 +1,141 @@
+{
+  "logic": "detect_accumulation(apply_streak_gate=True); RTF_MAX_STREAK_DAYS=3",
+  "source": "data/phase8_rtf_forensic_jan_aug.jsonl",
+  "label": "b10: max(high[+1..+10])/close0 >= 10%",
+  "raw": {
+    "n": 1774,
+    "hit": 826,
+    "winrate": 46.6
+  },
+  "current_all": {
+    "n": 1354,
+    "hit": 659,
+    "winrate": 48.7
+  },
+  "current_full_horizon": {
+    "n": 1240,
+    "hit": 602,
+    "winrate": 48.5,
+    "excluded_truncated": 114
+  },
+  "per_month": {
+    "2026-01": {
+      "n": 332,
+      "hit": 143,
+      "winrate": 43.1
+    },
+    "2026-02": {
+      "n": 78,
+      "hit": 29,
+      "winrate": 37.2
+    },
+    "2026-03": {
+      "n": 68,
+      "hit": 28,
+      "winrate": 41.2
+    },
+    "2026-04": {
+      "n": 295,
+      "hit": 146,
+      "winrate": 49.5
+    },
+    "2026-05": {
+      "n": 121,
+      "hit": 58,
+      "winrate": 47.9
+    },
+    "2026-06": {
+      "n": 132,
+      "hit": 62,
+      "winrate": 47.0
+    },
+    "2026-07": {
+      "n": 214,
+      "hit": 136,
+      "winrate": 63.6
+    }
+  },
+  "per_streak_day": {
+    "1": {
+      "n": 644,
+      "hit": 318,
+      "winrate": 49.4
+    },
+    "2": {
+      "n": 414,
+      "hit": 197,
+      "winrate": 47.6
+    },
+    "3": {
+      "n": 296,
+      "hit": 144,
+      "winrate": 48.6
+    },
+    "4": {
+      "n": 206,
+      "hit": 100,
+      "winrate": 48.5
+    },
+    "5": {
+      "n": 137,
+      "hit": 51,
+      "winrate": 37.2
+    },
+    "6": {
+      "n": 23,
+      "hit": 6,
+      "winrate": 26.1
+    },
+    "7": {
+      "n": 18,
+      "hit": 4,
+      "winrate": 22.2
+    },
+    "8": {
+      "n": 12,
+      "hit": 3,
+      "winrate": 25.0
+    },
+    "9": {
+      "n": 8,
+      "hit": 1,
+      "winrate": 12.5
+    },
+    "10": {
+      "n": 5,
+      "hit": 1,
+      "winrate": 20.0
+    },
+    "11": {
+      "n": 4,
+      "hit": 0,
+      "winrate": 0.0
+    },
+    "12": {
+      "n": 3,
+      "hit": 0,
+      "winrate": 0.0
+    },
+    "13": {
+      "n": 1,
+      "hit": 1,
+      "winrate": 100.0
+    },
+    "14": {
+      "n": 1,
+      "hit": 0,
+      "winrate": 0.0
+    },
+    "15": {
+      "n": 1,
+      "hit": 0,
+      "winrate": 0.0
+    },
+    "16": {
+      "n": 1,
+      "hit": 0,
+      "winrate": 0.0
+    }
+  },
+  "hit_count": 602
+}

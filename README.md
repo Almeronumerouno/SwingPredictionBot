@@ -87,7 +87,12 @@ Menjawab pertanyaan: *"Saham ini turun X% di bawah previous close — berapa pel
   - `NO_SETUP` — belum turun cukup jauh atau data tidak valid
   - Prioritas: base rate empiris per-saham (≥ 5 event) → fallback model global.
 - **Posisi vs Harga Acuan** — cek status harga sekarang vs close 1D/1W/1M/3M lalu (badge "Masih di Bawah" / "Udah di Atas" + jarak % per horizon).
-- **Volume & Akumulasi** — deteksi pola "akumulasi post-ARA lalu siap terbang": ARA (+10% harian) = puncak distribusi/dump, lalu tiap hari sejak ARA dibandingkan ke **rata-rata volume post-ARA** (baseline = seluruh bar post-ARA sebelum hari ini, tanpa hari ARA — anti-self-referencing) — minimal **2 hari** volume ≥ 2.0× baseline **dan kepadatan heavy ≥ 30%** (gate — tanpa ini edge mati) + harga **masih di bawah level ARA** (belum recovery) + harga **di atas SMA20** → badge "Siap Terbang". Divalidasi walk-forward anti-lookahead (915 saham IDX, 800 bar, 2026): P(boom +10%/5hari) arm **18.4%** vs kontrol **5.4%** (edge ~3.4x, p<1e-16, n=8.092; thr density 40%: 18.6% vs 5.6%, n=5.546). Baseline post-ARA teruji — kepadatan adalah kunci edge: tanpa gate density, sinyal 8.7% ≈ kontrol 8.7%. Info tambahan: `net_dist` (net distribution volume ±, skala −1..+1), `net_dist_heavy` (net distribution hanya hari heavy: #heavy dgn Close>Open / #heavy, skala 0..1 — definisi audit; komplementer dgn net_dist) & `sma_gap_pct` (jarak % ke SMA20).
+- **Volume & Akumulasi (Ready To Fly - RTF)** — deteksi pola "akumulasi post-ARA lalu siap terbang": ARA (+10% harian) = puncak distribusi/dump, lalu tiap hari sejak ARA dibandingkan ke **rata-rata volume post-ARA**. Kriteria wajib (Gates): minimal **2 hari** volume ≥ 2.0× baseline **dan kepadatan heavy ≥ 30%**, harga **masih di bawah level ARA** (belum recovery), dan harga **di atas SMA20** → status "Siap Terbang" (Ready to Fly).
+  - **Skor & Ranking**: Saham RTF diranking berdasarkan **Skor Kekuatan** (kepadatan akumulasi × net distribution heavy × decay penalty).
+  - **Filter Probabilitas Tinggi (Baru)**: Dilengkapi filter indikator volatilitas dan volume yang terbukti meningkatkan hit rate:
+    - **VCP (Volatility Contraction Pattern)**: Kontraksi volatilitas (High-Low) 3 hari terakhir vs 10 hari sebelumnya (Threshold: ≤ 0.65). Semakin sempit = risiko false breakout semakin rendah.
+    - **Volume Dry-Up (Supply Exhaustion)**: Volume transaksi 3 hari terakhir mengering dibanding rata-rata post-ARA (Threshold: ≤ 0.50). Menandakan *seller* sudah habis.
+  - **Validasi Kuantitatif**: Walk-forward anti-lookahead (915 saham IDX, 2026): P(boom +10%/5hari) arm **18.4%** vs kontrol **5.4%** (edge ~3.4x, p<1e-16). Kepadatan adalah kunci edge (tanpa gate density, sinyal mati).
 - **Confidence interval P(recover)** — tiap `p_hit` dilengkapi `ci_low/ci_high` (interval **90%, cluster bootstrap saham** — percentile, precomputed per grid dd, interpolasi — P6.2; delta method + scale = legacy fallback saja). **Semantics (P7.12): CI = estimation/parameter uncertainty antar-saham, BUKAN prediction interval** (bukan "chance range"). Metode/level/scope diekspos di API (`ci_method`/`ci_level`/`ci_scope`). Di UI tampil sebagai range "(x-y%)".
 - **Hasil verifikasi data 2026 (keputusan desain)** — squeeze volatilitas (ATR/Bollinger) **bukan** leading signal breakout (OR 0.74–1.06, ditolak — `_validate_squeeze.py`); efek buruk post-ARA hanya terasa di hari ke-1 lalu netral di ≥5 hari (`_validate_post_ara.py`, penalti harus meluruh, bukan blanket); momentum murni tetap baseline terkuat vs RTF (B10 OR: RTF 1.47, momentum 1.52–1.58; deep-drawdown tanpa model 1.07–1.11 — `_baseline_compare.py`); bootstrap saham → parameter recovery stabil, ranking transfer antar-regime AUC 0.80–0.83 tapi level under-prediksi di regime bearish (`_bootstrap_recovery.py`).
 - **Exit plan** (bila entry): target = prior high (bila sinyal model) atau previous close (bila base rate empiris), time-stop 63 hari trading (~3 bulan), stop-loss = entry − 2× jarak drop.
@@ -158,6 +163,7 @@ Awalnya direncanakan bot Telegram (Fase 4), tapi diubah jadi **dashboard web**:
 │   ├── scoring.py           # Fase 2: Swing Score + gating + confidence
 │   ├── risk.py              # Fase 3: SL/TP sizing, trade plan
 │   ├── gorengan.py          # Gorengan Detection Engine (pump & dump)
+│   ├── recovery.py          # Fitur Mean Reversion / Recovery & RTF
 │   ├── api.py               # Fase 4: FastAPI (gainers, analisis, history)
 │   ├── backtest.py          # Fase 6: Backtest engine
 │   ├── backtest_calibrate.py
@@ -166,7 +172,11 @@ Awalnya direncanakan bot Telegram (Fase 4), tapi diubah jadi **dashboard web**:
 │   │   ├── idx_client.py    # Daftar saham via GetSecuritiesStock
 │   │   ├── idx_trading.py   # Snapshot harian via GetStockSummary
 │   │   ├── gainers.py       # Top N Gainers (IDX → Yahoo fallback)
-│   │   └── yahoo_client.py  # Data historis via yfinance
+│   │   ├── yahoo_client.py  # Data historis via yfinance
+│   │   ├── local_dataset.py # Akses ke data historis lokal (.npz)
+│   │   ├── scan_all.py      # Entry point scanner cron (Gorengan & RTF)
+│   │   ├── gorengan_scanner.py   # Scanner Gorengan harian
+│   │   └── readytofly_scanner.py # Scanner Ready To Fly (RTF) harian
 │   └── cache/               # Cache JSON (securities list, gainers, history)
 │
 └── frontend/                # Fase 5: Next.js dashboard
