@@ -326,6 +326,21 @@ ACCUM_PRIMA_ADV_VAL = 1_000_000_000  # flag display "likuiditas prima" (Rp)
 ACCUM_DECAY_TAU = 2.0
 ACCUM_DECAY_CUTOFF_DAYS = 5
 
+# Supply Exhaustion: VCP (Volatility Contraction) & Volume Dry-Up.
+# SCORING BOOST, BUKAN gate eliminasi. Alasan: squeeze volatilitas murni BUKAN
+# leading signal di IDX (OR<1, _validate_squeeze 2026); di pasar IDX saham sering
+# meledak langsung dari volume tinggi tanpa periode tenang. Jadi VCP/dry-up hanya
+# meng-boost strength (ranking naik), tidak mengeliminasi sinyal.
+# Referensi: Minervini VCP (ATR recent < ATR past = kontraksi), Wyckoff supply
+# exhaustion (volume mengering sebelum breakout).
+ACCUM_VCP_RECENT_BARS = 3            # jendela volatilitas "hari terakhir"
+ACCUM_VCP_PAST_BARS = 10             # jendela volatilitas "masa lalu" (pembanding)
+ACCUM_VCP_BOOST_THRESHOLD = 0.65     # rasio range_recent/range_past <= ini → boost
+ACCUM_DRYUP_RECENT_BARS = 3          # jendela volume "hari terakhir"
+ACCUM_DRYUP_BOOST_THRESHOLD = 0.50   # rasio vol_recent/baseline <= ini → boost
+ACCUM_VCP_BOOST_MULT = 1.25          # multiplier strength jika VCP terdeteksi
+ACCUM_DRYUP_BOOST_MULT = 1.35        # multiplier strength jika dry-up terdeteksi
+
 # DEFINISI FORMULA (MED#7 — referensi tunggal, konsisten antar modul):
 #   - dd_fraction = 1 - close/prior_peak, prior_peak = max(close) trailing
 #     RECOVERY_PEAK_LOOKBACK_DAYS, clamp [0, RECOVERY_MODEL_DD_CLAMP].

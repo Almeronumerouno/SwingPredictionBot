@@ -25,6 +25,7 @@ import config
 from data_source.gainers import (
     GainerEntry,
     _cache_gainers,
+    enrich_gainers,
     build_gainers_from_raw,
     gainer_from_bars,
     get_or_fetch_securities_list,
@@ -79,6 +80,13 @@ def run_scan_all(target_date: Optional[str] = None, force_source: Optional[str] 
         max_codes: batasi jumlah saham (untuk smoke test), None = semua.
     """
     scraped_at = datetime.now(WIB)
+
+    # Mode LIVE (Yahoo + tanpa tanggal): pakai bar hari ini apa adanya (partial
+    # bar intraday). Tanpa ini fetch_trading_info memakai last_completed_idxs_session()
+    # yang menolak sesi hari ini sebelum 16:00 WIB & buta hari libur -> scan
+    # "real-time" diam-diam memakai data sesi kemarin (mis. libur 17 Agu -> data 14 Agu).
+    if force_source == "yahoo" and target_date is None:
+        target_date = date.today().isoformat()
 
     # 1. Daftar efek (cache lokal)
     securities = get_or_fetch_securities_list()
@@ -162,6 +170,8 @@ def run_scan_all(target_date: Optional[str] = None, force_source: Optional[str] 
 
     # 6. Cache — format sama persis dengan scanner per-kategori
     file_date = target_date or scraped_at.date().isoformat()
+    gorengan_dict = {g.code: g for g in gorengan_list}
+    enrich_gainers(gainers_list, target_date=target_date, gorengan_dict=gorengan_dict)
     _cache_gainers(gainers_list, scraped_at, cache_date=target_date)
 
     os.makedirs(config.CACHE_DIR, exist_ok=True)

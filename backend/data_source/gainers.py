@@ -35,6 +35,11 @@ import config
 from data_source.idx_client import Security, fetch_all_securities
 from data_source.idx_trading import IdxTradingError, fetch_daily_stock_summary
 from data_source.yahoo_client import DailyBar, YahooClientError, fetch_trading_info
+import numpy as np
+import indicators as ind
+import scoring
+import gorengan
+import short_selling
 
 WIB = ZoneInfo("Asia/Jakarta")
 
@@ -219,9 +224,75 @@ def scan_top_gainers(securities: Optional[list[Security]] = None,
             source = "Yahoo (fallback)"
 
     print(f"[INFO] Top gainers diambil dari {source}: {len(top_n)} saham")
+    enrich_gainers(top_n, target_date=target_date)
     _cache_gainers(top_n, scraped_at, cache_date=target_date)
     return top_n
 
+
+def enrich_gainers(gainers: list[GainerEntry], target_date: Optional[str] = None, gorengan_dict: Optional[dict] = None) -> None:
+    """Tambahkan swing_score dan gorengan_level ke GainerEntry dengan melakukan 1x fetch history."""
+    securities = get_or_fetch_securities_list()
+    sec_map = {s.code: s for s in securities}
+
+    for g in gainers:
+        try:
+            sec = sec_map.get(g.code)
+            shares = sec.shares if sec else None
+            board = sec.listing_board if sec else None
+
+            if gorengan_dict and g.code in gorengan_dict:
+                gore = gorengan_dict[g.code]
+                g.gorengan_score = gore.gorengan_score
+                g.gorengan_level = gore.gorengan_level
+
+            bars = fetch_trading_info(g.code, length=config.HISTORY_LOOKBACK_DAYS, target_date=target_date)
+            if len(bars) >= config.MIN_TRADING_DAYS:
+                close = np.array([b.close for b in bars])
+                open_ = np.array([b.open_price for b in bars])
+                high = np.array([b.high for b in bars])
+                low = np.array([b.low for b in bars])
+                volume = np.array([b.volume for b in bars])
+
+                rsi_val = ind.rsi(close)
+                atr_val = ind.atr(high, low, close)
+                ema_val = ind.ema_trend(close)
+                adx_val = ind.adx(high, low, close)
+                mfi_val = ind.mfi(high, low, close, volume)
+                rvol_val = ind.rvol(volume, config.RVOL_WINDOW)
+                donch = ind.donchian_channel(high, low)
+                sr = ind.support_resistance_levels(high, low)
+
+                score_input: scoring.ScoreInput = {
+                    "close": close, "rsi": rsi_val, "atr": atr_val,
+                    "adx": adx_val["adx"], "plus_di": adx_val["plus_di"], "minus_di": adx_val["minus_di"],
+                    "ema_fast": ema_val["ema_fast"], "ema_slow": ema_val["ema_slow"],
+                    "mfi": mfi_val, "rvol": rvol_val,
+                    "donchian_upper": donch["upper"], "donchian_lower": donch["lower"],
+                    "support": sr["support"], "resistance": sr["resistance"],
+                }
+                score_result = scoring.compute_score(score_input)
+
+                # Filter short selling BEI (sama seperti api.py)
+                if (score_result["valid"] and score_result["recommendation"] == "SELL" 
+                    and config.SHORT_SELLING_ENFORCE and not short_selling.is_short_selling_eligible(g.code)):
+                    score_result["recommendation"] = "HOLD"
+
+                if score_result["valid"]:
+                    g.swing_score = score_result["swing_score"]
+                    g.recommendation = score_result["recommendation"]
+
+                if not gorengan_dict or g.code not in gorengan_dict:
+                    gor_result = gorengan.compute_gorengan(
+                        close=close, open_=open_, high=high, low=low, volume=volume,
+                        atr_arr=atr_val, adx_arr=adx_val["adx"],
+                        rvol_arr=rvol_val, shares=shares, listing_board=board,
+                    )
+                    if gor_result:
+                        g.gorengan_score = gor_result["score"]
+                        g.gorengan_level = gor_result["level"]
+
+        except Exception as e:
+            print(f"[WARN] Gagal hitung swing_score untuk {g.code}: {e}")
 
 def _cache_gainers(entries: list[GainerEntry], scraped_at: datetime, cache_date: Optional[str] = None) -> None:
     _ensure_cache_dir()

@@ -293,11 +293,15 @@ export interface ReadyToFlyEntry {
   sma20: number | null
   state_ma20: string | null
   max_rvol: number | null
-  gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean; liquidity?: boolean } | null
+  gates: { below?: boolean; density?: boolean; min_heavy?: boolean; above_ma?: boolean; liquidity?: boolean; vcp?: boolean; dryup?: boolean } | null
   note: string | null
   reason: string | null
   post_ara_volume?: number | null
   post_ara_value?: number | null
+  vcp_ratio?: number | null
+  dryup_ratio?: number | null
+  vcp_ok?: boolean
+  dryup_ok?: boolean
 }
 
 export interface ReadyToFlyScannerResponse {

@@ -352,6 +352,10 @@ class ReadyToFlyEntryResponse(BaseModel):
     reason: str | None = None
     post_ara_volume: float | None = 0.0
     post_ara_value: float | None = 0.0
+    vcp_ratio: float | None = None
+    dryup_ratio: float | None = None
+    vcp_ok: bool = False
+    dryup_ok: bool = False
 
 
 class ReadyToFlyScannerResponse(BaseModel):
@@ -752,24 +756,8 @@ def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
 
     data = cached["data"]
 
-    securities = get_or_fetch_securities_list()
-    sec_by_code = {s.code: s for s in securities}
-
-    for entry in data:
-        try:
-            sec = sec_by_code.get(entry.code)
-            result = analyze_stock(entry.code, config.DEFAULT_CAPITAL,
-                                   shares=sec.shares if sec else None,
-                                   listing_board=sec.listing_board if sec else None)
-            if result["score"]["valid"]:
-                entry.swing_score = result["score"]["swing_score"]
-                entry.recommendation = result["score"]["recommendation"]
-            if result.get("gorengan"):
-                entry.gorengan_score = result["gorengan"]["score"]
-                entry.gorengan_level = result["gorengan"]["level"]
-            time.sleep(0.3)
-        except Exception:
-            continue
+    # Data swing_score dan gorengan_level sekarang diisi pada saat proses SCAN,
+    # bukan saat API dipanggil. Jadi endpoint ini super cepat (hanya baca JSON cache).
 
     return {
         "scraped_at": cached["scraped_at"],
@@ -986,6 +974,13 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
                 "distance_pct": e.distance_pct,
                 "net_dist": e.net_dist,
                 "net_dist_heavy": e.net_dist_heavy,
+                "acc_density": e.acc_density,
+                "post_ara_decay": e.post_ara_decay,
+                "strength": e.strength,
+                "adv_vol_20": e.adv_vol_20,
+                "adv_val_20": e.adv_val_20,
+                "liquidity_ok": e.liquidity_ok,
+                "liquidity_prima": e.liquidity_prima,
                 "sma_gap_pct": e.sma_gap_pct,
                 "sma20": e.sma20,
                 "state_ma20": e.state_ma20,
@@ -995,6 +990,10 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
                 "reason": e.reason,
                 "post_ara_volume": e.post_ara_volume,
                 "post_ara_value": e.post_ara_value,
+                "vcp_ratio": e.vcp_ratio,
+                "dryup_ratio": e.dryup_ratio,
+                "vcp_ok": e.vcp_ok,
+                "dryup_ok": e.dryup_ok,
             }
             for e in entries
         ],

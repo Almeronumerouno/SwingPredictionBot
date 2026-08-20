@@ -159,7 +159,7 @@ function MarketChoiceModal({
                   <p className="text-[11px] text-[var(--color-text-secondary)] mt-1 leading-relaxed">
                     {isPastDate
                       ? "Hanya tersedia untuk data hari ini (bukan tanggal historis)."
-                      : "Scan data pasar real-time langsung dari Bursa Efek Indonesia."}
+                      : "Scan data LIVE hari ini dari Yahoo Finance — bar intraday terbaru (bisa dipakai kapan saja, sebelum & sesudah market tutup)."}
                   </p>
                 </div>
               </button>

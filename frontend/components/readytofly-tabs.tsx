@@ -99,6 +99,8 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
               <th className="px-4 py-2.5 text-center">Dir Net</th>
               <th className="px-4 py-2.5 text-center" title="Skor = kepadatan x Dir Net x kesegaran exp(-d/2), cutoff hari ke-5. Urutan tabel = skor ini">Skor</th>
               <th className="px-4 py-2.5 text-center">Gap SMA20</th>
+              <th className="px-4 py-2.5 text-center" title="Rasio volatilitas 3 hari terakhir vs 10 hari sebelumnya. ≤0.65 = kontraksi (boost ranking). Referensi: Minervini VCP">VCP</th>
+              <th className="px-4 py-2.5 text-center" title="Rasio volume 3 hari terakhir vs rata-rata post-ARA. ≤0.50 = volume mengering (boost ranking). Referensi: Wyckoff supply exhaustion">Dry-Up</th>
               <th className="px-4 py-2.5 text-center">Gates</th>
             </tr>
           </thead>
@@ -145,6 +147,14 @@ function ReadyToFlyTable({ data, date }: { data: ReadyToFlyEntry[]; date?: strin
                   </td>
                   <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${(e.sma_gap_pct ?? 0) >= 0 ? "text-[var(--color-up)]" : "text-[var(--color-down)]"}`}>
                     {e.sma_gap_pct != null ? `${e.sma_gap_pct >= 0 ? "+" : ""}${e.sma_gap_pct.toFixed(1)}%` : "-"}
+                  </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${e.vcp_ok ? "text-[var(--color-up)]" : "text-[var(--color-text-secondary)]"}`}
+                      title={e.vcp_ratio != null ? `Rasio volatilitas recent/past: ${e.vcp_ratio.toFixed(3)} (≤0.65 = kontraksi aktif)` : undefined}>
+                    {e.vcp_ratio != null ? e.vcp_ratio.toFixed(2) : "-"}
+                  </td>
+                  <td className={`px-4 py-2.5 text-center tabular-nums font-bold ${e.dryup_ok ? "text-[var(--color-up)]" : "text-[var(--color-text-secondary)]"}`}
+                      title={e.dryup_ratio != null ? `Rasio volume recent/baseline: ${e.dryup_ratio.toFixed(3)} (≤0.50 = volume mengering)` : undefined}>
+                    {e.dryup_ratio != null ? e.dryup_ratio.toFixed(2) : "-"}
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex flex-wrap items-center justify-center gap-1">

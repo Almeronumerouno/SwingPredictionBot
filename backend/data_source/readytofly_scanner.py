@@ -52,6 +52,10 @@ class ReadyToFlyEntry:
     sma_gap_pct: float | None = None     # (harga - SMA20)/SMA20 dalam %
     post_ara_volume: float | None = 0.0
     post_ara_value: float | None = 0.0
+    vcp_ratio: float | None = None       # rasio volatilitas recent/past (<1 = menyempit)
+    dryup_ratio: float | None = None     # rasio volume recent/baseline (<1 = mengering)
+    vcp_ok: bool = False                  # True jika VCP contraction terdeteksi
+    dryup_ok: bool = False                # True jika volume dry-up terdeteksi
 
 
 def _ensure_cache_dir() -> None:
@@ -163,6 +167,10 @@ def _fetch_and_check_one(
             reason=accum.get("reason"),
             post_ara_volume=accum.get("post_ara_volume", 0.0),
             post_ara_value=accum.get("post_ara_value", 0.0),
+            vcp_ratio=accum.get("vcp_ratio"),
+            dryup_ratio=accum.get("dryup_ratio"),
+            vcp_ok=accum.get("vcp_ok", False),
+            dryup_ok=accum.get("dryup_ok", False),
         )
     except Exception:
         return None
@@ -262,6 +270,10 @@ def get_cached_ready_to_fly(for_date: Optional[str] = None) -> Optional[dict]:
     for row in raw.get("data", []):
         row.setdefault("post_ara_volume", None)
         row.setdefault("post_ara_value", None)
+        row.setdefault("vcp_ratio", None)
+        row.setdefault("dryup_ratio", None)
+        row.setdefault("vcp_ok", False)
+        row.setdefault("dryup_ok", False)
         data_rows.append(ReadyToFlyEntry(**row))
 
     return {

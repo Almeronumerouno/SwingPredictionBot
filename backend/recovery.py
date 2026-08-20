@@ -846,6 +846,51 @@ def detect_accumulation(bars: list, apply_streak_gate: bool = False) -> dict:
             or (t - 2 >= 0 and np.isfinite(sma[t - 2]) and close[t - 2] < sma[t - 2])
         ) else "above"
 
+    # ------------------------------------------------------------------
+    # Supply Exhaustion: VCP (Volatility Contraction) & Volume Dry-Up
+    # SCORING BOOST, bukan gate (squeeze volatilitas bukan leading signal
+    # di IDX, OR<1 — _validate_squeeze 2026). Saham yang menunjukkan
+    # pola kontraksi + volume mengering diberi boost ranking.
+    # ------------------------------------------------------------------
+    raw_high = np.array(
+        [(getattr(b, "raw_high", None) or b.high) for b in bars], dtype=float)
+    raw_low = np.array(
+        [(getattr(b, "raw_low", None) or b.low) for b in bars], dtype=float)
+
+    # VCP: bandingkan rentang harga (high-low)/close recent vs past
+    range_pct = np.where(close > 0, (raw_high - raw_low) / close * 100.0, 0.0)
+    recent_end = t + 1
+    recent_start = max(anchor_idx + 1, recent_end - config.ACCUM_VCP_RECENT_BARS)
+    past_end = recent_start
+    past_start = max(anchor_idx + 1, past_end - config.ACCUM_VCP_PAST_BARS)
+
+    vcp_ratio = None
+    if past_end > past_start and recent_end > recent_start:
+        avg_recent_range = float(np.mean(range_pct[recent_start:recent_end]))
+        avg_past_range = float(np.mean(range_pct[past_start:past_end]))
+        if avg_past_range > 0:
+            vcp_ratio = avg_recent_range / avg_past_range
+
+    # Volume Dry-Up: rata-rata volume recent / baseline post-ARA
+    dryup_ratio = None
+    recent_vol_slice = volume[recent_start:recent_end]
+    if len(recent_vol_slice) > 0 and window > 0 and post_vol_sum > 0:
+        avg_recent_vol = float(np.mean(recent_vol_slice))
+        avg_baseline_vol = post_vol_sum / window
+        if avg_baseline_vol > 0:
+            dryup_ratio = avg_recent_vol / avg_baseline_vol
+
+    vcp_ok = vcp_ratio is not None and vcp_ratio <= config.ACCUM_VCP_BOOST_THRESHOLD
+    dryup_ok = dryup_ratio is not None and dryup_ratio <= config.ACCUM_DRYUP_BOOST_THRESHOLD
+
+    vcp_mult = config.ACCUM_VCP_BOOST_MULT if vcp_ok else 1.0
+    dryup_mult = config.ACCUM_DRYUP_BOOST_MULT if dryup_ok else 1.0
+
+    base_strength = ((density_pct / 100.0)
+                     * (net_dist_heavy if net_dist_heavy is not None else 0.5)
+                     * post_ara_decay)
+    boosted_strength = base_strength * vcp_mult * dryup_mult
+
     res = {
         "valid": True,
         "ready_to_fly": True,
@@ -875,9 +920,11 @@ def detect_accumulation(bars: list, apply_streak_gate: bool = False) -> dict:
         "sma_gap_pct": round(sma_gap_pct, 2) if sma_gap_pct is not None else None,
         "acc_density": acc_density,
         "post_ara_decay": post_ara_decay,
-        "strength": round(
-            (density_pct / 100.0) * (net_dist_heavy if net_dist_heavy is not None else 0.5)
-            * post_ara_decay, 4),
+        "strength": round(boosted_strength, 4),
+        "vcp_ratio": round(vcp_ratio, 3) if vcp_ratio is not None else None,
+        "dryup_ratio": round(dryup_ratio, 3) if dryup_ratio is not None else None,
+        "vcp_ok": vcp_ok,
+        "dryup_ok": dryup_ok,
         "adv_vol_20": round(adv_vol, 0),
         "adv_val_20": round(adv_val, 0),
         "liquidity_ok": liq_ok,
@@ -891,6 +938,8 @@ def detect_accumulation(bars: list, apply_streak_gate: bool = False) -> dict:
             f"harga masih DI BAWAH level event ({dist_ara:+.1f}%) dan di atas "
             f"SMA{config.ACCUM_MA20_DAYS} = pola akumulasi post-large-upmove "
             f"(validasi walk-forward 915 saham: b10 {18.4:.1f}% vs kontrol {5.4:.1f}%, edge ~3.3x)."
+            + (f" VCP kontraksi terdeteksi (rasio {vcp_ratio:.2f})." if vcp_ok else "")
+            + (f" Volume dry-up terdeteksi (rasio {dryup_ratio:.2f})." if dryup_ok else "")
         ),
         "warning": "Akumulasi post-large-upmove (harga belum recovery ke level event) + konfirmasi SMA20 "
                    "probabilitas naik besar naik, tapi volatil; patuhi exit plan.",
