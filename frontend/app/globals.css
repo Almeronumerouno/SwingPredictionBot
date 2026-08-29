@@ -46,6 +46,56 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ── Dark Mode ── */
+html.dark {
+  color-scheme: dark;
+
+  /* Surface & Background */
+  --color-bg: #0B0F19;
+  --color-surface: #111827;
+  --color-surface-hover: #1E293B;
+  --color-muted-bg: #1E293B;
+  --color-border: #1E293B;
+  --color-border-strong: #334155;
+
+  /* Typography Colors */
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Market Semantics */
+  --color-up: #22C55E;
+  --color-up-bg: #052E16;
+  --color-down: #EF4444;
+  --color-down-bg: #450A0A;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #451A03;
+
+  /* Primary Brand / Neutral Action */
+  --color-primary: #E2E8F0;
+  --color-primary-hover: #CBD5E1;
+
+  /* Shadows (much subtler in dark) */
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-panel: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-card: var(--shadow-panel);
+  --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Dark mode: force native input/select backgrounds to match surface */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -211,6 +261,24 @@ input, select, button {
   animation: bar-grow 700ms var(--ease-out) both;
 }
 
+/* Expand row animation (RTF cards) */
+@keyframes expand-row {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+.animate-expand-row {
+  animation: expand-row 250ms var(--ease-out) both;
+  overflow: hidden;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-dropdown-in,
@@ -220,7 +288,8 @@ input, select, button {
   .animate-rise,
   .animate-rise-stagger-2,
   .animate-rise-stagger-3,
-  .animate-bar-grow {
+  .animate-bar-grow,
+  .animate-expand-row {
     animation: none !important;
     opacity: 1 !important;
   }

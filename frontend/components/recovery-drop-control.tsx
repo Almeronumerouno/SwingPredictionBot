@@ -48,7 +48,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           aria-pressed={mode === "auto"}
           className={`flex-1 h-8 text-xs font-medium transition-colors duration-150 cursor-pointer ${
             mode === "auto"
-              ? "bg-[var(--color-primary)] text-white"
+              ? "bg-[var(--color-text-primary)] text-[var(--color-bg)]"
               : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]"
           }`}
         >
@@ -59,7 +59,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           aria-pressed={mode === "manual"}
           className={`flex-1 h-8 text-xs font-medium transition-colors duration-150 cursor-pointer ${
             mode === "manual"
-              ? "bg-[var(--color-primary)] text-white"
+              ? "bg-[var(--color-text-primary)] text-[var(--color-bg)]"
               : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]"
           }`}
         >
@@ -77,7 +77,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           </p>
           <button
             onClick={apply}
-            className="w-full h-8 text-xs font-medium bg-[var(--color-primary)] text-white rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+            className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
           >
             Apply
           </button>
@@ -105,7 +105,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           </p>
           <button
             onClick={apply}
-            className="w-full h-8 text-xs font-medium bg-[var(--color-primary)] text-white rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+            className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
           >
             Apply
           </button>

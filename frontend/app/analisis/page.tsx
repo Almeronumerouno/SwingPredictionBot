@@ -21,6 +21,7 @@ function AnalisisContent() {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyClosing, setHistoryClosing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
 
   // Buka dropdown (batal fase penutupan kalau lagi jalan)
@@ -118,6 +119,7 @@ function AnalisisContent() {
   function goToStock(kode: string) {
     saveSearchHistory(kode);
     const dateParam = selectedDate ? `?date=${selectedDate}` : "";
+    setIsLoading(true);
     router.push(`/saham/${kode}${dateParam}`);
   }
 
@@ -206,10 +208,10 @@ function AnalisisContent() {
             />
             <button
               type="submit"
-              disabled={!code.trim()}
-              className="px-6 py-3 bg-[var(--color-text-primary)] text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity whitespace-nowrap"
+              disabled={!code.trim() || isLoading}
+              className="px-6 py-3 bg-[var(--color-text-primary)] text-[var(--color-bg)] font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity whitespace-nowrap"
             >
-              Cari
+              {isLoading ? "Memuat..." : "Cari"}
             </button>
           </div>
         </form>

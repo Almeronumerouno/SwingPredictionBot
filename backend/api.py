@@ -21,6 +21,7 @@ import gorengan
 import recovery
 import short_selling
 import fundamental_risk
+import bsjp_screener
 from data_source.gainers import get_cached_gainers, get_or_fetch_securities_list, scan_top_gainers
 from data_source.gorengan_scanner import get_cached_gorengan, scan_gorengan
 from data_source.readytofly_scanner import get_cached_ready_to_fly, scan_ready_to_fly
@@ -143,6 +144,29 @@ class GorenganResponse(BaseModel):
     factors: GorenganFactors
     warnings: list[str]
     explanation: str
+
+
+class BSJPEntryResponse(BaseModel):
+    code: str
+    name: str = ""
+    close: float
+    pct_change: float
+    ret1w: float
+    ret1d: float
+    rsi: float
+    ma5: float
+    ma20: float
+    value: float
+    volume: float
+    status: str = "SIGNAL"
+
+
+class BSJPScannerResponse(BaseModel):
+    scraped_at: str
+    date: str
+    count: int
+    stockbit_rules: list[str]
+    data: list[BSJPEntryResponse]
 
 
 class FundamentalFlagResponse(BaseModel):
@@ -998,3 +1022,42 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
             for e in entries
         ],
     }
+
+
+@app.get("/bsjp", response_model=BSJPScannerResponse)
+def get_bsjp(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    """
+    Mengambil data saham sinyal BSJP (Beli Sore Jual Pagi) berbasis formula Stockbit terkalibrasi.
+    """
+    try:
+        signals = bsjp_screener.screen_bsjp_universe(as_of_date=date)
+        now_str = datetime.now(ZoneInfo("Asia/Jakarta")).isoformat()
+        target_date = date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat()
+        
+        return {
+            "scraped_at": now_str,
+            "date": target_date,
+            "count": len(signals),
+            "stockbit_rules": bsjp_screener.STOCKBIT_RULES_LIST,
+            "data": [
+                {
+                    "code": s.code,
+                    "name": s.name,
+                    "close": s.close,
+                    "pct_change": s.pct_change,
+                    "ret1w": s.ret1w,
+                    "ret1d": s.ret1d,
+                    "rsi": s.rsi,
+                    "ma5": s.ma5,
+                    "ma20": s.ma20,
+                    "value": s.value,
+                    "volume": s.volume,
+                    "status": s.status,
+                }
+                for s in signals
+            ],
+        }
+    except Exception as e:
+        logging.exception("Get BSJP signals failed")
+        raise HTTPException(status_code=500, detail=str(e))
+

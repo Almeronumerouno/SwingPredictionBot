@@ -22,6 +22,39 @@ frontend/dist/
 
 # Cache
 cache/
+backend/cache/
+
+# Experimental / backtest sampah — jangan ke-push
+backend/bsjp_*.py
+backend/_bsjp_*.py
+backend/_ara_*.py
+backend/_ara_*.txt
+backend/daily_trade_*.py
+backend/daily_trade_*.txt
+backend/v5_*.py
+backend/v6_*.py
+backend/ultimate_*.py
+backend/gridsearch_*.py
+backend/multitarget_*.py
+backend/dd_*.py
+backend/tier_*.py
+backend/watchlist_*.py
+backend/check_*.py
+backend/recent_*.py
+backend/red_*.py
+backend/streak_*.py
+backend/eval_*.py
+backend/list_*.py
+backend/aug24_*.json
+backend/bsjp_*.txt
+backend/bsjp_*.md
+backend/data/bsjp_*.json
+backend/_tmp_*.json
+backend/_tmp_*.txt
+backend/_v3_*.json
+backend/_v3_*.txt
+backend/out.json
+backend/scrape_button_log.json
 
 # IDE
 .vscode/

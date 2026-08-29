@@ -311,3 +311,26 @@ export interface ReadyToFlyScannerResponse {
   count_almost: number
   data: ReadyToFlyEntry[]
 }
+
+export interface BSJPEntry {
+  code: string
+  name: string
+  close: number
+  pct_change: number
+  ret1w: number
+  ret1d: number
+  rsi: number
+  ma5: number | null
+  ma20: number | null
+  value: number
+  volume: number
+  status: "TOP_PICK" | "STRONG" | "SIGNAL"
+}
+
+export interface BSJPScannerResponse {
+  scraped_at: string
+  date: string
+  count: number
+  stockbit_rules: string[]
+  data: BSJPEntry[]
+}

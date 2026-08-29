@@ -35,18 +35,18 @@ export default function GorenganTabs({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Segmented Control */}
-        <div className="inline-flex bg-slate-100 p-1 rounded-md">
+        <div className="inline-flex bg-[var(--color-muted-bg)] p-1 rounded-md">
           <button
             onClick={() => setActiveTab("EXTREME")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded transition-all ${
               activeTab === "EXTREME"
-                ? "bg-white text-[var(--color-down)] shadow-sm ring-1 ring-black/5"
+                ? "bg-[var(--color-surface)] text-[var(--color-down)] shadow-sm ring-1 ring-black/5"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             EXTREME
             <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] tabular-nums ${
-              activeTab === "EXTREME" ? "bg-red-100 text-red-700" : "bg-slate-200/70 text-slate-500"
+              activeTab === "EXTREME" ? "bg-[var(--color-down-bg)] text-[var(--color-down)]" : "bg-[var(--color-muted-bg)] text-[var(--color-text-muted)]"
             }`}>
               {countExtreme}
             </span>
@@ -56,13 +56,13 @@ export default function GorenganTabs({
             onClick={() => setActiveTab("HIGH")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded transition-all ${
               activeTab === "HIGH"
-                ? "bg-white text-[var(--color-warning)] shadow-sm ring-1 ring-black/5"
+                ? "bg-[var(--color-surface)] text-[var(--color-warning)] shadow-sm ring-1 ring-black/5"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             HIGH
             <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] tabular-nums ${
-              activeTab === "HIGH" ? "bg-amber-100 text-amber-700" : "bg-slate-200/70 text-slate-500"
+              activeTab === "HIGH" ? "bg-[var(--color-warning-bg)] text-[var(--color-warning)]" : "bg-[var(--color-muted-bg)] text-[var(--color-text-muted)]"
             }`}>
               {countHigh}
             </span>

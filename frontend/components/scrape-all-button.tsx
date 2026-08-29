@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { triggerScrapeAll } from "@/lib/api/scan-all";
+import { triggerScrape } from "@/lib/api/scrape";
 
 type Toast = { message: string; type: "success" | "error" } | null;
 
@@ -57,7 +58,7 @@ function MarketChoiceModal({
 }: {
   loading: boolean;
   globalDate: string | null;
-  onConfirm: (source: "yahoo" | "idx", date?: string) => void;
+  onConfirm: (source: "yahoo" | "idx", date?: string, scope?: "all" | "gainers") => void;
   onCancel: () => void;
 }) {
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -67,6 +68,7 @@ function MarketChoiceModal({
   const [selectedDate, setSelectedDate] = useState<string>(
     globalDate || todayStr
   );
+  const [scanScope, setScanScope] = useState<"all" | "gainers">("all");
 
   function selectSource(source: "yahoo" | "idx") {
     if (source === "yahoo" && isPastDate) return; // histori cuma bisa via IDX
@@ -182,14 +184,14 @@ function MarketChoiceModal({
                   </div>
                 )}
                 <div className="w-8 h-8 rounded-md bg-slate-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[var(--color-text-primary)]">IDX (EOD)</span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)]">
                       Pilih Tanggal
                     </span>
                   </div>
@@ -262,9 +264,58 @@ function MarketChoiceModal({
                   </p>
                 </>
               )}
+
+              {/* Pilihan Scope */}
+              <div className="mt-5 border-t border-[var(--color-border)] pt-4">
+                <label className="block text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
+                  Cakupan Scan
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setScanScope("gainers")}
+                    className={`flex items-start gap-2 p-3 border rounded-md text-left transition-colors ${
+                      scanScope === "gainers" 
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5" 
+                        : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50"
+                    }`}
+                  >
+                    <div className={`mt-0.5 rounded-full p-0.5 ${scanScope === "gainers" ? "text-[var(--color-primary)]" : "text-transparent border border-[var(--color-border)]"}`}>
+                      {scanScope === "gainers" && (
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className={`text-xs font-bold ${scanScope === "gainers" ? "text-[var(--color-primary)]" : "text-[var(--color-text-primary)]"}`}>
+                        Fast Scan
+                      </p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Hanya perbarui Top Gainers (~2 dtk).</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setScanScope("all")}
+                    className={`flex items-start gap-2 p-3 border rounded-md text-left transition-colors ${
+                      scanScope === "all" 
+                        ? "border-emerald-500 bg-emerald-500/5" 
+                        : "border-[var(--color-border)] hover:border-emerald-500/50"
+                    }`}
+                  >
+                    <div className={`mt-0.5 rounded-full p-0.5 ${scanScope === "all" ? "text-emerald-500" : "text-transparent border border-[var(--color-border)]"}`}>
+                      {scanScope === "all" && (
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className={`text-xs font-bold ${scanScope === "all" ? "text-emerald-500" : "text-[var(--color-text-primary)]"}`}>
+                        Deep Scan
+                      </p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Termasuk Gorengan & RTF (~2 mnt).</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="px-5 pb-4 flex gap-2 border-t border-[var(--color-border)] pt-3">
+            <div className="px-5 pb-4 flex gap-2 border-t border-[var(--color-border)] pt-4">
               <button
                 onClick={() => setStep("choose-source")}
                 disabled={loading}
@@ -273,7 +324,7 @@ function MarketChoiceModal({
                 Kembali
               </button>
               <button
-                onClick={() => onConfirm(selectedSource, selectedSource === "idx" ? selectedDate : undefined)}
+                onClick={() => onConfirm(selectedSource, selectedSource === "idx" ? selectedDate : undefined, scanScope)}
                 disabled={loading || (selectedSource === "idx" && !selectedDate)}
                 className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
@@ -299,11 +350,14 @@ export default function ScrapeAllButton() {
 
   const dismissToast = useCallback(() => setToast(null), []);
 
-  async function handleConfirm(source: "yahoo" | "idx", date?: string) {
+  async function handleConfirm(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all") {
     setLoading(true);
     setShowModal(false);
     try {
-      const res = await triggerScrapeAll(source, date);
+      const res = scope === "gainers" 
+        ? await triggerScrape(source, date) 
+        : await triggerScrapeAll(source, date);
+        
       setToast({ message: res.message, type: "success" });
       if (date) {
         const params = new URLSearchParams(searchParams.toString());

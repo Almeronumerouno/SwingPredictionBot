@@ -58,7 +58,7 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
         </div>
 
         {/* Toolbar & Tabs */}
-        <div className="px-5 py-3 border-b border-[var(--color-border)] bg-[#FAFAFA] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="px-5 py-3 border-b border-[var(--color-border)] bg-[var(--color-muted-bg)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex bg-[var(--color-border)]/50 p-1 rounded-lg w-full sm:w-auto">
             <button
               onClick={() => { setActiveTab("buy"); setPage(1); }}
@@ -91,7 +91,7 @@ export default function SignalScreener({ data, date }: { data: GainerEntry[], da
               placeholder="Cari saham (mis: BBCA)" 
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 pr-4 py-1.5 text-xs font-medium bg-white border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] rounded-lg outline-none transition-all w-full text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] shadow-sm"
+              className="pl-9 pr-4 py-1.5 text-xs font-medium bg-[var(--color-surface)] border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] rounded-lg outline-none transition-all w-full text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] shadow-sm"
             />
           </div>
         </div>

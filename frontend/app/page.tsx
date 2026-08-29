@@ -271,20 +271,6 @@ export default async function DashboardPage({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <SignalCard
-            href={`/gorengan${date ? `?date=${date}` : ""}`}
-            title="Scanner Gorengan"
-            subtitle="Deteksi pump-and-dump & bandar"
-            state={gorenganState}
-            stamp={fmtStamp(gorengan?.scraped_at)}
-            noun="gorengan"
-            dateLabel={dateLabel}
-            animationDelay="110ms"
-            stats={[
-              { label: "Extreme", value: countExtreme, valueClass: "text-[var(--color-down)]" },
-              { label: "High Risk", value: countHigh, valueClass: "text-[var(--color-warning)]" },
-            ]}
-          />
-          <SignalCard
             href={`/ready-to-fly${date ? `?date=${date}` : ""}`}
             title="Ready To Fly"
             subtitle="Akumulasi post-ARA, kandidat breakout"
@@ -292,10 +278,24 @@ export default async function DashboardPage({
             stamp={fmtStamp(rtf?.scraped_at)}
             noun="ready to fly"
             dateLabel={dateLabel}
-            animationDelay="170ms"
+            animationDelay="70ms"
             stats={[
               { label: "Siap Terbang", value: countReady, valueClass: "text-[var(--color-up)]" },
               { label: "Hampir Siap", value: countAlmost, valueClass: "text-[var(--color-warning)]" },
+            ]}
+          />
+          <SignalCard
+            href={`/gorengan${date ? `?date=${date}` : ""}`}
+            title="Scanner Gorengan"
+            subtitle="Deteksi pump-and-dump & bandar"
+            state={gorenganState}
+            stamp={fmtStamp(gorengan?.scraped_at)}
+            noun="gorengan"
+            dateLabel={dateLabel}
+            animationDelay="140ms"
+            stats={[
+              { label: "Extreme", value: countExtreme, valueClass: "text-[var(--color-down)]" },
+              { label: "High Risk", value: countHigh, valueClass: "text-[var(--color-warning)]" },
             ]}
           />
         </div>

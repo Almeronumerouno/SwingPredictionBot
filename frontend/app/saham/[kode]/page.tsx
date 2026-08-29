@@ -179,87 +179,133 @@ export default async function SahamPage({
       </div>
 
       {/* Fundamental Context (F3.6) — terpisah dari skor, tanpa penalty */}
-      {analisis.fundamental_status && (
-        <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm mb-6 sm:mb-8">
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center">
-              <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-            </div>
-            <div className="mr-auto">
-              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Fundamental Context</h2>
-              <p className="text-xs text-[var(--color-text-muted)]">Konteks risiko fundamental — TIDAK memengaruhi skor</p>
-            </div>
-            {(() => {
-              const st = analisis.fundamental_status || "";
-              const meta: Record<string, { cls: string; sub: string }> = {
-                HEALTHY: { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", sub: "Data cukup, tanpa flag material" },
-                NEUTRAL: { cls: "bg-slate-100 text-slate-600 border-slate-200", sub: "Data parsial, tanpa flag material" },
-                RISK: { cls: "bg-red-50 text-red-700 border-red-200", sub: "Ada flag risiko fundamental" },
-                UNKNOWN: { cls: "bg-slate-50 text-slate-500 border-slate-200", sub: "Data fundamental tidak cukup" },
-              };
-              const m = meta[st] || meta.UNKNOWN;
-              return (
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded border ${m.cls}`}>{st}</span>
-                  {analisis.fundamental_meta?.data_quality && (
-                    <span className={`px-2 py-1 text-[10px] font-bold tracking-wide rounded border ${
-                      analisis.fundamental_meta.data_quality === "GOOD" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : analisis.fundamental_meta.data_quality === "PARTIAL" ? "bg-amber-50 text-amber-700 border-amber-200"
-                      : "bg-slate-100 text-slate-500 border-slate-200"
-                    }`}>
-                      Data {analisis.fundamental_meta.data_quality}
+      {analisis.fundamental_status && (() => {
+        const st = analisis.fundamental_status || "";
+        const statusConfig: Record<string, {
+          accent: string; iconBg: string; iconColor: string;
+          badgeBg: string; badgeText: string; badgeBorder: string;
+          icon: React.ReactNode; label: string; desc: string;
+        }> = {
+          HEALTHY: {
+            accent: "border-l-emerald-500",
+            iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600",
+            badgeBg: "bg-emerald-500/10", badgeText: "text-emerald-600", badgeBorder: "border-emerald-500/20",
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />,
+            label: "Healthy",
+            desc: "Data fundamental cukup dan tidak ada flag material terdeteksi.",
+          },
+          NEUTRAL: {
+            accent: "border-l-[var(--color-text-muted)]",
+            iconBg: "bg-[var(--color-muted-bg)]", iconColor: "text-[var(--color-text-muted)]",
+            badgeBg: "bg-[var(--color-muted-bg)]", badgeText: "text-[var(--color-text-secondary)]", badgeBorder: "border-[var(--color-border)]",
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+            label: "Neutral",
+            desc: "Data fundamental parsial dan tidak ada flag material terdeteksi.",
+          },
+          RISK: {
+            accent: "border-l-red-500",
+            iconBg: "bg-red-500/10", iconColor: "text-red-500",
+            badgeBg: "bg-red-500/10", badgeText: "text-red-600", badgeBorder: "border-red-500/20",
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />,
+            label: "Risk",
+            desc: "Terdeteksi flag risiko fundamental — periksa detail sebelum mengambil keputusan.",
+          },
+          UNKNOWN: {
+            accent: "border-l-[var(--color-border-strong)]",
+            iconBg: "bg-[var(--color-muted-bg)]", iconColor: "text-[var(--color-text-muted)]",
+            badgeBg: "bg-[var(--color-muted-bg)]", badgeText: "text-[var(--color-text-muted)]", badgeBorder: "border-[var(--color-border)]",
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+            label: "Unknown",
+            desc: "Data fundamental tidak cukup tersedia — status tidak dapat diklasifikasikan.",
+          },
+        };
+        const cfg = statusConfig[st] || statusConfig.UNKNOWN;
+        const dq = analisis.fundamental_meta?.data_quality;
+        const dqConfig: Record<string, { bg: string; text: string; border: string }> = {
+          GOOD: { bg: "bg-emerald-500/10", text: "text-emerald-600", border: "border-emerald-500/20" },
+          PARTIAL: { bg: "bg-amber-500/10", text: "text-amber-600", border: "border-amber-500/20" },
+        };
+        const dqStyle = dq ? (dqConfig[dq] || { bg: "bg-[var(--color-muted-bg)]", text: "text-[var(--color-text-muted)]", border: "border-[var(--color-border)]" }) : null;
+
+        const flags = analisis.fundamental_flags || [];
+        const flagConfig: Record<string, { label: string; dot: string }> = {
+          NEGATIVE_EARNINGS: { label: "Laba Negatif", dot: "bg-red-500" },
+          HIGH_LEVERAGE: { label: "Leverage Tinggi", dot: "bg-orange-500" },
+          EXTREME_VALUATION: { label: "Valuasi Ekstrem", dot: "bg-orange-500" },
+          LOW_COVERAGE: { label: "Data Minim", dot: "bg-[var(--color-text-muted)]" },
+        };
+
+        return (
+          <div className={`rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] border-l-[3px] ${cfg.accent} shadow-sm mb-6 sm:mb-8 overflow-hidden`}>
+            {/* Header */}
+            <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-9 h-9 rounded-lg ${cfg.iconBg} flex items-center justify-center shrink-0`}>
+                    <svg className={`w-[18px] h-[18px] ${cfg.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">{cfg.icon}</svg>
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-bold text-[var(--color-text-primary)] leading-tight">Fundamental Context</h2>
+                    <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">Konteks risiko — tidak memengaruhi skor</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className={`px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase rounded-md border ${cfg.badgeBg} ${cfg.badgeText} ${cfg.badgeBorder}`}>{cfg.label}</span>
+                  {dq && dqStyle && (
+                    <span className={`px-2 py-1 text-[10px] font-semibold tracking-wide rounded-md border ${dqStyle.bg} ${dqStyle.text} ${dqStyle.border}`}>
+                      {dq === "GOOD" ? "✓ Data" : dq === "PARTIAL" ? "~ Parsial" : dq}
                     </span>
                   )}
                 </div>
-              );
-            })()}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="px-4 sm:px-5 pb-3">
+              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">{cfg.desc}</p>
+            </div>
+
+            {/* Flags */}
+            {flags.length > 0 ? (
+              <div className="mx-4 sm:mx-5 mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] divide-y divide-[var(--color-border)]">
+                {flags.map((f) => {
+                  const fc = flagConfig[f.flag] || { label: f.flag, dot: "bg-[var(--color-text-muted)]" };
+                  return (
+                    <div key={f.flag} className="flex items-start gap-3 px-3.5 py-2.5">
+                      <div className="flex items-center gap-2 shrink-0 mt-px">
+                        <span className={`w-2 h-2 rounded-full ${fc.dot}`} />
+                        <span className="text-[11px] font-bold text-[var(--color-text-primary)] tracking-wide w-[100px]">{fc.label}</span>
+                      </div>
+                      <span className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">{f.reason}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mx-4 sm:mx-5 mb-4 flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]">
+                <svg className="w-3.5 h-3.5 text-[var(--color-up)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                <span className="text-[11px] text-[var(--color-text-secondary)]">Tidak ada flag risiko fundamental terdeteksi</span>
+              </div>
+            )}
+
+            {/* Footer — market cap & fetch notes */}
+            {(analisis.fundamental_meta?.context?.market_cap_idr_b != null || (analisis.fundamental_meta?.fetch_errors && analisis.fundamental_meta.fetch_errors.length > 0)) && (
+              <div className="px-4 sm:px-5 py-2.5 border-t border-[var(--color-border)] bg-[var(--color-bg)]/50 flex flex-wrap items-center gap-x-4 gap-y-1">
+                {analisis.fundamental_meta?.context?.market_cap_idr_b != null && (
+                  <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                    Market Cap: <span className="font-semibold text-[var(--color-text-secondary)]">Rp {new Intl.NumberFormat("id-ID").format(analisis.fundamental_meta.context.market_cap_idr_b)} miliar</span>
+                  </span>
+                )}
+                {analisis.fundamental_meta?.fetch_errors && analisis.fundamental_meta.fetch_errors.length > 0 && (
+                  <span className="text-[10px] text-amber-600">
+                    ⚠ {analisis.fundamental_meta.fetch_errors.join("; ")}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mb-4">{(() => {
-            const st = analisis.fundamental_status || "";
-            const sub: Record<string, string> = {
-              HEALTHY: "Data fundamental cukup dan tidak ada flag material terdeteksi.",
-              NEUTRAL: "Data fundamental parsial dan tidak ada flag material terdeteksi.",
-              RISK: "Terdekteksi flag risiko fundamental — periksa detail di bawah sebelum mengambil keputusan.",
-              UNKNOWN: "Data fundamental tidak cukup tersedia — status tidak dapat diklasifikasikan.",
-            };
-            return sub[st] || "";
-          })()}</p>
-
-          {analisis.fundamental_flags && analisis.fundamental_flags.length > 0 ? (
-            <ul className="space-y-2">
-              {analisis.fundamental_flags.map((f) => {
-                const labelMap: Record<string, { label: string; cls: string }> = {
-                  NEGATIVE_EARNINGS: { label: "Laba Negatif", cls: "bg-red-50 text-red-700 border-red-200" },
-                  HIGH_LEVERAGE: { label: "Leverage Tinggi", cls: "bg-orange-50 text-orange-700 border-orange-200" },
-                  EXTREME_VALUATION: { label: "Valuasi Ekstrem", cls: "bg-orange-50 text-orange-700 border-orange-200" },
-                  LOW_COVERAGE: { label: "Data Minim", cls: "bg-slate-100 text-slate-600 border-slate-200" },
-                };
-                const lm = labelMap[f.flag] || { label: f.flag, cls: "bg-slate-100 text-slate-600 border-slate-200" };
-                return (
-                  <li key={f.flag} className="flex items-start gap-2.5">
-                    <span className={`shrink-0 px-2 py-0.5 text-[11px] font-bold tracking-wide rounded border ${lm.cls}`}>{lm.label}</span>
-                    <span className="text-xs text-[var(--color-text-secondary)]">{f.reason}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-xs text-[var(--color-text-muted)]">Tidak ada flag risiko fundamental terdeteksi.</p>
-          )}
-
-          {analisis.fundamental_meta?.context?.market_cap_idr_b != null && (
-            <p className="text-[11px] text-[var(--color-text-muted)] mt-3">
-              Market Cap: Rp {new Intl.NumberFormat("id-ID").format(analisis.fundamental_meta.context.market_cap_idr_b)} miliar
-              (konteks likuiditas — bukan flag risiko)
-            </p>
-          )}
-          {analisis.fundamental_meta?.fetch_errors && analisis.fundamental_meta.fetch_errors.length > 0 && (
-            <p className="text-[11px] text-amber-600 mt-3">
-              Catatan fetch: {analisis.fundamental_meta.fetch_errors.join("; ")}
-            </p>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Score Components */}
       {s.components && (

@@ -62,7 +62,7 @@ export default function CapitalControl({ kode, capital }: { kode: string; capita
         </div>
         <button
           onClick={apply}
-          className="w-full h-8 text-xs font-medium bg-[var(--color-primary)] text-white rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+          className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
         >
           Apply
         </button>

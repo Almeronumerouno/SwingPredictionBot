@@ -5,6 +5,8 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect, useCallback } from "react";
 
+const THEME_KEY = "swingbot-theme";
+
 const navItems = [
   {
     label: "Dashboard",
@@ -41,6 +43,15 @@ const navItems = [
       <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 22h20" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z" />
+      </svg>
+    ),
+  },
+  {
+    label: "BSJP",
+    href: "/bsjp",
+    icon: (
+      <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
       </svg>
     ),
   },
@@ -96,6 +107,97 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         );
       })}
     </nav>
+  );
+}
+
+/* ── Dark Mode Toggle ── */
+function DarkModeToggle() {
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Read persisted preference on mount
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === "dark") {
+        setIsDark(true);
+        document.documentElement.classList.add("dark");
+      } else if (saved === "light") {
+        setIsDark(false);
+        document.documentElement.classList.remove("dark");
+      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setIsDark(true);
+        document.documentElement.classList.add("dark");
+      }
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  const toggle = useCallback(() => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      try {
+        localStorage.setItem(THEME_KEY, next ? "dark" : "light");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
+
+  // Avoid hydration mismatch — render neutral until mounted
+  if (!mounted) {
+    return (
+      <div className="px-3 py-3 border-t border-[var(--color-border)]">
+        <div className="h-9" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-3 py-3 border-t border-[var(--color-border)]">
+      <button
+        onClick={toggle}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-muted-bg)] transition-colors duration-150 group"
+        aria-label={isDark ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
+      >
+        <div className="flex items-center gap-2.5">
+          {/* Icon: moon for dark, sun for light */}
+          {isDark ? (
+            <svg className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          ) : (
+            <svg className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          )}
+          <span className="text-[13px] font-medium text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors">
+            {isDark ? "Dark mode" : "Light mode"}
+          </span>
+        </div>
+
+        {/* Toggle switch */}
+        <div
+          className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${
+            isDark ? "bg-[var(--color-primary)]" : "bg-[var(--color-border-strong)]"
+          }`}
+        >
+          <div
+            className={`absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+              isDark ? "translate-x-[21px]" : "translate-x-[3px]"
+            }`}
+          />
+        </div>
+      </button>
+    </div>
   );
 }
 
@@ -190,6 +292,7 @@ function SidebarInner() {
         <Suspense fallback={<div className="flex-1 p-4"></div>}>
           <SidebarContent onNavigate={close} />
         </Suspense>
+        <DarkModeToggle />
         <SidebarFooterNote />
       </aside>
 
@@ -204,6 +307,7 @@ function SidebarInner() {
         <Suspense fallback={<div className="flex-1 p-4"></div>}>
           <SidebarContent />
         </Suspense>
+        <DarkModeToggle />
         <SidebarFooterNote />
       </aside>
     </>
@@ -213,3 +317,4 @@ function SidebarInner() {
 export default function Sidebar() {
   return <SidebarInner />;
 }
+
