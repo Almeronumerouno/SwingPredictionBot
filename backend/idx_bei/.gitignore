@@ -1,0 +1,50 @@
+# --- Python & Environments ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+python/.venv/
+.env
+python/.env
+.env.local
+.python-version
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# --- Databases & DuckDB ---
+*.duckdb
+*.duckdb.wal
+neo4j_data/
+postgres_data/
+
+# --- Data ---
+# Large/regenerated scraped datasets
+data/timeseries/
+data/parquet/
+data/.raw_archive/
+data/.schema_snapshots.json
+data/.scrape_stats.json
+data/*.tmp
+data/*.bak
+data/ownership/
+
+# --- Logs & OS ---
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Project Specific ---
+.claude/
+.deprecated/
+CLAUDE.md
