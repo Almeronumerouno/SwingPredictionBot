@@ -22,23 +22,9 @@ export default function Loading() {
       role="status"
       aria-live="polite"
       aria-label="Loading market data"
-      className="ld-root flex min-h-screen w-full flex-col items-center justify-center px-4 py-10"
-      style={{ backgroundColor: "var(--color-bg)" }}
+      className="ld-root flex min-h-[70vh] w-full flex-col items-center justify-center px-4 py-10 bg-[var(--color-bg)]"
     >
       <style dangerouslySetInnerHTML={{ __html: `
-        :root {
-          --color-bg: #F8FAFC;
-          --color-surface: #FFFFFF;
-          --color-border: #E6E8EA;
-          --color-text-primary: #0F172A;
-          --color-text-secondary: #64748B;
-          --color-text-muted: #94A3B8;
-          --color-primary: #334155;
-          --color-up: #059669;
-          --color-down: #DC2626;
-          --color-muted-bg: #F8FAFC;
-        }
-
         @keyframes ld-candle-grow {
           0% { transform: scaleY(0.35); }
           50% { transform: scaleY(1); }
@@ -91,85 +77,67 @@ export default function Loading() {
       `}} />
 
       <div className="flex flex-col gap-6 p-6 sm:p-8" style={{ width: "100%", maxWidth: "480px" }}>
-          {/* Candlestick visualization */}
-          <div
-            className="relative h-36 overflow-hidden rounded-xl sm:h-40"
-            style={{ backgroundColor: "var(--color-muted-bg)" }}
-          >
-            {/* horizontal grid reference lines */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-0 py-3">
-              <div className="h-px w-full" style={{ backgroundColor: "var(--color-border)" }} />
-              <div className="h-px w-full" style={{ backgroundColor: "var(--color-border)" }} />
-              <div className="h-px w-full" style={{ backgroundColor: "var(--color-border)" }} />
-            </div>
+        {/* Candlestick visualization box seamlessly floating on background */}
+        <div className="relative h-36 overflow-hidden sm:h-40 bg-transparent">
+          {/* horizontal grid reference lines */}
+          <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-0 py-3">
+            <div className="h-px w-full bg-[var(--color-border)]/25" />
+            <div className="h-px w-full bg-[var(--color-border)]/25" />
+            <div className="h-px w-full bg-[var(--color-border)]/25" />
+          </div>
 
-            {/* candles */}
-            <div className="absolute inset-0 flex items-end justify-between gap-[3px] px-4 pb-3 sm:gap-1.5 sm:px-6">
-              {candles.map((c, i) => (
+          {/* candles */}
+          <div className="absolute inset-0 flex items-end justify-between gap-[3px] px-4 pb-3 sm:gap-1.5 sm:px-6">
+            {candles.map((c, i) => (
+              <div
+                key={i}
+                className="relative flex h-full flex-1 items-end justify-center"
+              >
+                {/* wick */}
                 <div
-                  key={i}
-                  className="relative flex h-full flex-1 items-end justify-center"
-                >
-                  {/* wick */}
-                  <div
-                    className="absolute bottom-0 w-px"
-                    style={{
-                      height: "100%",
-                      backgroundColor: "var(--color-border)",
-                    }}
-                  />
-                  {/* body */}
-                  <div
-                    className="ld-candle relative w-full max-w-[7px] rounded-[1.5px] sm:max-w-[9px]"
-                    style={{
-                      height: `${c.h}%`,
-                      backgroundColor: c.up ? "var(--color-up)" : "var(--color-down)",
-                      animationDuration: `${1.6 + (i % 5) * 0.22}s`,
-                      animationDelay: `${(i % 7) * 0.12}s`,
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* scanning analysis line */}
-            <div
-              className="ld-scanline pointer-events-none absolute top-0 h-full w-px"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                boxShadow: "0 0 8px 1px rgba(51, 65, 85, 0.25)",
-              }}
-            />
+                  className="absolute bottom-0 w-px bg-[var(--color-border)]"
+                  style={{ height: "100%" }}
+                />
+                {/* body */}
+                <div
+                  className={`ld-candle relative w-full max-w-[7px] rounded-[1.5px] sm:max-w-[9px] ${
+                    c.up ? "bg-[var(--color-up)]" : "bg-[var(--color-down)]"
+                  }`}
+                  style={{
+                    height: `${c.h}%`,
+                    animationDuration: `${1.6 + (i % 5) * 0.22}s`,
+                    animationDelay: `${(i % 7) * 0.12}s`,
+                  }}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Text */}
-          <div className="flex items-center justify-center gap-1 text-center">
-            <h1
-              className="text-base font-semibold sm:text-lg"
-              style={{ color: "var(--color-text-primary)" }}
-            >
-              Loading
-            </h1>
-            <span
-              className="ld-dot text-base font-semibold sm:text-lg"
-              style={{ color: "var(--color-text-primary)", animationDelay: "0s" }}
-            >
-              .
-            </span>
-            <span
-              className="ld-dot text-base font-semibold sm:text-lg"
-              style={{ color: "var(--color-text-primary)", animationDelay: "0.25s" }}
-            >
-              .
-            </span>
-            <span
-              className="ld-dot text-base font-semibold sm:text-lg"
-              style={{ color: "var(--color-text-primary)", animationDelay: "0.5s" }}
-            >
-              .
-            </span>
-          </div>
+          {/* scanning laser line */}
+          <div
+            className="ld-scanline pointer-events-none absolute top-0 h-full w-px bg-blue-500"
+            style={{
+              boxShadow: "0 0 10px 2px rgba(59, 130, 246, 0.45)",
+            }}
+          />
+        </div>
+
+        {/* Text */}
+        <div className="flex items-center justify-center gap-1 text-center">
+          <h1 className="text-base font-semibold sm:text-lg text-[var(--color-text-primary)]">
+            Loading
+          </h1>
+          <span className="ld-dot text-base font-semibold sm:text-lg text-[var(--color-text-primary)]" style={{ animationDelay: "0s" }}>
+            .
+          </span>
+          <span className="ld-dot text-base font-semibold sm:text-lg text-[var(--color-text-primary)]" style={{ animationDelay: "0.25s" }}>
+            .
+          </span>
+          <span className="ld-dot text-base font-semibold sm:text-lg text-[var(--color-text-primary)]" style={{ animationDelay: "0.5s" }}>
+            .
+          </span>
         </div>
       </div>
+    </div>
   );
 }

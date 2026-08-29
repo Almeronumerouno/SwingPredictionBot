@@ -18,7 +18,7 @@ function SignalBadge({ rec, score }: { rec: string | null; score: number | null 
     ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" 
     : isSell 
       ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" 
-      : "bg-amber-50 text-amber-700 border-amber-200";
+      : "bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning)]/20";
   
   const pctVal = score != null ? score.toFixed(0) : "";
   

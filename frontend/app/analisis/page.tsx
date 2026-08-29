@@ -209,7 +209,7 @@ function AnalisisContent() {
             <button
               type="submit"
               disabled={!code.trim() || isLoading}
-              className="px-6 py-3 bg-[var(--color-text-primary)] text-[var(--color-bg)] font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity whitespace-nowrap"
+              className="px-6 py-3 bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] border border-[var(--color-btn-primary-border)] font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap shadow-xs cursor-pointer"
             >
               {isLoading ? "Memuat..." : "Cari"}
             </button>

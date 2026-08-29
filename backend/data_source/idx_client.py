@@ -1,37 +1,22 @@
 """
-Client untuk endpoint www.idx.co.id (versi Nuxt.js) — KHUSUS daftar
-saham terdaftar via GetSecuritiesStock.
-
-PENTING (baca ini):
-- Endpoint ini BUKAN API resmi berkontrak dari BEI, ditemukan lewat
-  reverse-engineering website idx.co.id. Struktur response BISA BERUBAH
-  sewaktu-waktu tanpa pemberitahuan.
-- Syarat Penggunaan BEI melarang penggunaan data untuk tujuan KOMERSIAL
-  tanpa izin tertulis. Untuk personal use / testing / riset ini praktik
-  umum dan risikonya rendah.
-- www.idx.co.id memakai proteksi Cloudflare, karena itu kita pakai
-  `cloudscraper` alih-alih `requests` biasa.
-
-ASUMSI YANG PERLU DIVALIDASI (belum ada raw JSON sample lengkap):
-- Response GetSecuritiesStock diasumsikan berupa list langsung ATAU dict
-  dengan key umum (data/Data/items/Items) berisi list objek dengan field
-  `Code`, `Name`, `Shares`, `ListingDate`, `ListingBoard`.
+idx_client.py — Mengambil daftar saham terdaftar di BEI via curl_cffi / GetStockSummary.
 """
 
 from __future__ import annotations
 
 import json
-import time
+import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Optional
-
-import cloudscraper
+from curl_cffi import requests
 
 import config
 
+log = logging.getLogger("data_source.idx_client")
 
 class IdxClientError(Exception):
-    """Raised saat request ke idx.co.id gagal atau response tidak sesuai ekspektasi."""
+    """Raised saat request ke idx.co.id gagal."""
 
 
 @dataclass
@@ -43,79 +28,45 @@ class Security:
     listing_board: str = ""
 
 
-_SESSION: Optional[cloudscraper.CloudScraper] = None
-
-
-def _get_session() -> cloudscraper.CloudScraper:
-    global _SESSION
-    if _SESSION is not None:
-        return _SESSION
-    session = cloudscraper.create_scraper()
-    session.get(
-        config.IDX_BASE_URL + config.IDX_SESSION_INIT_PATH,
-        headers={"User-Agent": config.IDX_REQUEST_USER_AGENT, "Referer": config.IDX_BASE_URL},
-    )
-    _SESSION = session
-    return session
-
-
-def _request_json(session: cloudscraper.CloudScraper, url: str, params: dict, retries: int = None) -> dict:
-    retries = config.IDX_REQUEST_RETRIES if retries is None else retries
-    last_err: Optional[Exception] = None
-    for attempt in range(retries):
-        try:
-            resp = session.get(url, params=params, timeout=config.IDX_REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            return json.loads(resp.text)
-        except Exception as e:  # noqa: BLE001 - kita mau tangkap semua & retry
-            last_err = e
-            time.sleep(1.5 * (attempt + 1))
-    raise IdxClientError(f"Gagal fetch {url} dengan params {params}: {last_err}")
-
-
-def _extract_rows(result) -> list[dict]:
-    """
-    Normalisasi response GetSecuritiesStock yang bentuknya belum pasti (list
-    langsung, atau dict dibungkus key data/Data/items/Items). Dibuat
-    defensif karena field-nya baru ditemukan lewat testing manual, bukan
-    dokumentasi resmi.
-    """
-    if isinstance(result, list):
-        return result
-    if isinstance(result, dict):
-        for key in ("data", "Data", "items", "Items", "result", "Result"):
-            if key in result and isinstance(result[key], list):
-                return result[key]
-    raise IdxClientError(
-        f"Struktur response GetSecuritiesStock tidak dikenali: {type(result)} - "
-        f"kirim raw JSON-nya biar bisa disesuaikan. Sample: {str(result)[:300]}"
-    )
-
-
 def fetch_all_securities() -> list[Security]:
     """
-    Ambil seluruh daftar saham terdaftar di BEI lewat endpoint
-    GetSecuritiesStock. Dicoba single call dulu; kalau ternyata IDX
-    membatasi jumlah hasil per request, perlu ditambah logic pagination
-    lagi (kasih tau kalau hasilnya kurang dari ~900-965 saham).
+    Ambil seluruh daftar saham terdaftar di BEI via GetStockSummary (1 request = 960+ emiten lengkap).
     """
-    session = _get_session()
-    url = config.IDX_BASE_URL + config.IDX_SECURITIES_ENDPOINT
-
-    result = _request_json(session, url, params={})
-    rows = _extract_rows(result)
-
-    seen: set[str] = set()
-    all_securities: list[Security] = []
-    for row in rows:
-        code = str(row.get("Code", "")).strip()
-        name = str(row.get("Name", "")).strip()
-        shares = float(row.get("Shares", 0) or 0)
-        listing_date = str(row.get("ListingDate", "") or "")
-        listing_board = str(row.get("ListingBoard", "") or "")
-        if not code or code in seen:
-            continue
-        seen.add(code)
-        all_securities.append(Security(code=code, name=name, shares=shares, listing_date=listing_date, listing_board=listing_board))
-
-    return all_securities
+    from data_source.idx_trading import fetch_daily_stock_summary
+    
+    # Coba tanggal hari ini / kemarin / beberapa hari ke belakang
+    now = datetime.now()
+    securities = []
+    
+    for day_offset in range(5):
+        dt_str = (now - timedelta(days=day_offset)).strftime("%Y%m%d")
+        try:
+            raw_data = fetch_daily_stock_summary(dt_str)
+            if raw_data and len(raw_data) > 100:
+                seen = set()
+                for row in raw_data:
+                    code = str(row.get("StockCode") or row.get("Code") or "").strip()
+                    name = str(row.get("StockName") or row.get("Name") or "").strip()
+                    shares = float(row.get("ListedShares") or row.get("Shares") or 0.0)
+                    if code and code not in seen:
+                        seen.add(code)
+                        securities.append(Security(code=code, name=name, shares=shares))
+                if len(securities) > 100:
+                    log.info("Successfully fetched %d securities from IDX (%s)", len(securities), dt_str)
+                    return securities
+        except Exception as e:
+            log.warning("Failed fetching securities for date=%s: %s", dt_str, e)
+            
+    # Fallback jika IDX offline: load dari universe local
+    try:
+        from data_source.local_dataset import load_local_universe
+        uni = load_local_universe()
+        for c in uni.get("codes", []):
+            code_clean = c.decode() if isinstance(c, bytes) else str(c)
+            securities.append(Security(code=code_clean, name=code_clean))
+        if securities:
+            return securities
+    except Exception:
+        pass
+        
+    raise IdxClientError("Gagal mengambil daftar saham dari IDX maupun fallback lokal.")

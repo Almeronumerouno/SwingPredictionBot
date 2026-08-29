@@ -38,18 +38,18 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
   };
 
   return (
-    <div className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--color-surface)]">
+    <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-surface)] shadow-sm h-full flex flex-col justify-between">
       <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Recovery Setup</h3>
 
       {/* Mode toggle */}
-      <div className="flex rounded-md border border-[var(--color-border)] overflow-hidden mb-3">
+      <div className="flex rounded-lg border border-[var(--color-border)] bg-[var(--color-muted-bg)]/50 p-0.5 mb-3">
         <button
           onClick={() => setMode("auto")}
           aria-pressed={mode === "auto"}
-          className={`flex-1 h-8 text-xs font-medium transition-colors duration-150 cursor-pointer ${
+          className={`flex-1 h-7.5 text-xs font-semibold rounded-md transition-all duration-150 cursor-pointer ${
             mode === "auto"
-              ? "bg-[var(--color-text-primary)] text-[var(--color-bg)]"
-              : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]"
+              ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-xs border border-[var(--color-border)]"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
           Otomatis
@@ -57,10 +57,10 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
         <button
           onClick={() => setMode("manual")}
           aria-pressed={mode === "manual"}
-          className={`flex-1 h-8 text-xs font-medium transition-colors duration-150 cursor-pointer ${
+          className={`flex-1 h-7.5 text-xs font-semibold rounded-md transition-all duration-150 cursor-pointer ${
             mode === "manual"
-              ? "bg-[var(--color-text-primary)] text-[var(--color-bg)]"
-              : "text-[var(--color-text-secondary)] hover:bg-[var(--color-muted-bg)]"
+              ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-xs border border-[var(--color-border)]"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
           Manual
@@ -77,7 +77,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           </p>
           <button
             onClick={apply}
-            className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+            className="w-full h-8 text-xs font-semibold bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors duration-150 cursor-pointer shadow-xs"
           >
             Apply
           </button>
@@ -105,7 +105,7 @@ export default function RecoveryDropControl({ kode, dropPct }: { kode: string; d
           </p>
           <button
             onClick={apply}
-            className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+            className="w-full h-8 text-xs font-semibold bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors duration-150 cursor-pointer shadow-xs"
           >
             Apply
           </button>

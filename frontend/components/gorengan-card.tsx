@@ -2,9 +2,9 @@ import type { GorenganAnalysis } from "@/types/api";
 
 const levelConfig: Record<string, { color: string; bg: string; border: string; label: string }> = {
   LOW: { color: "text-[var(--color-up)]", bg: "bg-[var(--color-up-bg)]", border: "border-[var(--color-up)]/20", label: "Risiko Rendah" },
-  MEDIUM: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", label: "Waspada" },
-  HIGH: { color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200", label: "Risiko Tinggi" },
-  EXTREME: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200", label: "Sangat Berbahaya" },
+  MEDIUM: { color: "text-[var(--color-warning)]", bg: "bg-[var(--color-warning-bg)]", border: "border-[var(--color-warning)]/20", label: "Waspada" },
+  HIGH: { color: "text-[var(--color-warning)]", bg: "bg-[var(--color-warning-bg)]", border: "border-[var(--color-warning)]/20", label: "Risiko Tinggi" },
+  EXTREME: { color: "text-[var(--color-down)]", bg: "bg-[var(--color-down-bg)]", border: "border-[var(--color-down)]/20", label: "Sangat Berbahaya" },
 };
 
 const factorIcons: Record<string, React.ReactNode> = {

@@ -26,6 +26,11 @@
   /* Primary Brand / Neutral Action */
   --color-primary: #0F172A;        /* Deep Slate */
   --color-primary-hover: #1E293B;
+  --color-primary-fg: #FFFFFF;     /* Text on primary in light mode */
+  --color-btn-primary-bg: #0F172A;
+  --color-btn-primary-hover: #1E293B;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-border: #0F172A;
 
   /* Radius Scale */
   --radius-sm: 4px;
@@ -74,6 +79,11 @@ html.dark {
   /* Primary Brand / Neutral Action */
   --color-primary: #E2E8F0;
   --color-primary-hover: #CBD5E1;
+  --color-primary-fg: #0F172A;
+  --color-btn-primary-bg: #1E293B;
+  --color-btn-primary-hover: #334155;
+  --color-btn-primary-text: #F1F5F9;
+  --color-btn-primary-border: #334155;
 
   /* Shadows (much subtler in dark) */
   --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -111,7 +121,7 @@ body {
 }
 
 a {
-  color: var(--color-primary);
+  color: inherit;
   text-decoration: none;
 }
 

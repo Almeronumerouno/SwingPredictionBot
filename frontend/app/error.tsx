@@ -21,7 +21,7 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
 
       <button
         onClick={reset}
-        className="px-8 py-3 bg-[var(--color-text-primary)] text-[var(--color-bg)] font-bold rounded-xl hover:opacity-90 transition-opacity"
+        className="px-8 py-3 bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] border border-[var(--color-btn-primary-border)] font-bold rounded-xl transition-all shadow-xs cursor-pointer"
       >
         Coba Muat Ulang
       </button>

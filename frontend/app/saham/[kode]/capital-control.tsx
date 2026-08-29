@@ -35,7 +35,7 @@ export default function CapitalControl({ kode, capital }: { kode: string; capita
   };
 
   return (
-    <div className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--color-surface)]">
+    <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-surface)] shadow-sm h-full flex flex-col justify-between">
       <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Parameters</h3>
       <div className="space-y-3">
         <div>
@@ -62,7 +62,7 @@ export default function CapitalControl({ kode, capital }: { kode: string; capita
         </div>
         <button
           onClick={apply}
-          className="w-full h-8 text-xs font-medium bg-[var(--color-text-primary)] text-[var(--color-bg)] rounded-md hover:opacity-90 transition-opacity duration-150 cursor-pointer"
+          className="w-full h-8 text-xs font-semibold bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors duration-150 cursor-pointer shadow-xs"
         >
           Apply
         </button>

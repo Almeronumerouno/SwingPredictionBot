@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { ReadyToFlyScannerResponse } from "@/types/api";
 import { fetchReadyToFly } from "@/lib/api/readytofly";
 import DateSelector from "@/components/date-selector";
+import RealtimeClock from "@/components/realtime-clock";
 import ReadyToFlyTabs from "@/components/readytofly-tabs";
 
 export default async function ReadyToFlyPage({
@@ -37,6 +38,7 @@ export default async function ReadyToFlyPage({
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <RealtimeClock />
           <Suspense fallback={<div className="h-9 w-40 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/ready-to-fly" />
           </Suspense>
@@ -44,7 +46,7 @@ export default async function ReadyToFlyPage({
       </header>
 
       {error ? (
-        <div className="border border-amber-200 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-amber-800 mb-8">
+        <div className="border border-[var(--color-warning)]/20 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-[var(--color-warning)] mb-8">
           <p className="font-bold mb-1">Data Belum Tersedia</p>
           <p>{error}</p>
           <p className="mt-2 text-xs opacity-80">Lakukan scan dari halaman <Link href="/" className="underline font-bold">Dashboard</Link> terlebih dahulu.</p>

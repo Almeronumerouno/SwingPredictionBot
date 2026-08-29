@@ -4,6 +4,7 @@ import type { GainersResponse } from "@/types/api";
 import { fetchGainers } from "@/lib/api/gainers";
 import GainersTable from "@/components/gainers-table";
 import DateSelector from "@/components/date-selector";
+import RealtimeClock from "@/components/realtime-clock";
 
 export default async function TopGainersPage({
   searchParams,
@@ -28,6 +29,7 @@ export default async function TopGainersPage({
           <p className="text-[11px] sm:text-xs font-medium text-[var(--color-text-secondary)]">Saham dengan kenaikan tertinggi &middot; Bursa Efek Indonesia</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <RealtimeClock />
           <Suspense fallback={<div className="h-9 w-40 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/top-gainers" />
           </Suspense>
@@ -35,7 +37,7 @@ export default async function TopGainersPage({
       </header>
 
       {error ? (
-        <div className="border border-amber-200 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-amber-800">
+        <div className="border border-[var(--color-warning)]/20 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-[var(--color-warning)]">
           <p className="font-bold mb-1">Data Belum Tersedia</p>
           <p>{error}</p>
           <p className="mt-2 text-xs opacity-80">Lakukan scan dari halaman <Link href="/" className="underline font-bold">Dashboard</Link> terlebih dahulu.</p>

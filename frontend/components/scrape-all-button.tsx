@@ -154,7 +154,7 @@ function MarketChoiceModal({
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[var(--color-text-primary)]">Yahoo Finance</span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-up)]/10 text-[var(--color-up)]">
                       Real-Time
                     </span>
                   </div>
@@ -178,7 +178,7 @@ function MarketChoiceModal({
               >
                 {selectedSource === "idx" && (
                   <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-[var(--color-primary-fg)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -191,7 +191,7 @@ function MarketChoiceModal({
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[var(--color-text-primary)]">IDX (EOD)</span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
                       Pilih Tanggal
                     </span>
                   </div>
@@ -213,7 +213,7 @@ function MarketChoiceModal({
               <button
                 onClick={proceedToConfirm}
                 disabled={loading || !selectedSource}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                className="px-4 py-1.5 text-xs font-semibold text-[var(--color-btn-primary-text)] bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
                 Lanjut ke Konfirmasi
               </button>
@@ -225,10 +225,10 @@ function MarketChoiceModal({
           <>
             <div className="p-5">
               {selectedSource === "yahoo" ? (
-                <div className="rounded-md border border-emerald-200 bg-[var(--color-up-bg)] p-4">
+                <div className="rounded-md border border-[var(--color-up)]/30 bg-[var(--color-up-bg)] p-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[var(--color-text-primary)]">Yahoo Finance</span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-up)]/10 text-[var(--color-up)]">
                       Real-Time
                     </span>
                   </div>
@@ -301,7 +301,7 @@ function MarketChoiceModal({
                   >
                     <div className={`mt-0.5 rounded-full p-0.5 ${scanScope === "all" ? "text-emerald-500" : "text-transparent border border-[var(--color-border)]"}`}>
                       {scanScope === "all" && (
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                       )}
                     </div>
                     <div>
@@ -326,7 +326,7 @@ function MarketChoiceModal({
               <button
                 onClick={() => onConfirm(selectedSource, selectedSource === "idx" ? selectedDate : undefined, scanScope)}
                 disabled={loading || (selectedSource === "idx" && !selectedDate)}
-                className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                className="flex-1 px-4 py-2 text-xs font-semibold text-[var(--color-btn-primary-text)] bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
                 {loading ? "Scanning..." : "Konfirmasi & Scan"}
               </button>
@@ -404,11 +404,11 @@ export default function ScrapeAllButton() {
       <button
         onClick={() => setShowModal(true)}
         disabled={loading}
-        className="group h-9 px-3.5 inline-flex items-center gap-2 rounded-md text-xs font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.98] transition-all duration-150 disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 border border-slate-800"
+        className="group h-9 px-3.5 inline-flex items-center gap-2 rounded-lg text-xs font-semibold text-[var(--color-btn-primary-text)] bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] border border-[var(--color-btn-primary-border)] active:scale-[0.98] transition-all duration-150 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-btn-primary-border)]"
       >
         {loading ? (
           <>
-            <svg className="animate-spin -ml-0.5 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin -ml-0.5 h-3.5 w-3.5 text-[var(--color-btn-primary-text)]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
@@ -416,7 +416,7 @@ export default function ScrapeAllButton() {
           </>
         ) : (
           <>
-            <svg className="w-3.5 h-3.5 text-white transition-transform duration-500 ease-out group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 text-[var(--color-btn-primary-text)] transition-transform duration-500 ease-out group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             Scan Market

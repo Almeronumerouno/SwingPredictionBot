@@ -7,7 +7,7 @@ export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
   const isBuy = plan.direction === "BUY";
   
   return (
-    <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-surface)] shadow-sm">
+    <div className="border border-[var(--color-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-surface)] shadow-sm h-full flex flex-col justify-between">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Trading Plan</h3>
         <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${isBuy ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20"}`}>
@@ -49,7 +49,7 @@ export default function TradePlanCard({ plan }: { plan: TradePlanResponse }) {
           <span className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">{plan.lots} lot <span className="text-[var(--color-text-muted)] font-normal">({plan.shares} lbr)</span></span>
         </div>
         {plan.note && (
-          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium">
+          <div className="p-3 rounded-lg bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20 text-xs text-[var(--color-warning)] font-medium">
             {plan.note}
           </div>
         )}

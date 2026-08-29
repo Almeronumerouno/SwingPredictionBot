@@ -16,7 +16,7 @@ const HORIZON_LABELS: Record<number, string> = {
 
 const signalConfig: Record<string, { color: string; bg: string; border: string; label: string }> = {
   POTENTIAL: { color: "text-[var(--color-up)]", bg: "bg-[var(--color-up-bg)]", border: "border-[var(--color-up)]/20", label: "Berpotensi Recovery" },
-  WATCH: { color: "text-[var(--color-warning)]", bg: "bg-[var(--color-warning-bg)]", border: "border-amber-200", label: "Pantau" },
+  WATCH: { color: "text-[var(--color-warning)]", bg: "bg-[var(--color-warning-bg)]", border: "border-[var(--color-warning)]/20", label: "Pantau" },
   NO_SETUP: { color: "text-[var(--color-text-secondary)]", bg: "bg-[var(--color-muted-bg)]", border: "border-[var(--color-border)]", label: "Tidak Ada Setup" },
 };
 

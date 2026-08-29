@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { GorenganScannerResponse } from "@/types/api";
 import { fetchGorengan } from "@/lib/api/gorengan";
 import DateSelector from "@/components/date-selector";
+import RealtimeClock from "@/components/realtime-clock";
 import GorenganTabs from "@/components/gorengan-tabs";
 
 export default async function GorenganPage({
@@ -35,6 +36,7 @@ export default async function GorenganPage({
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <RealtimeClock />
           <Suspense fallback={<div className="h-9 w-40 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/gorengan" />
           </Suspense>
@@ -42,7 +44,7 @@ export default async function GorenganPage({
       </header>
 
       {error ? (
-        <div className="border border-amber-200 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-amber-800 mb-8">
+        <div className="border border-[var(--color-warning)]/20 bg-[var(--color-warning-bg)] rounded-lg px-5 py-4 text-sm text-[var(--color-warning)] mb-8">
           <p className="font-bold mb-1">Data Belum Tersedia</p>
           <p>{error}</p>
           <p className="mt-2 text-xs opacity-80">Lakukan scan dari halaman <Link href="/" className="underline font-bold">Dashboard</Link> terlebih dahulu.</p>

@@ -171,15 +171,15 @@ function DarkModeToggle() {
         <div className="flex items-center gap-2.5">
           {/* Icon: moon for dark, sun for light */}
           {isDark ? (
-            <svg className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-[18px] h-[18px] text-blue-400 group-hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           ) : (
-            <svg className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-[18px] h-[18px] text-amber-500 group-hover:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           )}
-          <span className="text-[13px] font-medium text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors">
+          <span className="text-[13px] font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-text-primary)] transition-colors">
             {isDark ? "Dark mode" : "Light mode"}
           </span>
         </div>
@@ -187,11 +187,11 @@ function DarkModeToggle() {
         {/* Toggle switch */}
         <div
           className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${
-            isDark ? "bg-[var(--color-primary)]" : "bg-[var(--color-border-strong)]"
+            isDark ? "bg-blue-600 shadow-inner" : "bg-slate-300"
           }`}
         >
           <div
-            className={`absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+            className={`absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-200 ease-out ${
               isDark ? "translate-x-[21px]" : "translate-x-[3px]"
             }`}
           />

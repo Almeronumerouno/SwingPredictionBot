@@ -6,8 +6,7 @@ import type { AnalisisResponse, HistoryResponse, RecoveryResponse } from "@/type
 import ScoreCard from "@/components/score-card";
 import TradePlanCard from "@/components/trade-plan-card";
 import PriceChart from "@/components/price-chart";
-import CapitalControl from "./capital-control";
-import RecoveryDropControl from "@/components/recovery-drop-control";
+import SimulationControls from "./simulation-controls";
 import RecoveryCard from "@/components/recovery-card";
 import BackButton from "@/components/back-button";
 import TechnicalIndicators from "@/components/technical-indicators";
@@ -98,7 +97,7 @@ export default async function SahamPage({
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{kode}</h1>
-                <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${rekomendasi === "BUY" ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : rekomendasi === "SELL" ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                <span className={`px-2 py-1 text-xs font-bold tabular-nums tracking-wide rounded border ${rekomendasi === "BUY" ? "bg-[var(--color-up-bg)] text-[var(--color-up)] border-[var(--color-up)]/20" : rekomendasi === "SELL" ? "bg-[var(--color-down-bg)] text-[var(--color-down)] border-[var(--color-down)]/20" : "bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning)]/20"}`}>
                   {rekomendasi}
                 </span>
               </div>
@@ -350,18 +349,21 @@ export default async function SahamPage({
         </div>
       )}
 
-      {/* Chart + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="lg:col-span-2 h-full">
-          <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden h-full min-h-[300px] sm:min-h-[400px]">
-            <PriceChart data={chartData} />
-          </div>
+      {/* Full-width TradingView Chart [===] */}
+      <div className="mb-6 sm:mb-8">
+        <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] shadow-sm overflow-hidden">
+          <PriceChart data={chartData} />
         </div>
-        <div className="space-y-5">
+      </div>
+
+      {/* 2 Balanced Cards Below Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8 items-stretch">
+        {/* Card 1: Trading Plan (60% width on desktop) */}
+        <div className="lg:col-span-3 h-full">
           {analisis.trade_plan ? (
             <TradePlanCard plan={analisis.trade_plan} />
           ) : (
-            <div className="border border-[var(--color-border)] rounded-xl p-6 bg-[var(--color-surface)] shadow-sm">
+            <div className="border border-[var(--color-border)] rounded-xl p-5 bg-[var(--color-surface)] shadow-sm h-full flex flex-col justify-center">
               <div className="flex flex-col items-center justify-center text-center py-4">
                 <div className="w-12 h-12 rounded-xl bg-[var(--color-muted-bg)] flex items-center justify-center mb-3">
                   <svg className="w-5 h-5 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -371,11 +373,17 @@ export default async function SahamPage({
               </div>
             </div>
           )}
-          <Suspense fallback={<div className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
-            <CapitalControl kode={kode} capital={sp.capital ? Number(sp.capital) : undefined} />
-          </Suspense>
-          <Suspense fallback={<div className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
-            <RecoveryDropControl kode={kode} dropPct={sp.drop_pct ? Number(sp.drop_pct) : undefined} />
+        </div>
+
+        {/* Card 2: Pengaturan Simulasi Terpadu (40% width on desktop) */}
+        <div className="lg:col-span-2 h-full">
+          <Suspense fallback={<div className="h-full min-h-[260px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
+            <SimulationControls
+              kode={kode}
+              capital={sp.capital ? Number(sp.capital) : undefined}
+              length={sp.length ? Number(sp.length) : undefined}
+              dropPct={sp.drop_pct ? Number(sp.drop_pct) : undefined}
+            />
           </Suspense>
         </div>
       </div>

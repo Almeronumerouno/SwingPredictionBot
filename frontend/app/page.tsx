@@ -5,6 +5,7 @@ import { fetchGorengan } from "@/lib/api/gorengan";
 import { fetchReadyToFly } from "@/lib/api/readytofly";
 import ScrapeAllButton from "@/components/scrape-all-button";
 import DateSelector from "@/components/date-selector";
+import RealtimeClock from "@/components/realtime-clock";
 import SignalScreener from "@/components/signal-screener";
 import AnimatedNumber from "@/components/animated-number";
 
@@ -204,6 +205,7 @@ export default async function DashboardPage({
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <RealtimeClock />
           <Suspense fallback={<div className="h-9 w-40 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] animate-pulse" />}>
             <DateSelector selected={date || ""} basePath="/" />
           </Suspense>

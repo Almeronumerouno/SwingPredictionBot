@@ -14,7 +14,7 @@ export default function NotFound() {
         404
       </h1>
 
-      <div className="w-12 h-[3px] bg-[var(--color-primary)] mb-8"></div>
+      <div className="w-12 h-[3px] bg-[var(--color-border-strong)] rounded-full mb-8"></div>
 
       <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] mb-3">
         Sepertinya kamu salah jalur
@@ -26,13 +26,16 @@ export default function NotFound() {
       <div className="flex flex-col sm:flex-row gap-3 justify-center w-full max-w-sm mx-auto">
         <Link
           href="/analisis"
-          className="flex-1 px-6 py-3 bg-[var(--color-primary)] !text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
+          style={{ color: "#FFFFFF" }}
+          className="flex-1 px-6 py-3 bg-[#0F172A] hover:bg-[#1E293B] dark:bg-[#1E293B] dark:hover:bg-[#334155] dark:border dark:border-[#334155] font-bold rounded-xl active:scale-[0.98] transition-all shadow-xs flex items-center justify-center cursor-pointer !text-white"
         >
-          Cari saham
+          <span style={{ color: "#FFFFFF" }} className="!text-white font-bold">
+            Cari saham
+          </span>
         </Link>
         <Link
           href="/"
-          className="flex-1 px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-bold rounded-xl hover:bg-[var(--color-muted-bg)] hover:text-[var(--color-text-primary)] active:scale-[0.98] transition-all"
+          className="flex-1 px-6 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-muted-bg)] font-bold rounded-xl active:scale-[0.98] transition-all shadow-xs flex items-center justify-center cursor-pointer"
         >
           Ke dashboard
         </Link>
