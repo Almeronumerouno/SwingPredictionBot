@@ -171,9 +171,9 @@ def build_parser():
     p_bt.add_argument(
         "--top", type=int, default=10, help="Top N stocks picked per session (default 10)"
     )
-    p_bt.add_argument("--stop-loss", type=float, default=None, help="Stop loss % e.g. 7.0 for -7%")
+    p_bt.add_argument("--stop-loss", type=float, default=None, help="Stop loss %% e.g. 7.0 for -7%%")
     p_bt.add_argument(
-        "--take-profit", type=float, default=None, help="Take profit % e.g. 15.0 for +15%"
+        "--take-profit", type=float, default=None, help="Take profit %% e.g. 15.0 for +15%%"
     )
 
     # 8. Knowledge Graph & UBO

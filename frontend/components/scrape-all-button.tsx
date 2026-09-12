@@ -58,7 +58,7 @@ function MarketChoiceModal({
 }: {
   loading: boolean;
   globalDate: string | null;
-  onConfirm: (source: "yahoo" | "idx", date?: string, scope?: "all" | "gainers") => void;
+  onConfirm: (source: "yahoo" | "idx", date?: string, scope?: "all" | "gainers", scheduledTimeStr?: string) => void;
   onCancel: () => void;
 }) {
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -69,6 +69,18 @@ function MarketChoiceModal({
     globalDate || todayStr
   );
   const [scanScope, setScanScope] = useState<"all" | "gainers">("all");
+  const [scheduledTime, setScheduledTime] = useState<string>("");
+
+  const now = new Date();
+  let isTimeInvalid = false;
+  if (scheduledTime) {
+    const [h, m] = scheduledTime.split(":").map(Number);
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target.getTime() <= now.getTime()) {
+      isTimeInvalid = true;
+    }
+  }
 
   function selectSource(source: "yahoo" | "idx") {
     if (source === "yahoo" && isPastDate) return; // histori cuma bisa via IDX
@@ -313,6 +325,32 @@ function MarketChoiceModal({
                   </button>
                 </div>
               </div>
+
+              {/* Pilihan Waktu Jadwal */}
+              <div className="mt-5 border-t border-[var(--color-border)] pt-4">
+                <label className="block text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">
+                  Jadwalkan Waktu (Opsional)
+                </label>
+                <input
+                  type="time"
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  className={`w-full h-10 px-3 text-xs font-semibold border rounded-md bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                    isTimeInvalid 
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      : "border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
+                  }`}
+                />
+                {isTimeInvalid ? (
+                  <p className="mt-2 text-[11px] font-medium text-red-500 leading-relaxed">
+                    Waktu yang dipilih sudah terlewat untuk hari ini.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-[11px] font-medium text-[var(--color-text-muted)] leading-relaxed">
+                    Biarkan kosong untuk scan sekarang. Jika diisi, scan akan otomatis berjalan pada waktu yang ditentukan (biarkan tab tetap buka).
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="px-5 pb-4 flex gap-2 border-t border-[var(--color-border)] pt-4">
@@ -324,11 +362,11 @@ function MarketChoiceModal({
                 Kembali
               </button>
               <button
-                onClick={() => onConfirm(selectedSource, selectedSource === "idx" ? selectedDate : undefined, scanScope)}
-                disabled={loading || (selectedSource === "idx" && !selectedDate)}
+                onClick={() => onConfirm(selectedSource, selectedSource === "idx" ? selectedDate : undefined, scanScope, scheduledTime)}
+                disabled={loading || (selectedSource === "idx" && !selectedDate) || isTimeInvalid}
                 className="flex-1 px-4 py-2 text-xs font-semibold text-[var(--color-btn-primary-text)] bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] border border-[var(--color-btn-primary-border)] rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
-                {loading ? "Scanning..." : "Konfirmasi & Scan"}
+                {loading ? "Scanning..." : scheduledTime ? "Jadwalkan Scan" : "Konfirmasi & Scan"}
               </button>
             </div>
           </>
@@ -346,13 +384,32 @@ export default function ScrapeAllButton() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
+  
+  const [scheduledTarget, setScheduledTarget] = useState<Date | null>(null);
+  const [scheduleInfo, setScheduleInfo] = useState<{source: "yahoo" | "idx", date?: string, scope: "all" | "gainers"} | null>(null);
+
   const router = useRouter();
 
   const dismissToast = useCallback(() => setToast(null), []);
 
-  async function handleConfirm(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all") {
+  useEffect(() => {
+    if (!scheduledTarget || !scheduleInfo) return;
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (now.getTime() >= scheduledTarget.getTime()) {
+        clearInterval(timer);
+        setScheduledTarget(null);
+        executeScan(scheduleInfo.source, scheduleInfo.date, scheduleInfo.scope);
+        setScheduleInfo(null);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [scheduledTarget, scheduleInfo]);
+
+  async function executeScan(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all") {
     setLoading(true);
-    setShowModal(false);
     try {
       const res = scope === "gainers" 
         ? await triggerScrape(source, date) 
@@ -372,6 +429,22 @@ export default function ScrapeAllButton() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  function handleConfirm(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all", scheduledTimeStr?: string) {
+    setShowModal(false);
+    
+    if (scheduledTimeStr) {
+      const [hours, minutes] = scheduledTimeStr.split(":").map(Number);
+      const target = new Date();
+      target.setHours(hours, minutes, 0, 0);
+
+      setScheduledTarget(target);
+      setScheduleInfo({ source, date, scope });
+      setToast({ message: `Scan dijadwalkan pada ${target.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`, type: "success" });
+    } else {
+      executeScan(source, date, scope);
     }
   }
 
@@ -402,7 +475,15 @@ export default function ScrapeAllButton() {
           document.body
         )}
       <button
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          if (scheduledTarget) {
+            setScheduledTarget(null);
+            setScheduleInfo(null);
+            setToast({ message: "Jadwal scan dibatalkan", type: "success" });
+          } else {
+            setShowModal(true);
+          }
+        }}
         disabled={loading}
         className="group h-9 px-3.5 inline-flex items-center gap-2 rounded-lg text-xs font-semibold text-[var(--color-btn-primary-text)] bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] border border-[var(--color-btn-primary-border)] active:scale-[0.98] transition-all duration-150 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-btn-primary-border)]"
       >
@@ -413,6 +494,13 @@ export default function ScrapeAllButton() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
             Scanning...
+          </>
+        ) : scheduledTarget ? (
+          <>
+            <svg className="w-3.5 h-3.5 text-[var(--color-btn-primary-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Batal Scan ({scheduledTarget.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })})
           </>
         ) : (
           <>

@@ -25,8 +25,6 @@ cache/
 backend/cache/
 
 # Experimental / backtest sampah — jangan ke-push
-backend/bsjp_*.py
-backend/_bsjp_*.py
 backend/_ara_*.py
 backend/_ara_*.txt
 backend/daily_trade_*.py
@@ -46,9 +44,6 @@ backend/streak_*.py
 backend/eval_*.py
 backend/list_*.py
 backend/aug24_*.json
-backend/bsjp_*.txt
-backend/bsjp_*.md
-backend/data/bsjp_*.json
 backend/_tmp_*.json
 backend/_tmp_*.txt
 backend/_v3_*.json
