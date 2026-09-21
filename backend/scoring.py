@@ -28,6 +28,8 @@ def _momentum_score(rsi: np.ndarray, mfi: np.ndarray, adx: np.ndarray) -> np.nda
 
 
 def _volume_score(rvol: np.ndarray, close: np.ndarray) -> np.ndarray:
+    if len(close) == 0:
+        return np.empty(0)
     sign = np.where(close > np.roll(close, 1), 1.0, -1.0)
     sign[0] = 0.0
     clamped = _clip(rvol - 1.0, 0.0, 1.0)
@@ -133,17 +135,36 @@ def confidence_from_score(
 
 def _price_stagnation_gate(high: np.ndarray, low: np.ndarray, close: np.ndarray) -> bool:
     n = len(close)
-    if n < config.STAGNATION_LOOKBACK:
+    if n < config.STAGNATION_LOOKBACK or len(high) < config.STAGNATION_LOOKBACK or len(low) < config.STAGNATION_LOOKBACK:
         return False
     recent_high = float(np.nanmax(high[-config.STAGNATION_LOOKBACK:]))
     recent_low = float(np.nanmin(low[-config.STAGNATION_LOOKBACK:]))
-    if recent_high == recent_low or close[-1] == 0:
+    if recent_high == recent_low or close[-1] == 0 or np.isnan(close[-1]):
         return True
     range_pct = (recent_high - recent_low) / close[-1]
     return range_pct < config.STAGNATION_RANGE_PCT
 
 
 def compute_score(data: dict) -> dict:
+    required_keys = [
+        "close", "rsi", "atr", "adx", "mfi", "rvol",
+        "ema_fast", "ema_slow", "donchian_upper", "donchian_lower",
+    ]
+    if not data or not isinstance(data, dict):
+        return {
+            "valid": False, "swing_score": None, "components": None,
+            "recommendation": None, "confidence": None, "risk_level": None,
+            "prob_continuation": None, "prob_reversal": None, "regime": "sideways",
+        }
+    for req in required_keys:
+        val = data.get(req)
+        if val is None or len(val) == 0:
+            return {
+                "valid": False, "swing_score": None, "components": None,
+                "recommendation": None, "confidence": None, "risk_level": None,
+                "prob_continuation": None, "prob_reversal": None, "regime": "sideways",
+            }
+
     close = data["close"]
     rsi = data["rsi"]
     atr_arr = data["atr"]

@@ -4,7 +4,7 @@
 |------|--------|
 | **Modul** | `backend/backtest.py`, `backend/backtest_calibrate.py` |
 | **Versi** | v0.2.0 |
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Ringkasan
 
@@ -157,13 +157,13 @@ Concat **semua** OOS trade dari seluruh (saham × window) jadi 1 equity curve:
 
 | Issue | Impact | Status |
 |-------|--------|--------|
-| Walk-forward belum ada | Parameter overfit ke periode test | **Sprint 1A** |
-| Fee model sederhana | Return overstate ~2-5% | Belum dijadwalkan |
+| Walk-forward belum ada | Parameter overfit ke periode test | **✅ Selesai** (`walkforward.py`) |
+| Fee model sederhana | Return overstate ~2-5% | **✅ Selesai** (`FEE_BUY_PCT=0.18`, `FEE_SELL_PCT=0.28`) |
 | S/R look-ahead minor | S/R pakai full history | PIT di backtest |
-| Short selling bias | IDX retail tidak bisa short | **Sprint 1D** |
-| R:R 0.83 | EV rendah (0.04 ATR/trade) | **Sprint 1B** |
-| No exit flexibility | Satu TP/SL untuk semua trade | **Sprint 1C** |
-| No regime filter | Performa tidak konsisten | **Sprint 3** |
+| Short selling bias | IDX retail tidak bisa short | **✅ Tested** (SELL 58% WR, kept as entry signal) |
+| R:R 0.83 | EV rendah (0.04 ATR/trade) | **Ditangguhkan** (TP 3.0 belum terbukti OOS) |
+| No exit flexibility | Satu TP/SL untuk semua trade | **✅ Tested** (breakeven 1.0 ATR degrades WR, disabled) |
+| No regime filter | Performa tidak konsisten | **✅ Selesai** (`regime.py` — SMA200+ADX) |
 
 ## 11. Roadmap Sprint
 
@@ -183,5 +183,5 @@ Concat **semua** OOS trade dari seluruh (saham × window) jadi 1 equity curve:
 - [ ] **Multiple timeframe filter** — weekly trend confirmation
 - [ ] **Monte Carlo simulation** — distribusi return estimasi
 - [ ] **Deflated Sharpe Ratio** — overfit detection
-- [ ] **Full fee & slippage modeling** — broker 0.15-0.35% round trip
+- [x] **Fee modeling** — `FEE_BUY_PCT=0.18%`, `FEE_SELL_PCT=0.28%` (asimetris, termasuk PPh Final 0.1%)
 - [ ] **PIT S/R levels** — point-in-time di backtest

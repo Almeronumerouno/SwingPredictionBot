@@ -9,6 +9,9 @@ import {
   HistogramSeries,
   LineStyle,
   type IChartApi,
+  type CandlestickData,
+  type SingleValueData,
+  type Time,
 } from "lightweight-charts";
 import type { Candle } from "@/types/api";
 import { calculateRSI, calculateMACD } from "@/lib/indicators";
@@ -90,7 +93,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         wickDownColor: "#EF4444",
         wickUpColor: "#10B981",
       });
-      candleSeries.setData(data as any);
+      candleSeries.setData(data as unknown as CandlestickData<Time>[]);
       charts.push(priceChart);
     }
 
@@ -132,7 +135,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         lastValueVisible: false,
         crosshairMarkerVisible: false,
       });
-      zeroLine.setData(data.map((d) => ({ time: d.time as any, value: 0 })));
+      zeroLine.setData(data.map((d) => ({ time: d.time as Time, value: 0 })));
 
       // MACD Histogram
       const histSeries = macdChart.addSeries(HistogramSeries, {
@@ -140,7 +143,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         priceLineVisible: false,
         lastValueVisible: false,
       });
-      histSeries.setData(macdData.histogram as any);
+      histSeries.setData(macdData.histogram as unknown as SingleValueData[]);
 
       // MACD Fast Line (Blue)
       const macdSeries = macdChart.addSeries(LineSeries, {
@@ -149,7 +152,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         priceLineVisible: false,
         lastValueVisible: false,
       });
-      macdSeries.setData(macdData.macdLine as any);
+      macdSeries.setData(macdData.macdLine as unknown as SingleValueData[]);
 
       // Signal Line (Amber)
       const signalSeries = macdChart.addSeries(LineSeries, {
@@ -158,7 +161,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         priceLineVisible: false,
         lastValueVisible: false,
       });
-      signalSeries.setData(macdData.signalLine as any);
+      signalSeries.setData(macdData.signalLine as unknown as SingleValueData[]);
 
       charts.push(macdChart);
     }
@@ -197,7 +200,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         lastValueVisible: false,
         crosshairMarkerVisible: false,
       });
-      line70.setData(data.map((d) => ({ time: d.time as any, value: 70 })));
+      line70.setData(data.map((d) => ({ time: d.time as Time, value: 70 })));
 
       // Guide line 50 (Middle)
       const line50 = rsiChart.addSeries(LineSeries, {
@@ -208,7 +211,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         lastValueVisible: false,
         crosshairMarkerVisible: false,
       });
-      line50.setData(data.map((d) => ({ time: d.time as any, value: 50 })));
+      line50.setData(data.map((d) => ({ time: d.time as Time, value: 50 })));
 
       // Guide line 30 (Oversold - Emerald/Green)
       const line30 = rsiChart.addSeries(LineSeries, {
@@ -219,7 +222,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         lastValueVisible: false,
         crosshairMarkerVisible: false,
       });
-      line30.setData(data.map((d) => ({ time: d.time as any, value: 30 })));
+      line30.setData(data.map((d) => ({ time: d.time as Time, value: 30 })));
 
       // RSI Main Line (Purple/Indigo)
       const rsiSeries = rsiChart.addSeries(LineSeries, {
@@ -228,7 +231,7 @@ export default function PriceChart({ data }: PriceChartProps) {
         priceLineVisible: false,
         lastValueVisible: true,
       });
-      rsiSeries.setData(rsiData as any);
+      rsiSeries.setData(rsiData as unknown as SingleValueData[]);
 
       charts.push(rsiChart);
     }

@@ -15,7 +15,10 @@ import json
 
 import numpy as np
 
-from sklearn.metrics import roc_auc_score
+try:
+    from sklearn.metrics import roc_auc_score
+except ImportError:
+    roc_auc_score = None
 
 import config as CFG
 from backtest import BacktestConfig, run_backtest
@@ -248,10 +251,10 @@ def run_walk_forward(
             ) if oos.total_trades else None
             ys = [1.0 if t.return_pct > 0 else 0.0 for t in oos.trades]
             scores = [t.entry_score for t in oos.trades]
-            if len(set(ys)) == 2 and len(scores) >= 4:
+            if roc_auc_score is not None and len(set(ys)) == 2 and len(scores) >= 4:
                 try:
                     auc = round(roc_auc_score(ys, scores), 4)
-                except ValueError:
+                except Exception:
                     auc = None
         results.append(WFResult(
             code=code,

@@ -16,10 +16,18 @@ import DownloadPdfButton from "@/components/download-pdf-button";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
-const fmtDate = (d: string) => {
-  const [y, m, day] = d.split("-");
+const fmtDate = (d?: string) => {
+  if (!d || typeof d !== "string") return "-";
+  const parts = d.split("-");
+  if (parts.length < 3) return d;
+  const [y, m, day] = parts;
+  const dayNum = parseInt(day, 10);
+  const mNum = parseInt(m, 10);
   const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-  return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
+  if (isNaN(dayNum) || isNaN(mNum) || mNum < 1 || mNum > 12) {
+    return d;
+  }
+  return `${dayNum} ${months[mNum - 1]} ${y}`;
 };
 const fmtTime = (iso?: string, delayed?: boolean) => {
   if (!iso) return "";

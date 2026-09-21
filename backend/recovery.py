@@ -35,8 +35,8 @@ import hashlib
 import math
 import os
 import json
+import sys
 
-import numpy as np
 from typing import Optional
 
 import numpy as np
@@ -652,7 +652,7 @@ def detect_accumulation(bars: list, apply_streak_gate: bool = False) -> dict:
             continue
         else:
             continue
-        heavy[i] = volume[i] >= config.ACCUM_HEAVY_RVOL * base
+        heavy[i] = (base > 0 and volume[i] > 0 and volume[i] >= config.ACCUM_HEAVY_RVOL * base)
 
     ara_meta = {
         "prev_ara_date": str(bars[prev_ara_idx].date)[:10] if prev_ara_idx is not None else None,

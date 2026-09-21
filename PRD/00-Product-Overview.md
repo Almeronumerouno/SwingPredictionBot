@@ -5,7 +5,7 @@
 | **Product Name** | Swingbot IDX |
 | **Version** | 0.3.0-wip |
 | **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Ringkasan
 
@@ -73,12 +73,12 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 
 | Sprint | Item | Status |
 |--------|------|--------|
-| S1A | Walk-forward harness skeleton | **Belum** |
-| S1B | Fix R:R — TP multiplier 3.0 | **Belum** |
-| S1C | Breakeven stop (1.0 ATR) | **Belum** |
-| S1D | Long-only mode (SELL advisory) | **Belum** |
-| S2 | Rekonsiliasi sizing + validasi OOS | **Belum** |
-| S3 | Regime detection + adaptive weights | **Belum** |
+| S1A | Walk-forward harness skeleton | **✅ Selesai** (`walkforward.py`, 461 baris, fully functional) |
+| S1B | Fix R:R — TP multiplier 3.0 | **Ditangguhkan** (baseline 2.5 dipertahankan, belum ada bukti OOS 3.0 lebih baik) |
+| S1C | Breakeven stop (1.0 ATR) | **✅ Tested & Disabled** (degrades TP_HIT & WR; tested 1.0/1.2/1.5/2.0) |
+| S1D | Long-only mode (SELL advisory) | **✅ Tested & Kept Off** (SELL validated 58% WR — tetap aktif sebagai entry signal) |
+| S2 | Rekonsiliasi sizing + validasi OOS | **✅ Selesai** (reconciled to all-in, `POSITION_SIZING_MODE="all_in"`) |
+| S3 | Regime detection + adaptive weights | **✅ Selesai** (`regime.py` — SMA200+ADX, 3 profiles, adaptive weights/sizing) |
 | S4+ | Scale-out, trailing, ML | **Ditunda** |
 
 ## 7. Hasil Backtest v0.2.0 (Baseline)
@@ -115,7 +115,7 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 ## 8. Catatan Penting
 
 - **BUY belum tervalidasi** edge independen lintas rezim (bullish WR 70.6% → bearish 27.3%)
-- **SELL tervalidasi** (~58% WR konsisten 2 rezim) — long-only mode aktif secara default
+- **SELL tervalidasi** (~58% WR konsisten 2 rezim) — long-only mode tersedia tapi sengaja OFF (SELL tetap entry signal)
 - **Micro-cap gainers tidak cocok** — sistem optimal di saham likuid mid-big cap
-- **Fees & slippage belum dimodelkan** — return overstate ~2-5%
-- **Walk-forward validation adalah prasyarat** untuk semua perubahan parameter baru — mencegah overfitting bertumpuk
+- **Fees sudah dimodelkan** — `FEE_BUY_PCT=0.18%`, `FEE_SELL_PCT=0.28%` (termasuk PPh Final 0.1%)
+- **Walk-forward validation sudah tersedia** (`walkforward.py`) — prasyarat untuk semua perubahan parameter baru

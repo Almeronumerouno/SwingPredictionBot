@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 export default function RealtimeClock() {
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [timeStr, setTimeStr] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    setMounted(true);
-
     const updateClock = () => {
       const now = new Date();
 

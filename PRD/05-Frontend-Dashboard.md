@@ -6,16 +6,20 @@
 | **Chart** | lightweight-charts 5.2.0 |
 | **CSS** | Tailwind CSS 4.3.3 |
 | **Font** | Inter (Google Fonts) |
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Halaman
 
 | Route | Halaman | Status |
 |-------|---------|--------|
-| `/` | Dashboard — Top Gainers overview + signal badges | ✅ |
-| `/saham/[kode]` | Detail Saham — Score, chart, trade plan, indicators | ✅ |
+| `/` | Dashboard — Top Gainers overview + signal screener | ✅ |
+| `/saham/[kode]` | Detail Saham — Score, chart, trade plan, recovery, indicators | ✅ |
 | `/analisis` | Analisis — Form input kode saham | ✅ |
 | `/top-gainers` | Full Gainers List | ✅ |
+| `/ready-to-fly` | Ready-to-Fly Scanner (Akumulasi post-ARA) | ✅ |
+| `/gorengan` | Gorengan Risk Scanner | ✅ |
+| `/ai-trade` | AI Trade Strategy & Multi-Agent Signals | ✅ |
+| `/login`, `/register`, `/profile` | User Authentication & Profile | ✅ |
 
 ## 2. Komponen
 
@@ -86,15 +90,15 @@
 | Gorengan Score | GorenganCard | Detail |
 
 ## 6. Missing Features
-
-| Fitur | Status | Prioritas |
-|-------|--------|-----------|
+ 
+| Fitur | Status | Prioritas / Catatan |
+|-------|--------|---------------------|
 | Dark Mode | ❌ | Medium |
-| Search / Filter gainers | ❌ | Medium |
-| Sorting gainers table | ❌ | Low |
+| Search / Filter gainers | ✅ | Selesai (`components/signal-screener.tsx`) |
+| Sorting gainers table | ✅ | Selesai (`components/signal-screener.tsx`) |
+| Export PDF laporan | ✅ | Selesai (`components/download-pdf-button.tsx` via jspdf) |
 | Auto-refresh scrape | ❌ | Low |
-| Export PDF laporan | ❌ | Low |
-| Loading skeleton halus | ✅ | — |
+| Loading skeleton halus | ✅ | Selesai |
 
 ## 7. Performance Targets
 

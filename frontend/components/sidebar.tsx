@@ -3,7 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback, useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 const THEME_KEY = "swingbot-theme";
 
@@ -103,37 +105,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 /* ── Dark Mode Toggle ── */
 function DarkModeToggle() {
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Read persisted preference on mount
-  useEffect(() => {
-    setMounted(true);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === "undefined") return false;
     try {
       const saved = localStorage.getItem(THEME_KEY);
-      if (saved === "dark") {
-        setIsDark(true);
-        document.documentElement.classList.add("dark");
-      } else if (saved === "light") {
-        setIsDark(false);
-        document.documentElement.classList.remove("dark");
-      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        setIsDark(true);
-        document.documentElement.classList.add("dark");
-      }
+      if (saved === "dark") return true;
+      if (saved === "light") return false;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
     } catch {
-      // localStorage unavailable
+      return false;
     }
-  }, []);
+  });
+
+  // Synchronize DOM class with state
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
 
   const toggle = useCallback(() => {
     setIsDark((prev) => {
       const next = !prev;
-      if (next) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
       try {
         localStorage.setItem(THEME_KEY, next ? "dark" : "light");
       } catch {

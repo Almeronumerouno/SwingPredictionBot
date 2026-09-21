@@ -105,6 +105,7 @@ class RawIndicatorsResponse(BaseModel):
     resistance: float | None
     fibonacci: dict[str, float] | None
     candlestick_patterns: list[str]
+    pattern_candles: list[dict] | None = None
 
 
 class GorenganFactors(BaseModel):
@@ -297,7 +298,7 @@ class RecoveryResponse(BaseModel):
     ref_days: int | None = None
     last_updated: str
     distance_pct: float | None
-    drop_pct: float
+    drop_pct: float | None = None
     drop_source: str
     in_setup: bool
     gbm: RecoveryGbm | None = None          # DEPRECATED — selalu None
@@ -675,6 +676,20 @@ def _market_is_open() -> bool:
     return open_time <= now < close_time
 
 
+def validate_query_date(target_date: str | None) -> str | None:
+    """Validasi format tanggal kalender ISO (YYYY-MM-DD)."""
+    if not target_date:
+        return None
+    try:
+        date.fromisoformat(target_date)
+        return target_date
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Format tanggal tidak valid",
+        )
+
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
@@ -778,6 +793,7 @@ def trigger_scrape_all(
     1x snapshot IDX + 1x fetch bars per saham => Top Gainers + Gorengan + Ready To Fly.
     Jadi tidak lagi 3x fetch hampir ~900-an saham (2.700 request -> ~900 request).
     """
+    validate_query_date(date)
     try:
         result = run_scan_all(target_date=date, force_source=source)
         return result
@@ -791,6 +807,7 @@ def trigger_scrape(
     source: str | None = Query(None, pattern=r"^(yahoo|idx)$"),
     date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
+    validate_query_date(date)
     try:
         securities = get_or_fetch_securities_list()
         gainers = scan_top_gainers(securities, force_source=source, target_date=date)
@@ -807,13 +824,14 @@ def trigger_scrape(
 
 @app.get("/gainers", response_model=GainersResponse)
 def get_gainers(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    validate_query_date(date)
     try:
         cached = get_cached_gainers(for_date=date)
     except Exception as e:
-        logging.error("Gagal baca cache gainers: %s", e)
-        raise HTTPException(status_code=500, detail="Gagal membaca data gainers.")
+        logging.warning("Gagal baca cache gainers: %s", e)
+        cached = None
 
-    if cached is None:
+    if not cached or not cached.get("data"):
         label = date or "hari ini"
         raise HTTPException(
             status_code=404,
@@ -839,6 +857,7 @@ def get_analisis(
     capital: float = Query(config.DEFAULT_CAPITAL, gt=0),
     date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
+    validate_query_date(date)
     kode = kode.strip().upper()
 
     securities = get_or_fetch_securities_list()
@@ -872,6 +891,7 @@ def get_history(
     length: int = Query(config.HISTORY_LOOKBACK_DAYS, gt=0, le=config.MAX_HISTORY_QUERY_DAYS),
     date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
+    validate_query_date(date)
     kode = kode.strip().upper()
 
     securities = get_or_fetch_securities_list()
@@ -881,7 +901,13 @@ def get_history(
             detail=f"Kode saham {kode} tidak ditemukan di daftar efek IDX.",
         )
 
-    bars = fetch_trading_info(kode, length=length, target_date=date)
+    try:
+        bars = fetch_trading_info(kode, length=length, target_date=date)
+    except (YahooClientError, IdxTradingError) as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Gagal ambil data historis {kode}: {e}",
+        )
 
     if not bars:
         raise HTTPException(
@@ -910,6 +936,7 @@ def get_recovery(
     ref_days = target acuan dalam hari trading (1 = previous close).
     Hanya relevan saat harga di bawah harga acuan.
     """
+    validate_query_date(date)
     kode = kode.strip().upper()
 
     securities = get_or_fetch_securities_list()
@@ -937,6 +964,7 @@ def trigger_scrape_gorengan(date: str | None = Query(None, pattern=r"^\d{4}-\d{2
     Trigger scan seluruh bursa untuk mendeteksi saham gorengan.
     Proses ini memakan waktu beberapa menit.
     """
+    validate_query_date(date)
     try:
         results = scan_gorengan(target_date=date)
         return {"status": "success", "count": len(results), "message": "Scrape gorengan selesai."}
@@ -950,34 +978,47 @@ def get_gorengan(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"))
     """
     Mengambil data saham gorengan yang sudah di-scrape hari ini atau tanggal tertentu.
     """
-    cached = get_cached_gorengan(for_date=date)
-    if not cached:
+    validate_query_date(date)
+    try:
+        cached = get_cached_gorengan(for_date=date)
+    except Exception as e:
+        logging.warning("Gagal baca cache gorengan: %s", e)
+        cached = None
+
+    if cached is None or "data" not in cached:
         raise HTTPException(
             status_code=404,
             detail="Data belum discrape hari ini. Silakan klik tombol 'Scrape Gorengan' terlebih dahulu.",
         )
 
-    return {
-        "scraped_at": cached["scraped_at"],
-        "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
-        "count": len(cached["data"]),
-        "data": [
-            {
-                "code": e.code,
-                "name": e.name,
-                "close": e.close,
-                "pct_change": e.pct_change,
-                "volume": e.volume,
-                "value": e.value,
-                "frequency": e.frequency,
-                "gorengan_score": e.gorengan_score,
-                "gorengan_level": e.gorengan_level,
-                "factors": e.factors,
-                "warnings": e.warnings,
-            }
-            for e in cached["data"]
-        ],
-    }
+    try:
+        return {
+            "scraped_at": cached.get("scraped_at", ""),
+            "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
+            "count": len(cached.get("data", [])),
+            "data": [
+                {
+                    "code": getattr(e, "code", e.get("code") if isinstance(e, dict) else ""),
+                    "name": getattr(e, "name", e.get("name") if isinstance(e, dict) else ""),
+                    "close": getattr(e, "close", e.get("close") if isinstance(e, dict) else 0.0),
+                    "pct_change": getattr(e, "pct_change", e.get("pct_change") if isinstance(e, dict) else 0.0),
+                    "volume": getattr(e, "volume", e.get("volume") if isinstance(e, dict) else 0.0),
+                    "value": getattr(e, "value", e.get("value") if isinstance(e, dict) else 0.0),
+                    "frequency": getattr(e, "frequency", e.get("frequency") if isinstance(e, dict) else 0.0),
+                    "gorengan_score": getattr(e, "gorengan_score", e.get("gorengan_score") if isinstance(e, dict) else 0.0),
+                    "gorengan_level": getattr(e, "gorengan_level", e.get("gorengan_level") if isinstance(e, dict) else "LOW"),
+                    "factors": getattr(e, "factors", e.get("factors") if isinstance(e, dict) else {}),
+                    "warnings": getattr(e, "warnings", e.get("warnings") if isinstance(e, dict) else []),
+                }
+                for e in cached.get("data", [])
+            ],
+        }
+    except Exception as e:
+        logging.warning("Data cache gorengan rusak atau tidak valid: %s", e)
+        raise HTTPException(
+            status_code=404,
+            detail="Data cache gorengan rusak atau tidak valid.",
+        )
 
 
 @app.post("/scrape/readytofly")
@@ -986,6 +1027,7 @@ def trigger_scrape_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d
     Trigger scan seluruh bursa untuk mendeteksi saham siap terbang (akumulasi post-ARA).
     Proses ini memakan waktu beberapa menit.
     """
+    validate_query_date(date)
     try:
         results = scan_ready_to_fly(target_date=date)
         count_ready = sum(1 for r in results if r.status == "ready")
@@ -1006,62 +1048,83 @@ def get_readytofly(date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"
     """
     Mengambil data saham ready-to-fly yang sudah di-scan.
     """
-    cached = get_cached_ready_to_fly(for_date=date)
-    if not cached:
+    validate_query_date(date)
+    try:
+        cached = get_cached_ready_to_fly(for_date=date)
+    except Exception as e:
+        logging.warning("Gagal baca cache ready-to-fly: %s", e)
+        cached = None
+
+    if cached is None or "data" not in cached:
         raise HTTPException(
             status_code=404,
             detail="Data belum discan. Silakan klik tombol 'Scan Ready To Fly' terlebih dahulu.",
         )
 
-    entries = cached["data"]
-    count_ready = sum(1 for e in entries if e.status == "ready")
-    count_almost = sum(1 for e in entries if e.status == "almost")
+    try:
+        entries = cached.get("data", [])
 
-    return {
-        "scraped_at": cached["scraped_at"],
-        "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
-        "count_ready": count_ready,
-        "count_almost": count_almost,
-        "data": [
-            {
-                "code": e.code,
-                "name": e.name,
-                "close": e.close,
-                "pct_change": e.pct_change,
-                "status": e.status,
-                "density_pct": e.density_pct,
-                "k_heavy": e.k_heavy,
-                "window_days": e.window_days,
-                "ara_date": e.ara_date,
-                "ara_ref_price": e.ara_ref_price,
-                # P6.7 (C14): alias user-facing
-                "large_upmove_date": e.ara_date,
-                "large_upmove_ref_price": e.ara_ref_price,
-                "distance_pct": e.distance_pct,
-                "net_dist": e.net_dist,
-                "net_dist_heavy": e.net_dist_heavy,
-                "acc_density": e.acc_density,
-                "post_ara_decay": e.post_ara_decay,
-                "strength": e.strength,
-                "adv_vol_20": e.adv_vol_20,
-                "adv_val_20": e.adv_val_20,
-                "liquidity_ok": e.liquidity_ok,
-                "liquidity_prima": e.liquidity_prima,
-                "sma_gap_pct": e.sma_gap_pct,
-                "sma20": e.sma20,
-                "state_ma20": e.state_ma20,
-                "max_rvol": e.max_rvol,
-                "gates": e.gates,
-                "note": e.note,
-                "reason": e.reason,
-                "post_ara_volume": e.post_ara_volume,
-                "post_ara_value": e.post_ara_value,
-                "vcp_ratio": e.vcp_ratio,
-                "dryup_ratio": e.dryup_ratio,
-                "vcp_ok": e.vcp_ok,
-                "dryup_ok": e.dryup_ok,
-            }
-            for e in entries
-        ],
-    }
+        def _g(obj, attr, default=None):
+            if hasattr(obj, attr):
+                return getattr(obj, attr)
+            if isinstance(obj, dict):
+                return obj.get(attr, default)
+            return default
+
+        count_ready = sum(1 for e in entries if _g(e, "status") == "ready")
+        count_almost = sum(1 for e in entries if _g(e, "status") == "almost")
+
+        return {
+            "scraped_at": cached.get("scraped_at", ""),
+            "date": date or datetime.now(ZoneInfo("Asia/Jakarta")).date().isoformat(),
+            "count_ready": count_ready,
+            "count_almost": count_almost,
+            "data": [
+                {
+                    "code": _g(e, "code", ""),
+                    "name": _g(e, "name", ""),
+                    "close": _g(e, "close", 0.0),
+                    "pct_change": _g(e, "pct_change", 0.0),
+                    "status": _g(e, "status", "almost"),
+                    "density_pct": _g(e, "density_pct"),
+                    "k_heavy": _g(e, "k_heavy", 0),
+                    "window_days": _g(e, "window_days", 0),
+                    "ara_date": _g(e, "ara_date"),
+                    "ara_ref_price": _g(e, "ara_ref_price"),
+                    # P6.7 (C14): alias user-facing
+                    "large_upmove_date": _g(e, "large_upmove_date", _g(e, "ara_date")),
+                    "large_upmove_ref_price": _g(e, "large_upmove_ref_price", _g(e, "ara_ref_price")),
+                    "distance_pct": _g(e, "distance_pct"),
+                    "net_dist": _g(e, "net_dist"),
+                    "net_dist_heavy": _g(e, "net_dist_heavy"),
+                    "acc_density": _g(e, "acc_density"),
+                    "post_ara_decay": _g(e, "post_ara_decay"),
+                    "strength": _g(e, "strength"),
+                    "adv_vol_20": _g(e, "adv_vol_20"),
+                    "adv_val_20": _g(e, "adv_val_20"),
+                    "liquidity_ok": _g(e, "liquidity_ok", True),
+                    "liquidity_prima": _g(e, "liquidity_prima", False),
+                    "sma_gap_pct": _g(e, "sma_gap_pct"),
+                    "sma20": _g(e, "sma20"),
+                    "state_ma20": _g(e, "state_ma20"),
+                    "max_rvol": _g(e, "max_rvol"),
+                    "gates": _g(e, "gates"),
+                    "note": _g(e, "note"),
+                    "reason": _g(e, "reason"),
+                    "post_ara_volume": _g(e, "post_ara_volume"),
+                    "post_ara_value": _g(e, "post_ara_value"),
+                    "vcp_ratio": _g(e, "vcp_ratio"),
+                    "dryup_ratio": _g(e, "dryup_ratio"),
+                    "vcp_ok": _g(e, "vcp_ok", False),
+                    "dryup_ok": _g(e, "dryup_ok", False),
+                }
+                for e in entries
+            ],
+        }
+    except Exception as e:
+        logging.warning("Data cache ready-to-fly rusak atau tidak valid: %s", e)
+        raise HTTPException(
+            status_code=404,
+            detail="Data cache ready-to-fly rusak atau tidak valid.",
+        )
 

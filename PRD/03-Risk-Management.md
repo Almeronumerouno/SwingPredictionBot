@@ -4,7 +4,7 @@
 |------|--------|
 | **Modul** | `backend/risk.py` |
 | **Versi** | v0.4.0-wip |
-| **Last Updated** | 7 Agustus 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Ringkasan
 
@@ -112,15 +112,15 @@ Setelah base sizing direkonsiliasi (Sprint 2), sizing bervariasi per regime. **v
 
 ## 8. Roadmap Sprint (S1-S4)
 
-| Sprint | Item | Parameter Baru | Dependensi |
-|--------|------|:--------------:|------------|
-| **S1A** | Walk-forward harness | 0 | — |
-| **S1B** | Fix R:R (TP 3.0) | 1 | S1A |
-| **S1C** | Breakeven stop (1.0 ATR) | 1 | S1A |
-| **S1D** | Long-only mode | 0 | — |
-| **S2** | Rekonsiliasi sizing + validasi S1 | 0 | S1A–D |
-| **S3** | Regime detection + adaptive weights | 2-3 | S2 |
-| **S4+** | Full scale-out, trailing, ML | banyak | S3 |
+| Sprint | Item | Parameter Baru | Dependensi | Status |
+|--------|------|:--------------:|:----------:|:------:|
+| **S1A** | Walk-forward harness | 0 | — | ✅ Selesai (`walkforward.py`, 461 baris) |
+| **S1B** | Fix R:R (TP 3.0) | 1 | S1A | Ditangguhkan (baseline 2.5 dipertahankan) |
+| **S1C** | Breakeven stop (1.0 ATR) | 1 | S1A | ✅ Tested & Disabled (`BREAKEVEN_TRIGGER=999.0`) |
+| **S1D** | Long-only mode | 0 | — | ✅ Tested & Kept Off (`LONG_ONLY_MODE=False`, SELL 58% WR) |
+| **S2** | Rekonsiliasi sizing + validasi S1 | 0 | S1A–D | ✅ Selesai (`POSITION_SIZING_MODE="all_in"`) |
+| **S3** | Regime detection + adaptive weights | 2-3 | S2 | ✅ Selesai (`regime.py` SMA200+ADX) |
+| **S4+** | Full scale-out, trailing, ML | banyak | S3 | Ditunda (Fase 8) |
 
 ## 9. Backtest Outcome Distribution (v0.2.0 Baseline)
 

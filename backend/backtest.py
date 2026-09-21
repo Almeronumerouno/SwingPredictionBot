@@ -267,7 +267,8 @@ def compute_signals(data: dict, cfg: BacktestConfig) -> dict:
     momentum_scores = 0.5 + (raw_mom - 0.5) * gate
 
     sign = np.where(close > np.roll(close, 1), 1.0, -1.0)
-    sign[0] = 0.0
+    if len(sign) > 0:
+        sign[0] = 0.0
     clamped = np.clip(rvol_arr - 1.0, 0.0, 1.0)
     volume_scores = 0.5 + sign * clamped * 0.5
 
@@ -427,7 +428,7 @@ def run_backtest(
     warmup = max(_find_warmup(swing_scores), sim_start_idx)
     sim_end = n if sim_end_idx is None else min(sim_end_idx, n)
     last_idx = sim_end - 1
-    if warmup >= last_idx:
+    if capital <= 0 or warmup >= last_idx:
         return BacktestMetrics(
             code=code,
             period_start=dates[0] if dates else "",
@@ -465,7 +466,8 @@ def run_backtest(
     for i in range(warmup, sim_end):
         # ── Mark-to-market equity ──
         if in_position:
-            ret_mtm = (close[i] / pos["entry_price"] - 1)
+            entry_p = pos.get("entry_price", 0.0)
+            ret_mtm = (close[i] / entry_p - 1) if entry_p > 0 else 0.0
             if pos["direction"] == "SELL":
                 ret_mtm = -ret_mtm
             current_equity = pos["entry_equity"] * (1 + ret_mtm * pos["deploy_fraction"])
@@ -636,7 +638,8 @@ def run_backtest(
                 if slip_out > 0:
                     exit_price_candidate *= (1.0 - slip_out) if direction == "BUY" \
                         else (1.0 + slip_out)
-                ret = (exit_price_candidate - pos["entry_price"]) / pos["entry_price"]
+                entry_p = pos.get("entry_price", 0.0)
+                ret = (exit_price_candidate - entry_p) / entry_p if entry_p > 0 else 0.0
                 if direction == "SELL":
                     ret = -ret
 
@@ -645,7 +648,7 @@ def run_backtest(
 
                 fee_buy_rate = bt_config.fee_buy_pct / 100
                 fee_sell_rate = bt_config.fee_sell_pct / 100
-                net_ret = ret - fee_buy_rate - fee_sell_rate * (exit_price_candidate / pos["entry_price"])
+                net_ret = ret - fee_buy_rate - fee_sell_rate * (exit_price_candidate / entry_p if entry_p > 0 else 0.0)
 
                 trade = BacktestTrade(
                     entry_date=pos["entry_date"],
@@ -673,14 +676,15 @@ def run_backtest(
     # ── Close any open position at end of window ──
     if in_position:
         holding = last_idx - pos["entry_idx"]
-        ret = (close[last_idx] - pos["entry_price"]) / pos["entry_price"]
+        entry_p = pos.get("entry_price", 0.0)
+        ret = (close[last_idx] - entry_p) / entry_p if entry_p > 0 else 0.0
         if pos["direction"] == "SELL":
             ret = -ret
         # P6.4: slippage sisi jual saat tutup posisi akhir window
         slip_out = bt_config.slippage_bps / 10000.0
         if slip_out > 0:
             adj = (1.0 - slip_out) if pos["direction"] == "BUY" else (1.0 + slip_out)
-            ret = (close[last_idx] * adj - pos["entry_price"]) / pos["entry_price"]
+            ret = (close[last_idx] * adj - entry_p) / entry_p if entry_p > 0 else 0.0
             if pos["direction"] == "SELL":
                 ret = -ret
 
@@ -688,7 +692,7 @@ def run_backtest(
         total_fees += fee_exit
         fee_buy_rate = bt_config.fee_buy_pct / 100
         fee_sell_rate = bt_config.fee_sell_pct / 100
-        net_ret = ret - fee_buy_rate - fee_sell_rate * (close[last_idx] / pos["entry_price"])
+        net_ret = ret - fee_buy_rate - fee_sell_rate * (close[last_idx] / entry_p if entry_p > 0 else 0.0)
 
         trade = BacktestTrade(
             entry_date=pos["entry_date"],
@@ -714,11 +718,11 @@ def run_backtest(
     #  5. Compute Metrics
     # ──────────────────────────────────────────
 
-    total_return = (equity / capital - 1) * 100
+    total_return = (equity / capital - 1) * 100 if capital > 0 else 0.0
 
     buy_start = close[warmup]
     buy_end = close[last_idx]
-    buy_hold_ret = (buy_end - buy_start) / buy_start * 100
+    buy_hold_ret = (buy_end - buy_start) / buy_start * 100 if buy_start > 0 else 0.0
 
     winning = [t for t in trades if t.return_pct > 0]
     losing = [t for t in trades if t.return_pct <= 0]

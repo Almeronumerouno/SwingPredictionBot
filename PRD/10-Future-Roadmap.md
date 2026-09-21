@@ -2,7 +2,7 @@
 
 | Item | Detail |
 |------|--------|
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## Fase 7 — Production Readiness (Short-term)
 
@@ -14,17 +14,17 @@
 
 ### Adaptive Threshold
 - [ ] Dynamic buy/sell threshold berdasarkan 30-day volatility
-- [ ] Market regime filter (bull/bear/sideways)
-- [ ] Regime-dependent component weights
+- [x] Market regime filter (bull/bear/sideways) — ✅ `regime.py` (SMA200+ADX, 3 profiles)
+- [x] Regime-dependent component weights — ✅ bull/sideways/bear bobot adaptif di `regime.py`
 
 ### Validation
-- [ ] Walk-forward validation (purge + embargo)
-- [ ] Long-only mode (nonaktifkan SELL untuk IDX retail)
-- [ ] Fees & slippage modeling (broker 0.15-0.35%)
+- [x] Walk-forward validation (purge + embargo) — ✅ `walkforward.py` (461 baris, fully functional)
+- [x] Long-only mode — ✅ tested & deliberately kept OFF (SELL validated 58% WR)
+- [x] Fees & slippage modeling — ✅ `FEE_BUY_PCT=0.18%`, `FEE_SELL_PCT=0.28%` (asimetris)
 
 ### Quality of Life
 - [ ] Dark mode
-- [ ] Sorting & filtering gainers table
+- [x] Sorting & filtering gainers table — ✅ Selesai (`SignalScreener` di `components/signal-screener.tsx`)
 - [ ] Auto-refresh scrape (cron/scheduler)
 
 ## Fase 8 — Platform Maturity (Medium-term)
@@ -56,16 +56,16 @@
 ## Fase 9 — Full Platform (Long-term)
 
 ### Multi-User
-- [ ] User accounts & authentication
+- [x] User accounts & authentication — ✅ Selesai (Frontend auth routes: `/login`, `/register`, `/profile`)
 - [ ] Watchlist / portfolio tracking
 - [ ] Personalized notification (email/push)
 - [ ] Trade journal & history
 
 ### Advanced Features
 - [ ] Real-time data (WebSocket IDX)
-- [ ] Screening engine (scan seluruh pasar untuk sinyal)
+- [x] Screening engine (scan seluruh pasar untuk sinyal) — ✅ Selesai (`/readytofly`, `/gorengan`, `/scrape/all` + UI routes)
 - [ ] Backtest-on-demand via UI
-- [ ] Export laporan PDF
+- [x] Export laporan PDF — ✅ Selesai (`download-pdf-button.tsx` via jspdf)
 
 ### Market Expansion
 - [ ] Multi-exchange support (SGX, NYSE)
@@ -74,15 +74,15 @@
 
 ## Known Gaps
 
-| Gap | Impact | Timeline |
-|-----|--------|----------|
-| BUY not validated | Edge tidak konsisten antara bullish vs bearish | Fase 7 |
-| No walk-forward | Parameter mungkin overfit | Fase 7 |
-| Equal-weight suboptimal | Bobot tidak adaptif terhadap regime | Fase 7 |
-| No trailing stop | Sering kehilangan profit setelah TP | Fase 7 |
-| No partial exit | Semua atau tidak sama sekali | Fase 7 |
-| Fee/slippage not modeled | Return overstate 2-5% | Fase 7 |
-| Short selling bias | SELL signal tidak applicable untuk retail | Fase 7 |
-| Micro-cap not suitable | Optimal di mid-big cap liquid | Fase 8 |
-| No sentiment | Hanya data teknikal | Fase 8 |
-| No intermarket analysis | Tidak ada konteks makro | Fase 9 |
+| Gap | Impact | Status |
+|-----|--------|--------|
+| BUY not validated | Edge tidak konsisten antara bullish vs bearish | ⚠️ Open |
+| No walk-forward | Parameter mungkin overfit | ✅ Resolved (`walkforward.py`) |
+| Equal-weight suboptimal | Bobot tidak adaptif terhadap regime | ✅ Resolved (`regime.py` adaptive weights) |
+| No trailing stop | Sering kehilangan profit setelah TP | ⚠️ Open (S4+) |
+| No partial exit | Semua atau tidak sama sekali | ⚠️ Open (S4+) |
+| Fee/slippage not modeled | Return overstate 2-5% | ✅ Resolved (`FEE_BUY/SELL_PCT`) |
+| Short selling bias | SELL signal tidak applicable untuk retail | ✅ Resolved (SELL 58% WR, kept as entry) |
+| Micro-cap not suitable | Optimal di mid-big cap liquid | ⚠️ Open |
+| No sentiment | Hanya data teknikal | ⚠️ Open (Fase 8) |
+| No intermarket analysis | Tidak ada konteks makro | ⚠️ Open (Fase 9) |

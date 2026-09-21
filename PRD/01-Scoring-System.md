@@ -4,7 +4,7 @@
 |------|--------|
 | **Modul** | `backend/scoring.py` |
 | **Versi** | v0.2.0 |
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Ringkasan
 
@@ -99,16 +99,16 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 
 | Issue | Dampak | Status |
 |-------|--------|--------|
-| Equal-weight tidak optimal | Bobot 0.25 untuk semua komponen belum tentu optimal di semua regime | ❌ Belum dioptimasi |
-| Threshold statis | Threshold 75/35 fixed, tidak adaptif terhadap volatilitas | ❌ Belum |
-| Tidak ada regime filter | Sama scoring-nya di bull vs bear market | ❌ Belum |
-| BUY tidak tervalidasi | Threshold 75 belum punya edge independen | ❌ Fase 6.5 |
-| No walk-forward | Parameter mungkin overfit ke periode test | ❌ Belum |
+| Equal-weight tidak optimal | Bobot 0.25 untuk semua komponen belum tentu optimal di semua regime | ✅ Selesai dioptimasi (`regime.py` bobot adaptif per regime) |
+| Threshold statis | Threshold 75/35 fixed, tidak adaptif terhadap volatilitas | ✅ Selesai (Regime threshold: Bull 72, Sideways 68, Bear 70) |
+| Tidak ada regime filter | Sama scoring-nya di bull vs bear market | ✅ Selesai (`regime.py` SMA200+ADX) |
+| BUY tidak tervalidasi | Threshold 75 belum punya edge independen | ⚠️ Masih dipantau (experimental in-sample) |
+| No walk-forward | Parameter mungkin overfit ke periode test | ✅ Selesai (`walkforward.py`, 461 baris) |
 
 ## 8. Future Improvements (Fase 7)
 
-- [ ] **Dynamic threshold**: threshold adaptif berdasarkan volatilitas pasar
-- [ ] **Regime-dependent weights**: bobot komponen berubah sesuai regime (bull/bear/sideways)
-- [ ] **Market regime filter**: hanya trading di regime yang sesuai
-- [ ] **Walk-forward validation**: validasi parameter out-of-sample
-- [ ] **Machine learning weighting**: XGBoost feature importance untuk bobot dinamis
+- [x] **Dynamic threshold**: threshold adaptif per regime (Bull 72, Sideways 68, Bear 70 di `regime.py`)
+- [x] **Regime-dependent weights**: bobot komponen berubah sesuai regime (bull/bear/sideways) di `regime.py`
+- [x] **Market regime filter**: deteksi SMA200+ADX di `regime.py`
+- [x] **Walk-forward validation**: validasi parameter out-of-sample di `walkforward.py`
+- [ ] **Machine learning weighting**: XGBoost feature importance untuk bobot dinamis (Fase 8)

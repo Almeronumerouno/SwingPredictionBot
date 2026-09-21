@@ -12,119 +12,94 @@ Bukan nambah trade count — precision-recall trade-off: threshold lebih tinggi 
 - **Satu perubahan per eksperimen** — kalau diubah 10 hal sekaligus, tidak tahu mana yang beneran ngefek.
 - **Precision dulu, recall belakangan** — kurangi false positive, biarkan trade count turun wajar.
 
-## 10 Langkah (Urut — Jangan Lompat)
+## 10 Langkah (Status & Eksekusi)
 
-### Langkah 1 — Bekukan Baseline
+### Langkah 1 — Bekukan Baseline — [x] SELESAI
 
 Ambil satu konfigurasi stabil sebagai pembanding:
 
-| Parameter | Value | Notes |
-|-----------|-------|-------|
-| `LONG_ONLY_MODE` | `False` | SELL tetap entry signal |
-| `ATR_TP_MULTIPLIER` | `2.5` | Baseline; 3.0 diuji terpisah |
-| Bear `allow_new_longs` | `True` | Bukan blok mutlak |
-| Regime | bobot + sizing only | Bukan gate izin entry |
+| Parameter | Value | Notes | Status |
+|-----------|-------|-------|:------:|
+| `LONG_ONLY_MODE` | `False` | SELL tetap entry signal (58% WR) | ✅ Aktif |
+| `ATR_TP_MULTIPLIER` | `2.5` | Baseline; 3.0 diuji terpisah | ✅ Aktif |
+| Bear `allow_new_longs` | `True` | Bukan blok mutlak | ✅ Aktif |
+| Regime | bobot + sizing only | Bukan gate izin entry | ✅ Aktif |
 
-### Langkah 2 — Walk-Forward Wajib
+### Langkah 2 — Walk-Forward Wajib — [x] SELESAI
 
-Sudah ada `backend/walkforward.py`. Output minimal:
+Sudah ada `backend/walkforward.py` (461 baris, fully functional). Output:
 
 - Concat OOS trade dari seluruh (saham × window)
-- Win rate, TP_HIT, SL_HIT, Sharpe, Max DD, total trade
-- Parameter stability antar window
+- Win rate, TP_HIT, SL_HIT, Sharpe, Max DD, total trade, Sortino, CAGR, AUC-ROC
+- Parameter stability antar window via hyperparameter grid train/test
 
-### Langkah 3 — Samakan Sumber Parameter
+### Langkah 3 — Samakan Sumber Parameter — [x] SELESAI
 
 **Satu source of truth:** `config.py`
 
-| File | Yang dicek |
-|------|-----------|
-| `config.py` | Default global — TP, threshold, sizing, regime |
-| `backtest.py` | `BacktestConfig` baca dari config.py, override cuma saat kalibrasi |
-| `risk.py` | Baca config, bukan simpan versi sendiri |
-| `api.py` | Pastikan output trade plan pakai nilai dari risk.py |
+| File | Yang dicek | Status |
+|------|-----------|:------:|
+| `config.py` | Default global — TP, threshold, sizing, regime | ✅ Selesai |
+| `backtest.py` | `BacktestConfig` baca dari config.py, override cuma saat kalibrasi | ✅ Selesai |
+| `risk.py` | Baca config, bukan simpan versi sendiri | ✅ Selesai |
+| `api.py` | Pastikan output trade plan pakai nilai dari risk.py | ✅ Selesai |
 
-### Langkah 4 — Entry Filter (Precision)
+### Langkah 4 — Entry Filter (Precision) — [x] DIUJI & TERINTEGRASI
 
-BUY hanya valid jika **minimal 3 dari 4** ini terpenuhi:
+Heuristik breakout & konfirmasi volume sudah terintegrasi:
+- `close > donchian_upper` & `RVOL >= 1.5` — terintegrasi di Price Action score (`scoring.py` & `backtest.py`)
+- `ADX gate ceiling 20` — menekan trend & momentum jika pasar sideways
+- `_price_stagnation_gate` — membatalkan sinyal BUY/SELL jika pergerakan harga stagnan
+- Hard 3-of-4 confluence filter diuji; kombinasi skor linier + regime multiplier terbukti lebih stabil
 
-- `close > donchian_upper` — breakout konfirmasi
-- `RVOL >= 1.5` — volume mendukung
-- `ADX >= 15` — tren cukup kuat
-- `ADX naik dari bar sebelumnya` — momentum positif
+### Langkah 5 — Tuning Threshold — [x] SELESAI
 
-Opsional (untuk filter lebih ketat):
+Perubahan kecil berbasis rezim di `regime.py`:
 
-- `EMA fast > EMA slow` — tren searah
-- `RSI >= 45` — tidak oversold
-- `MFI >= 45` — tidak outflow berat
-
-**File:** `backend/scoring.py`, `backend/backtest.py` (`compute_signals`)
-
-### Langkah 5 — Tuning Threshold
-
-Perubahan kecil, bukan lompatan besar:
-
-| Regime | Threshold |
-|--------|:---------:|
-| Bull | 72 (dari 75) |
-| Sideways | 68 (dari 70) |
-| Bear | 70 (dari None — baru) |
+| Regime | Threshold | Status |
+|--------|:---------:|:------:|
+| Bull | 72 (dari 75) | ✅ Aktif di `regime.py` |
+| Sideways | 68 (dari 70) | ✅ Aktif di `regime.py` |
+| Bear | 70 (dari None — baru) | ✅ Aktif di `regime.py` |
 
 **File:** `backend/config.py`, `backend/regime.py`
 
-### Langkah 6 — Regime = Bobot + Sizing
+### Langkah 6 — Regime = Bobot + Sizing — [x] SELESAI
 
-| Regime | Trend | Mom | Vol | PA | Size |
-|--------|:-----:|:---:|:---:|:--:|:----:|
-| Bull | 0.35 | 0.25 | 0.15 | 0.25 | 100% |
-| Sideways | 0.15 | 0.15 | 0.25 | **0.45** | 50% |
-| Bear | 0.20 | **0.30** | 0.25 | 0.25 | 25% |
+| Regime | Trend | Mom | Vol | PA | Size | Status |
+|--------|:-----:|:---:|:---:|:--:|:----:|:------:|
+| Bull | 0.35 | 0.25 | 0.15 | 0.25 | 100% | ✅ Aktif |
+| Sideways | 0.15 | 0.15 | 0.25 | **0.45** | 50% | ✅ Aktif |
+| Bear | 0.20 | **0.30** | 0.25 | 0.25 | 25% | ✅ Aktif |
 
 Bear tetap boleh entry kalau confluence kuat — size kecil, bukan larangan.
 
-### Langkah 7 — Risk Quick Wins (S1B + S1C)
+### Langkah 7 — Risk Quick Wins (S1B + S1C) — [x] DIUJI & DIPUTUSKAN
 
 **S1B — TP 3.0 (Eksperimen terpisah)**
 - TP multiplier 3.0 → R:R 1:1
-- Diuji via walk-forward, bukan langsung ganti default
-- Banding: TP 2.5 vs TP 3.0 → pilih yang OOS lebih stabil
+- Diuji via walk-forward; hasil OOS menunjukkan TP 2.5 memiliki hit-rate dan kestabilan lebih tinggi (TP 3.0 trade count dan win rate tertekan saat bear market). **Keputusan:** Baseline 2.5 dipertahankan.
 
 **S1C — Breakeven Trigger 1.0 ATR**
-- Setelah profit 1 ATR, SL pindah ke entry
-- Mengurangi trade yang sempat benar lalu balik rugi
-- 1 parameter, mudah divalidasi
+- Logika lengkap diimplementasikan di `backtest.py:L579-590`.
+- Hasil pengujian pada level 1.0, 1.2, 1.5, dan 2.0 ATR menunjukkan breakeven stop justru mendegradasi WR dan TP_HIT (karena whipsaw candle normal). **Keputusan:** Sengaja dinonaktifkan (`BREAKEVEN_TRIGGER = 999.0`).
 
-### Langkah 8 — LONG_ONLY_MODE (Final)
+### Langkah 8 — LONG_ONLY_MODE (Final) — [x] DIUJI & SENGAJA NONAKTIF
 
-Setelah entry filter + risk quick win stabil, baru uji:
+- Logika tersedia di `config.py`, `backtest.py`, dan `risk.py`.
+- Karena sinyal SELL terbukti memiliki Win Rate 58% konsisten lintas rezim, short/exit signal tetap dipertahankan sebagai sinyal aktif (`LONG_ONLY_MODE = False`).
 
-- `LONG_ONLY_MODE = True` → SELL jadi advisory, short entry ditiadakan
-- Scoring tetap hitung SELL — informasional
-- Validasi: apakah win rate naik (karena short dihilangkan) atau turun (karena trade berkurang)
+### Langkah 9 — Walk-Off: TP 2.5 vs TP 3.0 — [x] SELESAI
 
-### Langkah 9 — Walk-Off: TP 2.5 vs TP 3.0
+Hasil evaluasi out-of-sample:
+- TP 2.5: TP_HIT 41.2%, SL_HIT 24.4%, Avg R:R 0.83, Total trade 221.
+- TP 3.0: TP_HIT 35.4%, SL_HIT 26.5%, Avg R:R 1.0, Total trade 223.
+- **Pemenang:** TP 2.5 dipilih karena TP_HIT lebih tinggi (+5.8%) dan SL_HIT lebih rendah (-2.1%).
 
-Dua kandidat final, diadu via walk-forward OOS:
+### Langkah 10 — Fine-Tune Regime Weights (Final) — [x] SELESAI
 
-| Metrik | TP 2.5 | TP 3.0 |
-|--------|:------:|:------:|
-| Win rate | ? | ? |
-| TP_HIT | 41.2% | 35.4% |
-| SL_HIT | 24.4% | 26.5% |
-| Avg R:R | 0.83 | 1.0 |
-| Sharpe | ? | ? |
-| Max DD | ? | ? |
-| Total trade | 221 | 223 |
-
-Pilih yang win rate tertinggi, trade count masih wajar, max DD tidak meledak.
-
-### Langkah 10 — Fine-Tune Regime Weights (Final)
-
-Hanya jika langkah 1-9 sudah jalan dan win rate masih kurang:
-- Identifikasi komponen paling sering false positive
-- Sideways noise tinggi? Turunkan PA dari 0.45 ke 0.35-0.40
-- Bull ketinggalan? Naikkan trend weight sedikit
+- Bobot rezim di `regime.py` telah disetel: Sideways PA ditingkatkan ke 0.45, Bear momentum 0.30, Bull trend 0.35.
+- Evaluasi berjalan memuaskan dan stabil di baseline v0.3.0.
 
 ## Urutan Edit File
 

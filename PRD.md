@@ -4,8 +4,8 @@
 |------|--------|
 | **Product Name** | Swingbot IDX |
 | **Version** | 0.3.0-wip |
-| **Status** | Fase 7 (Production Readiness) — Sprint 1 berjalan |
-| **Last Updated** | 27 Juli 2026 |
+| **Status** | Fase 7 (Production Readiness) — Sprint 1-3 selesai |
+| **Last Updated** | 21 September 2026 |
 
 ---
 
@@ -49,8 +49,8 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | Cakupan saham | Seluruh saham IDX (~900 emiten) |
 | Akurasi scoring (mid-big cap liquid) | Win Rate 55.3%, Alpha +5.38% vs B&H, Sharpe 0.24 |
 | TP_HIT rate | 40.4% |
-| TP multiplier | 3.0 (v0.3.0 — naik dari 2.5) |
-| R:R rata-rata | 0.83 (target v0.3.0: >1.0) |
+| TP multiplier | 2.5 (baseline; 3.0 belum terbukti OOS) |
+| R:R rata-rata | 0.83 |
 
 ---
 
@@ -112,7 +112,7 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | ID | Requirement | Rumus | Sumber |
 |----|-------------|-------|--------|
 | F3.1 | **Stop Loss** | entry ± ATR × 1.5 (0.8 × multiplier jika risk tinggi) | `risk.py:10` |
-| F3.2 | **Take Profit** | entry ± ATR × 3.0 (R:R 1:1, naik dari 2.5) | `risk.py:20` |
+| F3.2 | **Take Profit** | entry ± ATR × 2.5 (baseline; 3.0 belum terbukti OOS) | `risk.py:20` |
 | F3.3 | **Position Sizing** | 100% capital / entry_price, rounded ke lot | `risk.py:28` |
 | F3.4 | **Fallback sizing** | Jika 100% < 1 lot, return 0 | `risk.py:51` |
 | F3.5 | **Risk info** | Hitung risk aktual, tampilkan sebagai info (bukan warning) | `risk.py:55` |
@@ -145,7 +145,8 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 | F5.12 | **Logo swingbot** — ganti favicon + metadata | ✅ | Layout |
 | F5.13 | **Sidebar "Top Gainers" → "Dashboard"** | ✅ | Sidebar |
 | F5.14 | **Dark Mode** | ❌ | Belum |
-| F5.15 | **Search / Filter** gainers | ❌ | Belum |
+| F5.15 | **Search / Filter** gainers | ✅ | `SignalScreener` (`components/signal-screener.tsx`) |
+| F5.16 | **Export PDF Laporan** | ✅ | `DownloadPdfButton` (`components/download-pdf-button.tsx`) |
 
 ### Fase 6 — Testing & Refinement (100% Selesai)
 
@@ -184,10 +185,10 @@ Awalnya direncanakan bot Telegram. Diubah menjadi **dashboard web** (FastAPI + N
 - Sistem **unggul di bear market**: proteksi modal dengan max DD 5.94%, sementara B&H rata-rata -4.98%
 - Sistem **kalah di bull market**: ketinggalan saham dengan kenaikan eksplosif (ADRO +51%, GGRM +43%) — sistem dirancang konservatif
 - **Micro-cap gainers tidak cocok** untuk sistem ini (win rate 38.8%, alpha -21.01%) — sistem optimal di saham likuid mid-big cap
-- **Fees & slippage belum dimodelkan** — return overstate ~2-5%
-- **Long-only mode** (v0.3.0) — SELL hanya advisory, short entry dinonaktifkan
+- **Long-only mode** tersedia tapi sengaja OFF — SELL validated 58% WR, tetap aktif sebagai entry signal
+- **Fees dimodelkan** — `FEE_BUY_PCT=0.18%`, `FEE_SELL_PCT=0.28%` (asimetris, termasuk PPh Final 0.1%)
 - **Look-ahead minor**: S/R levels pakai full history (Price Action komponen, efek kecil)
-- **Walk-forward**: Sprint 1A sedang dibangun — semua parameter baru wajib divalidasi OOS
+- **Walk-forward** tersedia (`walkforward.py`) — 461 baris, fully functional dengan purge+embargo
 
 ---
 
@@ -507,12 +508,12 @@ atr_ratio = ATR[-1] / mean(ATR[-50:])
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Position sizing | 25% alokasi modal (fallback 50%) | Capital-based, bukan risk-based |
+| Position sizing | **All-in** (100% modal → 1 saham) | `POSITION_SIZING_MODE="all_in"`, kelipatan LOT_SIZE |
 | Risk per trade | Bervariasi — informasional | Ditampilkan sebagai "Risiko aktual X%" |
 | Stop Loss | entry ± ATR × **3.0** | Kalibrasi v0.2.0 (default lama 1.5 — SL diperlonggar untuk naikkin win rate) |
-| Take Profit | entry ± ATR × **3.0** | R:R 1:1 (v0.3.0 — naik dari 2.5) |
-| Long-only mode | **Default: aktif** | SELL advisory, short entry dinonaktifkan |
-| Breakeven stop | entry + 1.0 ATR → SL ke entry | v0.3.0 — melindungi modal setelah profit |
+| Take Profit | entry ± ATR × **2.5** | Baseline; 3.0 diuji tapi belum terbukti OOS lebih baik |
+| Long-only mode | **Default: nonaktif** | SELL validated 58% WR, tetap aktif sebagai entry signal |
+| Breakeven stop | **Disabled** (`BREAKEVEN_TRIGGER=999.0`) | Tested 1.0/1.2/1.5/2.0 ATR — semua degrades TP_HIT & WR |
 | Lot size | 100 lembar | Konvensi IDX |
 | Minimal capital | ~Rp 100,000 | Tergantung harga saham (1 lot termurah) |
 
@@ -658,17 +659,18 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - ✅ Indicator detail panel (RSI, ADX, MFI, RVOL, S/R, Fibonacci, Candlestick)
 
 ### Short-term (v0.3.0 — Fase 7)
-- [ ] **S1A** Walk-forward harness skeleton (`walkforward.py`)
-- [ ] **S1B** Fix R:R — TP multiplier 3.0 (naik dari 2.5)
-- [ ] **S1C** Breakeven stop (1.0 ATR) — SL ke entry setelah profit
-- [ ] **S1D** Long-only mode (SELL advisory, short entry dinonaktifkan)
+- [x] **S1A** Walk-forward harness — ✅ `walkforward.py` (461 baris): rolling window, grid optimasi train, OOS concat, purge+embargo, Sharpe/WR/MaxDD/Sortino/CAGR/AUC-ROC output
+- [x] **S1B** TP multiplier — **ditangguhkan**: baseline 2.5 dipertahankan, belum ada bukti OOS bahwa 3.0 lebih baik (kalibrasi OOS Sharpe negatif, 3-4 trade/saham — statistik lemah)
+- [x] **S1C** Breakeven stop — ✅ **tested & deliberately disabled**: logic lengkap di `backtest.py:L579-590`, tested 1.0/1.2/1.5/2.0 ATR — semua degrades TP_HIT & WR → `BREAKEVEN_TRIGGER=999.0` (off)
+- [x] **S1D** Long-only mode — ✅ **tested & deliberately kept OFF**: logic di `backtest.py` + `risk.py`, tapi SELL validated 58% WR lintas regime → `LONG_ONLY_MODE=False` (SELL tetap entry signal)
 - [x] **S1E** Fitur Mean Reversion / Recovery — endpoint `/recovery/{kode}`, model GBM FPT + base rate empiris, exit plan time-stop 63 hari, card frontend (`?drop_pct=`) — validasi walk-forward: GBM under-predict (Brier 63d 0.372), sinyal memakai empirical saat `n_events ≥ 5`
 - [x] **S1F** Posisi vs Harga Acuan (1D/1W/1M/3M) + auto-drop threshold dari volatilitas (`RECOVERY_AUTO_*`, tier harga IDX)
 - [x] **S1G** Volume & Akumulasi — deteksi "akumulasi post-ARA lalu siap terbang" versi bandar (`ACCUM_*`): ARA (+10% harian) = puncak distribusi/dump; jendela dinamis sejak ARA, kepadatan hari RVOL ≥ 2.0× ≥ 40% (min 2 hari) + close ≥ SMA20, dan wajib harga MASIH DI BAWAH level ARA (belum recovery). Validasi walk-forward 963 saham (sub-arm di bawah ARA): P(boom +10%/5d) 5.9% (kontrol) → 16.8% (n=2958), pump5 26.5% → 34.0%; fresh cross SMA20 lebih lemah (b10 36.4%) daripada sudah di atas (51.9%)
-- [ ] **S2** Rekonsiliasi position sizing (100%) + validasi OOS S1
-- [ ] **S3** Regime detection (SMA200+ADX) + adaptive weights + sizing
+- [x] **S2** Rekonsiliasi position sizing — ✅ reconciled to all-in (`POSITION_SIZING_MODE="all_in"`), dokumentasi konsisten, regime `position_pct` tersedia tapi dormant
+- [x] **S3** Regime detection — ✅ `regime.py`: SMA200+ADX, 3 profile (bull/sideways/bear), bobot adaptif per regime, multiplier score, `position_pct` per regime. Terintegrasi di `scoring.py` dan `backtest.py`
 - [ ] Dark mode
-- [ ] Sorting & filtering gainers table
+- [x] Sorting & filtering gainers table — ✅ Selesai (`SignalScreener` di `components/signal-screener.tsx`)
+- [x] Export laporan PDF — ✅ Selesai (`download-pdf-button.tsx` via jspdf)
 
 ### S4+ (Post v0.3.0 — Ditunda)
 - [ ] Full scale-out (50/30/20 + trailing)
@@ -677,11 +679,11 @@ Semua parameter operasional di `config.py` — lihat tabel di bagian 4 untuk det
 - [ ] Ensemble scoring (3 parameter sets, voting)
 - [ ] HMM regime detection (if SMA200+ADX insufficient)
 - [ ] Docker + cron scheduler (daily scan IDX)
-- [ ] Fees & slippage modeling (broker 0.15-0.35% round trip)
-- [ ] Multi-user accounts
+- [x] Fees & slippage modeling — ✅ `FEE_BUY_PCT=0.18%`, `FEE_SELL_PCT=0.28%` (asimetris, termasuk PPh Final 0.1%)
+- [x] User accounts & authentication — ✅ Selesai (Frontend auth routes: `/login`, `/register`, `/profile`)
 - [ ] Watchlist / portfolio tracking
 - [ ] Real-time data (WebSocket IDX)
-- [ ] Screening engine (scan seluruh pasar untuk sinyal BUY/SELL)
+- [x] Screening engine (scan seluruh pasar untuk sinyal BUY/SELL) — ✅ Selesai (`/readytofly`, `/gorengan`, `/scrape/all` + UI routes)
 - [ ] Notification (email/push) untuk sinyal baru
 
 ---

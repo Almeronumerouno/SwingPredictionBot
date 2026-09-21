@@ -24,12 +24,27 @@ function AnalisisContent() {
   const [isLoading, setIsLoading] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
 
+  function loadHistoryFromStorage() {
+    try {
+      const raw = window.localStorage.getItem(HISTORY_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setSearchHistory(parsed.filter((k) => typeof k === "string").slice(0, HISTORY_LIMIT));
+        }
+      }
+    } catch {
+      // localStorage tidak tersedia / corrupt: abaikan
+    }
+  }
+
   // Buka dropdown (batal fase penutupan kalau lagi jalan)
   function openHistory() {
     if (closeTimerRef.current !== null) {
       window.clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
     }
+    loadHistoryFromStorage();
     setHistoryClosing(false);
     setHistoryOpen(true);
   }
@@ -57,19 +72,12 @@ function AnalisisContent() {
     };
   }, []);
 
-  // Muat riwayat pencarian dari localStorage (client-only)
+  // Muat riwayat pencarian dari localStorage (client-only, non-cascading)
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(HISTORY_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          setSearchHistory(parsed.filter((k) => typeof k === "string").slice(0, HISTORY_LIMIT));
-        }
-      }
-    } catch {
-      // localStorage tidak tersedia / corrupt: abaikan
-    }
+    const timer = window.setTimeout(() => {
+      loadHistoryFromStorage();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Sync date changes to URL so that back button restores it

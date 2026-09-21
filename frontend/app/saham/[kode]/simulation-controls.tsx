@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function fmt(n: string) {
   const num = parseInt(n.replace(/\D/g, ""), 10);
@@ -34,8 +34,14 @@ export default function SimulationControls({
   const [mode, setMode] = useState<"auto" | "manual">(dropPct ? "manual" : "auto");
   const [drop, setDrop] = useState(dropPct ? String(dropPct) : "5");
 
-  // Sync state if props change from URL navigation
-  useEffect(() => {
+  // Sync state if props change from URL navigation (adjust during render)
+  const [prevProps, setPrevProps] = useState({ capital, initialLength, dropPct });
+  if (
+    prevProps.capital !== capital ||
+    prevProps.initialLength !== initialLength ||
+    prevProps.dropPct !== dropPct
+  ) {
+    setPrevProps({ capital, initialLength, dropPct });
     if (capital) setModal(fmt(String(capital)));
     if (initialLength) setLength(String(initialLength));
     if (dropPct) {
@@ -44,7 +50,7 @@ export default function SimulationControls({
     } else {
       setMode("auto");
     }
-  }, [capital, initialLength, dropPct]);
+  }
 
   const handleApply = () => {
     const params = new URLSearchParams(searchParams.toString());

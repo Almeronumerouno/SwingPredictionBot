@@ -3,8 +3,8 @@
 | Item | Detail |
 |------|--------|
 | **Target Version** | v0.3.0 |
-| **Status** | Sprint 1 — Walk-Forward + Quick Win |
-| **Last Updated** | 27 Juli 2026 |
+| **Status** | Sprint 1-3 — ✅ Selesai (Walk-Forward, Regime, Sizing reconciled) |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Ringkasan
 

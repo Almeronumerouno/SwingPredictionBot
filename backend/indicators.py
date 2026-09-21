@@ -88,13 +88,16 @@ def true_range(high: np.ndarray, low: np.ndarray, close: np.ndarray) -> np.ndarr
     low = np.asarray(low, dtype=float)
     close = np.asarray(close, dtype=float)
     n = len(high)
+    if n == 0:
+        return np.empty(0)
     tr = np.empty(n)
     tr[0] = high[0] - low[0]
-    prev_close = close[:-1]
-    hl = high[1:] - low[1:]
-    hc = np.abs(high[1:] - prev_close)
-    lc = np.abs(low[1:] - prev_close)
-    tr[1:] = np.maximum(hl, np.maximum(hc, lc))
+    if n > 1:
+        prev_close = close[:-1]
+        hl = high[1:] - low[1:]
+        hc = np.abs(high[1:] - prev_close)
+        lc = np.abs(low[1:] - prev_close)
+        tr[1:] = np.maximum(hl, np.maximum(hc, lc))
     return tr
 
 
@@ -224,6 +227,8 @@ def mfi(high: np.ndarray, low: np.ndarray, close: np.ndarray, volume: np.ndarray
     close = np.asarray(close, dtype=float)
     volume = np.asarray(volume, dtype=float)
     n = len(close)
+    if n == 0:
+        return np.empty(0)
 
     typical_price = (high + low + close) / 3.0
     raw_money_flow = typical_price * volume
@@ -367,7 +372,9 @@ def support_resistance_levels(high: np.ndarray, low: np.ndarray, window: int = 2
         clusters: list[list[float]] = [[sorted_prices[0]]]
         for p in sorted_prices[1:]:
             last_cluster_mean = np.mean(clusters[-1])
-            if abs(p - last_cluster_mean) / last_cluster_mean * 100 <= tolerance_pct:
+            if last_cluster_mean == 0:
+                clusters.append([p])
+            elif abs(p - last_cluster_mean) / last_cluster_mean * 100 <= tolerance_pct:
                 clusters[-1].append(p)
             else:
                 clusters.append([p])
@@ -628,23 +635,23 @@ def candlestick_patterns(open_: np.ndarray, high: np.ndarray, low: np.ndarray,
 
         # Tweezer Top (previous bullish, current bearish, same high)
         if p_bull and c_bear:
-            if abs(c_high - p_high) / max(c_high, p_high) <= 0.01:
+            if max(c_high, p_high) > 0 and abs(c_high - p_high) / max(c_high, p_high) <= 0.01:
                 tweezer_top[i] = True
 
         # Tweezer Bottom (previous bearish, current bullish, same low)
         if p_bear and c_bull:
-            if abs(c_low - p_low) / max(c_low, p_low) <= 0.01:
+            if max(c_low, p_low) > 0 and abs(c_low - p_low) / max(c_low, p_low) <= 0.01:
                 tweezer_bottom[i] = True
 
         # On-Neck Line
         if p_bear and c_bull:
-            if abs(c_close - p_low) / max(c_close, p_low) <= 0.01:
+            if max(c_close, p_low) > 0 and abs(c_close - p_low) / max(c_close, p_low) <= 0.01:
                 on_neck[i] = True
 
         # In-Neck Line
         if p_bear and c_bull:
             c_range = c_high - c_low
-            if c_range > 0 and 0.01 < abs(c_close - p_low) / max(c_close, p_low) <= 0.03:
+            if c_range > 0 and max(c_close, p_low) > 0 and 0.01 < abs(c_close - p_low) / max(c_close, p_low) <= 0.03:
                 in_neck[i] = True
 
         # Kicker Bullish

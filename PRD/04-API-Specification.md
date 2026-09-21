@@ -5,7 +5,7 @@
 | **Modul** | `backend/api.py` |
 | **Framework** | FastAPI (Python 3.14) |
 | **Versi** | 0.1.0 |
-| **Last Updated** | 27 Juli 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ## 1. Endpoints
 
@@ -72,6 +72,22 @@ Data OHLCV historis mentah.
 
 Cek status pasar IDX (buka/tutup).
 
+### 1.6 GET /recovery/{kode}
+
+Analisis mean-reversion & first-passage-time recovery probability (GBM + empirical base rate) dengan time stop 63 hari.
+
+### 1.7 GET /readytofly & POST /scrape/readytofly
+
+Deteksi akumulasi post-ARA "siap terbang" versi bandarmologi (kepadatan volume, baseline dinamis, posisi vs SMA20).
+
+### 1.8 GET /gorengan & POST /scrape/gorengan
+
+Deteksi risiko saham gorengan (RVOL spike, volatilitas ekstrem, likuiditas semu, anomali price action).
+
+### 1.9 POST /scrape/all & GET /scraped-dates
+
+Scrape menyeluruh (gainers + gorengan + ready-to-fly) dalam 1 alur terkoordinasi & daftar tanggal snapshot yang tersedia di cache.
+
 ## 2. Data Sources
 
 | Data | Sumber | Frekuensi | Coverage | Latency |
@@ -99,7 +115,7 @@ Cek status pasar IDX (buka/tutup).
 
 ## 5. Future Endpoints
 
-- [ ] `GET /screener` — Scan seluruh pasar untuk sinyal BUY/SELL
+- [x] `GET /screener` — ✅ Diimplementasi via endpoint multi-scanner (`/readytofly`, `/gorengan`, `/scrape/all`, dan frontend `SignalScreener`)
 - [ ] `GET /watchlist` — Portfolio tracking multi-user
 - [ ] `GET /backtest` — On-demand backtest via API
 - [ ] `WebSocket /realtime` — Real-time data streaming

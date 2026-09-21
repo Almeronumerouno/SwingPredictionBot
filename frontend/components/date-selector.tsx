@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { fetchScrapedDates } from "@/lib/api/dates";
 import type { ScrapedDatesResponse } from "@/types/api";
@@ -60,8 +60,10 @@ export default function DateSelector({
   const [viewYear, setViewYear] = useState<number>(initialYear || new Date().getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(!isNaN(initialMonth) ? initialMonth : new Date().getMonth());
 
-  // Sinkronisasi view jika selected berubah
-  useEffect(() => {
+  // Sinkronisasi view jika selected berubah (adjust during render)
+  const [prevSelected, setPrevSelected] = useState(selected);
+  if (prevSelected !== selected) {
+    setPrevSelected(selected);
     if (selected) {
       const y = parseInt(selected.slice(0, 4), 10);
       const m = parseInt(selected.slice(5, 7), 10) - 1;
@@ -70,7 +72,7 @@ export default function DateSelector({
         setViewMonth(m);
       }
     }
-  }, [selected]);
+  }
 
   // Fetch daftar tanggal yang sudah discrape
   useEffect(() => {
@@ -148,19 +150,22 @@ export default function DateSelector({
   }
 
   // Cek apakah tanggal sudah discrape sesuai halaman aktif
-  function isDateScraped(dateStr: string): boolean {
-    if (!scrapedData) return false;
-    if (basePath === "/top-gainers") {
-      return scrapedData.by_category?.gainers?.includes(dateStr) ?? false;
-    }
-    if (basePath === "/gorengan") {
-      return scrapedData.by_category?.gorengan?.includes(dateStr) ?? false;
-    }
-    if (basePath === "/ready-to-fly") {
-      return scrapedData.by_category?.readytofly?.includes(dateStr) ?? false;
-    }
-    return scrapedData.dates?.includes(dateStr) ?? false;
-  }
+  const isDateScraped = useCallback(
+    (dateStr: string): boolean => {
+      if (!scrapedData) return false;
+      if (basePath === "/top-gainers") {
+        return scrapedData.by_category?.gainers?.includes(dateStr) ?? false;
+      }
+      if (basePath === "/gorengan") {
+        return scrapedData.by_category?.gorengan?.includes(dateStr) ?? false;
+      }
+      if (basePath === "/ready-to-fly") {
+        return scrapedData.by_category?.readytofly?.includes(dateStr) ?? false;
+      }
+      return scrapedData.dates?.includes(dateStr) ?? false;
+    },
+    [scrapedData, basePath]
+  );
 
   // Ambil rincian modul yang tersedia untuk tanggal tertentu
   function getDateDetailText(dateStr: string): { status: string; isScraped: boolean } {
@@ -258,7 +263,7 @@ export default function DateSelector({
     }
 
     return cells;
-  }, [viewYear, viewMonth, todayStr, selected, scrapedData, basePath]);
+  }, [viewYear, viewMonth, todayStr, selected, isDateScraped]);
 
   const activeHoverOrSelected = hoveredDate || selected;
   const hoverDetail = activeHoverOrSelected ? getDateDetailText(activeHoverOrSelected) : null;

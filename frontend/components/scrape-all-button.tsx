@@ -392,6 +392,33 @@ export default function ScrapeAllButton() {
 
   const dismissToast = useCallback(() => setToast(null), []);
 
+  const executeScan = useCallback(
+    async (source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all") => {
+      setLoading(true);
+      try {
+        const res = scope === "gainers" 
+          ? await triggerScrape(source, date) 
+          : await triggerScrapeAll(source, date);
+          
+        setToast({ message: res.message, type: "success" });
+        if (date) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("date", date);
+          router.push(`${pathname}?${params.toString()}`);
+        }
+        router.refresh();
+      } catch (e) {
+        setToast({
+          message: e instanceof Error ? e.message : "Scrape gagal",
+          type: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [searchParams, pathname, router]
+  );
+
   useEffect(() => {
     if (!scheduledTarget || !scheduleInfo) return;
 
@@ -406,31 +433,7 @@ export default function ScrapeAllButton() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [scheduledTarget, scheduleInfo]);
-
-  async function executeScan(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all") {
-    setLoading(true);
-    try {
-      const res = scope === "gainers" 
-        ? await triggerScrape(source, date) 
-        : await triggerScrapeAll(source, date);
-        
-      setToast({ message: res.message, type: "success" });
-      if (date) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("date", date);
-        router.push(`${pathname}?${params.toString()}`);
-      }
-      router.refresh();
-    } catch (e) {
-      setToast({
-        message: e instanceof Error ? e.message : "Scrape gagal",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [scheduledTarget, scheduleInfo, executeScan]);
 
   function handleConfirm(source: "yahoo" | "idx", date?: string, scope: "all" | "gainers" = "all", scheduledTimeStr?: string) {
     setShowModal(false);

@@ -126,7 +126,11 @@ def _momentum(close: np.ndarray, n: int = 20) -> tuple[float, str | None]:
     """Momentum = (close[-1] - close[-1-n]) / close[-1-n] * 100, di-Z-score."""
     if len(close) <= n + 1:
         return 0.0, None
-    returns = np.diff(close) / close[:-1] * 100
+    if close[-1 - n] <= 0:
+        return 0.0, None
+    prev = close[:-1]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        returns = np.where(prev > 0, np.diff(close) / prev * 100, 0.0)
     z = _zscore(returns, lookback=n)
 
     score = _zscore_to_score(z) if z > 0 else 0.0
@@ -146,9 +150,18 @@ def _liquidity_risk(close: np.ndarray, volume: np.ndarray) -> tuple[float, str |
     """Deteksi saham tidak likuid berdasarkan median daily value 60 hari.
     Kita pakai median agar lonjakan transaksi saat 'digoreng' tidak menutupi fakta 
     bahwa saham ini biasanya sangat sepi (tidak likuid)."""
-    lookback = min(60, len(close))
+    if len(close) == 0 or len(volume) == 0:
+        return 0.0, None
+    lookback = min(60, len(close), len(volume))
+    if lookback == 0:
+        return 0.0, None
     daily_value = close[-lookback:] * volume[-lookback:]
-    median_value = np.median(daily_value)
+    valid_value = daily_value[~np.isnan(daily_value)]
+    if len(valid_value) == 0:
+        return 0.0, None
+    median_value = float(np.median(valid_value))
+    if np.isnan(median_value):
+        return 0.0, None
 
     if median_value > CFG.GORENGAN_LIQ_HIGH:
         score = 0.0
@@ -408,6 +421,8 @@ def _active_pump(
               CFG.GORENGAN_MOMENTUM_10D_MODERATE, CFG.GORENGAN_MOMENTUM_10D_LOW)),
     ]:
         if len(close) > lookback:
+            if close[-1 - lookback] <= 0:
+                continue
             ret = (close[-1] - close[-1 - lookback]) / close[-1 - lookback] * 100
             if ret > thresholds[0]:
                 scores.append(100)
