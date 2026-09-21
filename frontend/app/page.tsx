@@ -197,7 +197,7 @@ export default async function DashboardPage({
   return (
     <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 lg:mb-8 gap-4 animate-rise">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 lg:mb-8 gap-4 animate-rise relative z-30">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] mb-0.5">Dashboard</h1>
           <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider">

@@ -311,3 +311,19 @@ export interface ReadyToFlyScannerResponse {
   count_almost: number
   data: ReadyToFlyEntry[]
 }
+
+export interface ScrapedDateCategoryDetails {
+  gainers: boolean
+  gorengan: boolean
+  readytofly: boolean
+}
+
+export interface ScrapedDatesResponse {
+  dates: string[]
+  by_category: {
+    gainers: string[]
+    gorengan: string[]
+    readytofly: string[]
+  }
+  details: Record<string, ScrapedDateCategoryDetails>
+}

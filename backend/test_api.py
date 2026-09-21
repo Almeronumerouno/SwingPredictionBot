@@ -151,4 +151,20 @@ print(f"  {r.json()}")
 print(f"  -> {'PASS (422)' if r.status_code == 422 else 'FAIL'}")
 
 
+section("GET /scraped-dates")
+r = client.get("/scraped-dates")
+print(f"Status: {r.status_code}")
+assert r.status_code == 200, f"Expected 200, got {r.status_code}"
+d = r.json()
+print(f"  total scraped dates: {len(d['dates'])}")
+print(f"  sample dates: {d['dates'][:5]}")
+print(f"  gainers count: {len(d['by_category']['gainers'])}")
+print(f"  gorengan count: {len(d['by_category']['gorengan'])}")
+print(f"  readytofly count: {len(d['by_category']['readytofly'])}")
+if d['dates']:
+    sample = d['dates'][0]
+    print(f"  sample detail ({sample}): {d['details'][sample]}")
+print("  -> PASS (200)")
+
+
 print("\n[DONE] Smoke test selesai.")

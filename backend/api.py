@@ -4,6 +4,7 @@ from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
+import os
 import logging
 import time
 
@@ -366,13 +367,26 @@ class ReadyToFlyScannerResponse(BaseModel):
     data: list[ReadyToFlyEntryResponse]
 
 
+class CategoryDetails(BaseModel):
+    gainers: bool = False
+    gorengan: bool = False
+    readytofly: bool = False
+
+
+class ScrapedDatesResponse(BaseModel):
+    dates: list[str]
+    by_category: dict[str, list[str]]
+    details: dict[str, CategoryDetails]
+
+
 for _model in (ScoreResponse, TradePlanResponse, HistoryBar, GainerEntryResponse,
                GainersResponse, RawIndicatorsResponse, GorenganFactors, GorenganResponse,
                AnalisisResponse, HistoryResponse, MarketStatusResponse,
                RecoveryProbability, RecoveryEmpirical, RecoveryGbm,
                RecoveryModel, RecoveryExitPlan, RecoveryVsLookback, RecoveryAccumulation, RecoveryResponse,
                GorenganScannerEntryResponse, GorenganScannerResponse,
-               ReadyToFlyEntryResponse, ReadyToFlyScannerResponse):
+               ReadyToFlyEntryResponse, ReadyToFlyScannerResponse,
+               CategoryDetails, ScrapedDatesResponse):
     _model.model_rebuild()
 
 
@@ -699,6 +713,58 @@ def get_market_status():
         "message": message,
         "current_time": now.isoformat(),
         "suggested_source": suggested,
+    }
+
+
+@app.get("/scraped-dates", response_model=ScrapedDatesResponse)
+def get_scraped_dates():
+    """Mengembalikan daftar seluruh tanggal yang sudah memiliki data cache hasil scrape."""
+    gainers_dates: set[str] = set()
+    gorengan_dates: set[str] = set()
+    rtf_dates: set[str] = set()
+
+    cache_dir = config.CACHE_DIR
+    if os.path.exists(cache_dir):
+        for entry in os.scandir(cache_dir):
+            if not entry.is_file() or not entry.name.endswith(".json"):
+                continue
+            try:
+                if entry.stat().st_size < 50:
+                    continue
+            except OSError:
+                continue
+
+            name = entry.name
+            if name.startswith("gainers_"):
+                d = name[len("gainers_"):-len(".json")]
+                if len(d) == 10 and d[4] == "-" and d[7] == "-":
+                    gainers_dates.add(d)
+            elif name.startswith("gorengan_"):
+                d = name[len("gorengan_"):-len(".json")]
+                if len(d) == 10 and d[4] == "-" and d[7] == "-":
+                    gorengan_dates.add(d)
+            elif name.startswith("readytofly_"):
+                d = name[len("readytofly_"):-len(".json")]
+                if len(d) == 10 and d[4] == "-" and d[7] == "-":
+                    rtf_dates.add(d)
+
+    all_dates = sorted(list(gainers_dates | gorengan_dates | rtf_dates), reverse=True)
+    details = {
+        d: CategoryDetails(
+            gainers=(d in gainers_dates),
+            gorengan=(d in gorengan_dates),
+            readytofly=(d in rtf_dates),
+        )
+        for d in all_dates
+    }
+    return {
+        "dates": all_dates,
+        "by_category": {
+            "gainers": sorted(list(gainers_dates), reverse=True),
+            "gorengan": sorted(list(gorengan_dates), reverse=True),
+            "readytofly": sorted(list(rtf_dates), reverse=True),
+        },
+        "details": details,
     }
 
 

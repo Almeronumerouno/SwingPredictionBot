@@ -28,7 +28,7 @@ export default async function GorenganPage({
 
   return (
     <>
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 lg:mb-8 gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 lg:mb-8 gap-4 relative z-30">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] mb-0.5">Scanner Gorengan</h1>
           <p className="text-[11px] sm:text-xs font-medium text-[var(--color-text-secondary)]">
